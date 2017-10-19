@@ -57,8 +57,7 @@ exports.select = function (...selectedProperties) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection
-            .filter(item => values.includes(item[property]));
+        return collection.filter(item => values.includes(item[property]));
     };
 };
 
@@ -90,14 +89,13 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection
-            .map(item => {
-                if (item.hasOwnProperty) {
-                    item[property] = formatter(item[property]);
-                }
+        return collection.map(item => {
+            if (item.hasOwnProperty) {
+                item[property] = formatter(item[property]);
+            }
 
-                return item;
-            });
+            return item;
+        });
     };
 };
 
