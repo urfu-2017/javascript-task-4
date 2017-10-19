@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 const queue = ['filterIn', 'sortBy', 'and', 'or', 'select', 'format', 'limit'];
 
@@ -78,29 +78,23 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(friends) {
-        if (order === 'asc') {
-            friends.sort((f1, f2) => {
-                if (f1[property] > f2[property]) {
+        friends.sort((fr1, fr2) => {
+            if (fr1[property] === fr2[property]) {
+                return 0;
+            }
+            if (fr1[property] > fr2[property]) {
+                if (order === 'asc') {
                     return 1;
                 }
-                if (f1[property] < f2[property]) {
-                    return -1;
-                }
 
-                return 0;
-            });
-        } else {
-            friends.sort((f1, f2) => {
-                if (f1[property] < f2[property]) {
-                    return 1;
-                }
-                if (f1[property] > f2[property]) {
-                    return -1;
-                }
+                return -1;
+            }
+            if (order === 'asc') {
+                return -1;
+            }
 
-                return 0;
-            });
-        }
+            return 1;
+        });
 
         return friends;
     };
