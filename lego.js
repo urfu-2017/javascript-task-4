@@ -1,89 +1,153 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
 exports.isStar = true;
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
+
+// Constants
+//
+var FUNC_PRIORITY = [
+    'and',
+    'or',
+    'filterIn',
+    'sortBy',
+    'select',
+    'limit',
+    'format'
+];
+
+
+// Functions-helpers
+//
+var _functionSorter = function (one, another) {
+    var nameOne = one.name.split(' ')[1];
+    var nameAnother = another.name.split(' ')[1];
+
+    return FUNC_PRIORITY.indexOf(nameOne) > FUNC_PRIORITY.indexOf(nameAnother);
+};
+
+var _functionApplyer = function (obj, f) {
+    return f(obj);
+};
+
+var _objectBuilder = function (obj, keyValuePair) {
+    var key = keyValuePair[0];
+    var value = keyValuePair[1];
+
+    var newObject = Object.assign({}, obj);
+    newObject[key] = value;
+
+    return newObject;
+};
+
+var _in = function (collection, obj) {
+    return collection.indexOf(obj) !== -1;
+};
+
+var _objIn = function (obj, collection) {
+    return _in(collection, obj);
+};
+
+var _takeKeyValuePair = function (item, key) {
+    return [key, item[key]];
+};
+
+
+// Query functions
+//
+var select = function (keys, collection) {
+    return collection
+        .map(function (item) {
+            return Object.keys(item)
+                .filter(_in.bind(null, keys))
+                .map(_takeKeyValuePair.bind(null, item))
+                .reduce(_objectBuilder, {});
+        });
+};
+
+var filterIn = function (key, values, collection) {
+    return collection
+        .filter(function (item) {
+            return _in(values, item[key]);
+        });
+};
+
+var sortBy = function (key, order, collection) {
+    return collection
+        .sort(function (one, another) {
+            return order === 'asc'
+                ? one[key] > another[key]
+                : one[key] < another[key];
+        });
+};
+
+var format = function (key, formatter, collection) {
+    return collection
+        .map(function (item) {
+            var itemCopy = Object.assign({}, item);
+            itemCopy[key] = formatter(itemCopy[key]);
+
+            return itemCopy;
+        });
+};
+
+var limit = function (count, collection) {
+    return collection.slice(0, count);
+};
+
+var or = function (filters, collection) {
+    return collection
+        .filter(function (item) {
+            return filters
+                .map(_functionApplyer.bind(null, collection))
+                .some(_objIn.bind(null, item));
+        });
+};
+
+var and = function (filters, collection) {
+    return collection
+        .filter(function (item) {
+            return filters
+                .map(_functionApplyer.bind(null, collection))
+                .every(_objIn.bind(null, item));
+        });
+};
+
+
+// Export
+//
 exports.query = function (collection) {
-    return collection;
+    return [].slice.call(arguments, 1)
+        .sort(_functionSorter)
+        .reduce(_functionApplyer, collection.slice());
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
 exports.select = function () {
-    return;
+    return select.bind(null, [].slice.call(arguments));
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
-
-    return;
+exports.filterIn = function (key, values) {
+    return filterIn.bind(null, key, values);
 };
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
-
-    return;
+exports.sortBy = function (key, order) {
+    return sortBy.bind(null, key, order);
 };
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
-    return;
+exports.format = function (key, formatter) {
+    return format.bind(null, key, formatter);
 };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
 exports.limit = function (count) {
-    console.info(count);
-
-    return;
+    return limit.bind(null, count);
 };
+
 
 if (exports.isStar) {
-
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
     exports.or = function () {
-        return;
+        return or.bind(null, [].slice.call(arguments));
     };
 
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
     exports.and = function () {
-        return;
+        return and.bind(null, [].slice.call(arguments));
     };
 }
