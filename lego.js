@@ -16,6 +16,19 @@ function useFunction(collection, func, funcQueue) {
     return collection;
 }
 
+function copy(collection) {
+    let copy = [];
+    for (const key in collection) {
+        copy[key] = {};
+        const objKeys = Object.keys(collection[key]);
+        for (const objK of objKeys) {
+            copy[key][objK] = collection[key][objK];
+        }
+    }
+
+    return copy;
+}
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -23,7 +36,7 @@ function useFunction(collection, func, funcQueue) {
  * @returns {Array}
  */
 exports.query = function (collection) {
-    let friendsCopy = collection.slice(0);
+    let friendsCopy = copy(collection);
     let functions = Array.prototype.slice.call(arguments, 1);
     for (let funcQueue of queue) {
         for (let func of functions) {
@@ -44,14 +57,14 @@ exports.select = function () {
 
     return function select(friends) {
         return friends.map((friend) => {
-            let updatedFriend = {};
-            for (let key in friend) {
-                if (fields.indexOf(key) !== -1) {
-                    updatedFriend[key] = friend[key];
+            for (const key in friend) {
+                if (fields.indexOf(key) === -1) {
+                    delete friend[key];
                 }
             }
 
-            return updatedFriend;
+            console.info(friend);
+            return friend;
         });
     };
 };
