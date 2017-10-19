@@ -1,89 +1,67 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
 exports.isStar = true;
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
-exports.query = function (collection) {
-    return collection;
+function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+exports.query = function (collection, ...queries) {
+    var qs = { select: [], limit: [], format: [], undefined: [] };
+    queries.forEach(x => qs[String(x.type)].push(x));
+    var selects = qs.select.map(x => x.fields).reduce((acc, x) => x.filter(y => acc.includes(y)));
+    var result = qs.undefined.reduce((acc, x) => x(acc), deepCopy(collection));
+    result = qs.limit.concat(qs.format).reduce((acc, x) => x(acc), result);
+
+    return result.map(x => {
+        var keys = Object.keys(x).filter(k => selects.includes(k));
+
+        return Object.assign({}, ...keys.map(k => ({ [k]: x[k] })));
+    });
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
-exports.select = function () {
-    return;
+exports.select = function (...fields) {
+    var result = list => list;
+
+    return Object.assign(result, { type: 'select', fields });
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
-
-    return;
+    return list => list.filter(x => values.includes(x[property]));
 };
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
+
 exports.sortBy = function (property, order) {
-    console.info(property, order);
+    return list => list.sort(({ [property]: x }, { [property]: y }) => {
+        if (x === y) {
+            return 0;
+        }
 
-    return;
+        return (order === 'asc' ? 1 : -1) * (x > y ? 1 : -1);
+    });
 };
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
+    var result = list => list.map(x => Object.assign(x, {
+        [property]: formatter(x[property])
+    }));
 
-    return;
+    return Object.assign(result, { type: 'format' });
 };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
 exports.limit = function (count) {
-    console.info(count);
+    var result = list => list.filter((x, i) => i < count);
 
-    return;
+    return Object.assign(result, { type: 'limit' });
 };
 
 if (exports.isStar) {
 
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.or = function () {
-        return;
+    exports.or = function (...filters) {
+        return list => list.filter(x => filters.some(f => f([x]).length));
     };
 
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.and = function () {
-        return;
+    exports.and = function (...filters) {
+        return list => list.filter(x => filters.every(f => f([x]).length));
     };
 }
