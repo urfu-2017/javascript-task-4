@@ -8,22 +8,12 @@ exports.isStar = true;
 
 const queue = ['filterIn', 'sortBy', 'and', 'or', 'select', 'format', 'limit'];
 
-function compare(el1, el2) {
-    return JSON.stringify(el1) === JSON.stringify(el2);
-}
-
 function useFunction(collection, func, funcQueue) {
     if (func.name === funcQueue) {
         collection = func(collection);
     }
 
     return collection;
-}
-
-function contains(iter, item) {
-    return iter.some((element) => {
-        return compare(element, item);
-    });
 }
 
 /**
@@ -74,11 +64,9 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(friends) {
-        friends = friends.filter((friend) => {
+        return friends.filter((friend) => {
             return (values.indexOf(friend[property]) !== -1);
         });
-
-        return friends;
     };
 };
 
@@ -157,18 +145,11 @@ if (exports.isStar) {
         const filters = Array.prototype.slice.call(arguments, 0);
 
         return function or(friends) {
-            let result = [];
-            for (const filter of filters) {
-                let copyFriends = friends.slice(0);
-                filter(copyFriends).forEach((friend) => {
-                    if (contains(result, friend)) {
-                        return;
-                    }
-                    result.push(friend);
+            return friends.filter((friend) => {
+                return filters.some((filter) => {
+                    return (filter(friends).indexOf(friend) !== -1);
                 });
-            }
-
-            return result;
+            });
         };
     };
 
@@ -182,11 +163,11 @@ if (exports.isStar) {
         const filters = Array.prototype.slice.call(arguments, 0);
 
         return function and(friends) {
-            filters.forEach((filter) => {
-                friends = filter(friends);
+            return friends.filter((friend) => {
+                return filters.every((filter) => {
+                    return (filter(friends).indexOf(friend) !== -1);
+                });
             });
-
-            return friends;
         };
     };
 }
