@@ -4,12 +4,12 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 var PRIORITY_OF_FUNCTIONS = {
     filterIn: 1,
     sortBy: 2,
-    or: 3,
+    or: 4,
     and: 4,
     select: 5,
     limit: 6,
