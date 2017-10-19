@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-const queue = ['filterIn', 'sortBy', 'and', 'or', 'select', 'format', 'limit'];
+const queue = ['filterIn', 'and', 'or', 'sortBy', 'select', 'format', 'limit'];
 
 function useFunction(collection, func, funcQueue) {
     if (func.name === funcQueue) {
