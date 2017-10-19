@@ -2,11 +2,10 @@
 
 Перед выполнением задания внимательно прочитайте:
 
-- [О всех этапах проверки задания](https://github.com/urfu-2016/guides/blob/master/workflow/overall.md)
-- [Как отправить пулл](https://github.com/urfu-2016/guides/blob/master/workflow/pull.md)
-- [Как пройти тесты](https://github.com/urfu-2016/guides/blob/master/workflow/test.md)
-- Правила оформления [javascript](https://github.com/urfu-2016/guides/blob/master/codestyle/js.md), [HTML](https://github.com/urfu-2016/guides/blob/master/codestyle/html.md) и [CSS](https://github.com/urfu-2016/guides/blob/master/codestyle/css.md) кода
-- Лекцию [«Функции»](https://urfu-2016.github.io/javascript-slides/04-functions/#/)
+- [О всех этапах проверки задания](https://github.com/urfu-2017/guides/blob/master/workflow/overall.md)
+- [Как отправить пулл](https://github.com/urfu-2017/guides/blob/master/workflow/pull.md)
+- [Как пройти тесты](https://github.com/urfu-2017/guides/blob/master/workflow/test.md)
+- Правила оформления [javascript](https://github.com/urfu-2017/guides/blob/master/codestyle/js.md), [HTML](https://github.com/urfu-2017/guides/blob/master/codestyle/html.md) и [CSS](https://github.com/urfu-2017/guides/blob/master/codestyle/css.md) кода
 
 ## Основное задание
 
@@ -64,7 +63,7 @@
 
 ## Дополнительное задание (+6 к харизме, +4 к интеллекту)
 
-> Перед выполнением внимательно прочитайте [про особенности](https://github.com/urfu-2016/guides/blob/master/workflow/extra.md)
+> Перед выполнением внимательно прочитайте [про особенности](https://github.com/urfu-2017/guides/blob/master/workflow/extra.md)
 
 Для Билли будет удобно, если вы реализуете два дополнительных условных оператора `.or()` и `.and()`, которые позволяют объединять несколько фильтров `.filterIn()` в логические цепочки.
 
