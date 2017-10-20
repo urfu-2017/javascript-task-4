@@ -112,7 +112,7 @@ exports.format = function (property, formatter) {
     console.info(property, formatter);
 
     return function format(collection) {
-        var newCollection = collection.slice();
+        var newCollection = JSON.parse(JSON.stringify(collection));
 
         return newCollection.map(x => {
             let keys = Object.keys(x);
