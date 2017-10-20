@@ -14,6 +14,7 @@ const OPERATION_PRIORITY = {
 
 exports.query = function (collection, ...params) {
     let collectionCopy = [...collection];
+
     params
         .sort((a, b) => OPERATION_PRIORITY[b.name] - OPERATION_PRIORITY[a.name])
         .forEach(param => {
@@ -28,7 +29,9 @@ exports.select = (...params) =>
         return collection.map(entry => {
             let newEntry = {};
             params.forEach(function (param) { // can't make arrow func here
-                newEntry[param] = entry[param];
+                if (entry[param]) {
+                    newEntry[param] = entry[param];
+                }
             });
 
             return newEntry;
