@@ -156,7 +156,7 @@ if (exports.isStar) {
     exports.or = function (...functions) {
 
         return function or(collection) {
-            var newCollection = collection.slice();
+            var newCollection = JSON.parse(JSON.stringify(collection));
             var finalCollection = [];
             for (let func of functions) {
                 finalCollection = finalCollection.concat(func(newCollection));
@@ -175,7 +175,7 @@ if (exports.isStar) {
     exports.and = function (...functions) {
 
         return function and(collection) {
-            var newCollection = collection.slice();
+            var newCollection = JSON.parse(JSON.stringify(collection));
             for (let func of functions) {
                 newCollection = func(newCollection);
             }
