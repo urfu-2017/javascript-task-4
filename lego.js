@@ -28,7 +28,13 @@ exports.query = function (collection) {
     result = result.map(function (item) {
         let res = {};
         let keys = Object.keys(item);
-        keys = keys.filter((key) => item.selectParam.indexOf(key) !== -1);
+        keys = keys.filter((key) => {
+            if (item.selectParam === undefined) {
+                return true;
+            }
+
+            return item.selectParam.indexOf(key) !== -1;
+        });
 
         for (let key of keys) {
             res[key] = item[key];
@@ -38,6 +44,7 @@ exports.query = function (collection) {
             res.changeFunc();
         }
         delete res.changeFunc;
+        delete res.maxCount;
 
         return res;
     });
@@ -55,11 +62,10 @@ exports.select = function () {
     let resultFunc = function (collection, argumentsFunc = args) {
         let result = collection.map(function (item) {
             let res = Object.assign({}, item);
-            if (res.selectParam !== undefined) {
-                res.selectParam = res.selectParam.concat(argumentsFunc);
-            } else {
-                res.selectParam = argumentsFunc;
+            if (res.selectParam === undefined) {
+                res.selectParam = [];
             }
+            res.selectParam = res.selectParam.concat(argumentsFunc);
 
             return res;
         });
