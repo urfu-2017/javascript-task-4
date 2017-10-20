@@ -5,6 +5,15 @@
  * Реализованы методы or и and
  */
 exports.isStar = true;
+const SELECTORS_PRIORITY = {
+    filterIn: 1,
+    and: 2,
+    or: 3,
+    sortBy: 4,
+    select: 5,
+    limit: 6,
+    format: 7
+};
 
 /**
  * Запрос к коллекции
@@ -12,69 +21,29 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    let result = collection.slice();
-    let args = Array.prototype.slice.call(arguments);
-    args = args.slice(1);
-    collection = result.slice();
-    for (let func of args) {
-        result = func(result);
-    }
-    let maxLength = result.length;
-    if (result !== [] && result[0].maxCount !== undefined) {
-        maxLength = result[0].maxCount;
-    }
-    result = result.splice(0, maxLength);
-    result = result.map(function (item) {
-        let res = {};
-        let keys = Object.keys(item);
-        keys = keys.filter((key) => {
-            if (item.selectParam === undefined) {
-                return true;
-            }
-
-            return item.selectParam.indexOf(key) !== -1;
-        });
-
-        for (let key of keys) {
-            res[key] = item[key];
-        }
-        if (item.changeFunc !== undefined) {
-            res.changeFunc = item.changeFunc;
-            res.changeFunc();
-        }
-        delete res.changeFunc;
-        delete res.maxCount;
-
-        return res;
-    });
-
-    return result;
-};
+exports.query = (collection, ...selectors) =>
+    selectors
+        .sort((item1, item2) => SELECTORS_PRIORITY[item1.name] - SELECTORS_PRIORITY[item2.name])
+        .reduce((result, selector) => selector(result), collection);
 
 /**
  * Выбор полей
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function () {
-    let args = Array.prototype.slice.call(arguments);
-    let resultFunc = function (collection, argumentsFunc = args) {
-        let result = collection.map(function (item) {
-            let res = Object.assign({}, item);
-            if (res.selectParam === undefined) {
-                res.selectParam = [];
-            }
-            res.selectParam = res.selectParam.concat(argumentsFunc);
+exports.select = (...properties) =>
+    function select(collection) {
+        return collection.map((item) => {
+            let res = {};
+            Object.keys(item)
+                .filter((key) => properties.some((property) => key === property))
+                .forEach(function (key) {
+                    res[key] = item[key];
+                });
 
             return res;
         });
-
-        return result;
     };
-
-    return resultFunc;
-};
 
 /**
  * Фильтрация поля по массиву значений
@@ -82,16 +51,13 @@ exports.select = function () {
  * @param {Array} values – Доступные значения
  * @returns {Function}
  */
-exports.filterIn = function (property, values) {
-    let resultFunc = function (collection, argumentsFunc = property, valuesFunc = values) {
-        let result = collection.filter(
-            (men) => valuesFunc.indexOf(men[argumentsFunc]) !== -1);
-
-        return result;
+exports.filterIn = (property, values) =>
+    function filterIn(collection) {
+        return collection
+            .filter(
+                (men) => values
+                    .some((value) => men[property] === value));
     };
-
-    return resultFunc;
-};
 
 /**
  * Сортировка коллекции по полю
@@ -99,37 +65,21 @@ exports.filterIn = function (property, values) {
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  * @returns {Function}
  */
-exports.sortBy = function (property, order) {
-    let resultFunc = function (collection, propertyFunc = property, orderFunc = order) {
-        let filterFunc = (propertyFunc !== 'age')
-            ? function (a, b) {
-                return a.localeCompare(b);
-            }
-            : (a, b) => {
-                if (a > b) {
-                    return 1;
-                }
-                if (b > a) {
-                    return -1;
-                }
+exports.sortBy = (property, order) =>
+    function sortBy(collection) {
+        let ordered = order === 'asc' ? 1 : -1;
 
-                return 0;
-            };
-
-        let result = collection
+        return collection
             .slice()
-            .sort((one, two) =>
-                filterFunc(one[propertyFunc], two[propertyFunc])
+            .sort((one, two) => {
+                if (one[property] === two[property]) {
+                    return 0;
+                }
+
+                return one[property] > two[property] ? ordered : -ordered;
+            }
             );
-        if (orderFunc === 'desc') {
-            result.reverse();
-        }
-
-        return result;
     };
-
-    return resultFunc;
-};
 
 /**
  * Форматирование поля
@@ -137,42 +87,23 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  * @returns {Function}
  */
-exports.format = function (property, formatter) {
-    let resultFunc = function (collection, propertyFunc = property, formatterFunc = formatter) {
-        let result = collection.map(function (item) {
-            let res = Object.assign({}, item);
-            res.changeFunc = function (proper = propertyFunc, func = formatterFunc) {
-                this[proper] = func(this[proper]);
-            };
-
-            return res;
-        });
-
-        return result;
+exports.format = (property, formatter) =>
+    function format(collection) {
+        return collection
+            .map((item) =>
+                Object.assign({}, item, { [property]: formatter(item[property]) })
+            );
     };
-
-    return resultFunc;
-};
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  * @returns {Function}
  */
-exports.limit = function (count) {
-    let resultFunc = function (collection, countFunc = count) {
-        let result = collection.map((item) => {
-            let res = Object.assign({}, item);
-            res.maxCount = countFunc;
-
-            return res;
-        });
-
-        return result;
+exports.limit = (count) =>
+    function limit(collection) {
+        return collection.slice().splice(0, count);
     };
-
-    return resultFunc;
-};
 
 if (exports.isStar) {
 
@@ -182,20 +113,11 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function () {
-        let args = Array.prototype.slice.call(arguments);
-        let resultFunc = function (collection, argument = args) {
-            let result = [];
-            for (let func of argument) {
-                let res = func(collection);
-                result = result.concat(res);
-            }
-
-            return result;
+    exports.or = (...selectors) =>
+        function or(collection) {
+            return collection.filter(item =>
+                selectors.some(selector => selector([item]).length > 0));
         };
-
-        return resultFunc;
-    };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
@@ -203,18 +125,9 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function () {
-        let args = Array.prototype.slice.call(arguments);
-        let resultFunc = function (collection, argument = args) {
-            let result = collection.slice();
-            for (let func of argument) {
-                result = func(result);
-            }
-
-            return result;
+    exports.and = (...selectors) =>
+        function and(collection) {
+            return collection.filter(item =>
+                selectors.every(selector => selector([item]).length > 0));
         };
-
-        return resultFunc;
-    };
 }
-
