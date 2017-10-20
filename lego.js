@@ -116,13 +116,12 @@ exports.format = function (property, formatter) {
 
         return newCollection.map(x => {
             let keys = Object.keys(x);
-            let newElement = JSON.parse(JSON.stringify(x));
             if (!keys.includes(property)) {
                 return x;
             }
-            newElement[property] = formatter(x[property]);
+            x[property] = formatter(x[property]);
 
-            return newElement;
+            return x;
         });
     };
 };
@@ -139,9 +138,7 @@ exports.limit = function (count) {
         var newCollection = [];
         for (var i = 0; i < count; i++) {
             var element = collection[i];
-            if (typeof element !== 'undefined') {
-                newCollection.push(element);
-            }
+            newCollection.push(element);
         }
 
         return newCollection;
