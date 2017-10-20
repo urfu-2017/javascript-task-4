@@ -1,89 +1,97 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
 exports.isStar = true;
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
-exports.query = function (collection) {
-    return collection;
+const OPERATION_PRIORITY = {
+    filterIn: 6,
+    and: 5,
+    or: 4,
+    sortBy: 3,
+    limit: 2,
+    select: 1,
+    format: 0
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
-exports.select = function () {
-    return;
+exports.query = function (collection, ...params) {
+    let collectionCopy = [...collection];
+    params
+        .sort((a, b) => OPERATION_PRIORITY[b.name] - OPERATION_PRIORITY[a.name])
+        .forEach(param => {
+            collectionCopy = param(collectionCopy);
+        });
+
+    return collectionCopy;
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
+exports.select = (...params) =>
+    function select(collection) {
+        return collection.map(entry => {
+            let newEntry = {};
+            params.forEach(function (param) { // can't make arrow func here
+                newEntry[param] = entry[param];
+            });
 
-    return;
+            return newEntry;
+        });
+    };
+
+
+exports.filterIn = (property, values) => {
+    let filtered = [];
+
+    return function filterIn(collectionCopy) {
+        collectionCopy.filter(entry =>
+            values.forEach(value => {
+                if (entry[property] === value) {
+                    filtered.push(entry);
+                }
+            })
+        );
+
+        return filtered;
+    };
 };
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
+exports.sortBy = (property, order) =>
+    function sortBy(collection) {
+        let copy = [...collection];
+        if (order === 'asc') {
+            return copy.sort((a, b) => a[property] - b[property]);
+        }
 
-    return;
-};
+        return copy.sort((a, b) => b[property] - a[property]);
+    };
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
+exports.format = (property, formatter) =>
+    function format(collection) {
+        return collection.map(entry => {
+            entry[property] = formatter(entry[property]);
 
-    return;
-};
+            return entry;
+        });
+    };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
-exports.limit = function (count) {
-    console.info(count);
-
-    return;
-};
+exports.limit = (count) =>
+    function limit(collection) {
+        return collection.slice(0, count);
+    };
 
 if (exports.isStar) {
+    exports.or = (...params) =>
+        function or(collection) {
+            return collection.filter(entry =>
+                params.some(param =>
+                    param(collection).indexOf(entry) !== -1
+                )
+            );
+        };
 
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.or = function () {
-        return;
-    };
-
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.and = function () {
-        return;
-    };
+    exports.and = (...params) =>
+        function and(collection) {
+            return collection.filter(entry =>
+                params.every(param =>
+                    param(collection).indexOf(entry) !== -1
+                )
+            );
+        };
 }
