@@ -97,7 +97,7 @@ exports.sortBy = function (property, order) {
                 return x[property] > y[property];
             }
 
-            return y[property] < x[property];
+            return y[property] > x[property];
         });
     };
 };
