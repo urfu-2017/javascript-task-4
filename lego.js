@@ -40,18 +40,11 @@ exports.select = (...params) =>
 
 
 exports.filterIn = (property, values) => {
-    let filtered = [];
 
     return function filterIn(collectionCopy) {
-        collectionCopy.filter(entry =>
-            values.forEach(value => {
-                if (entry[property] === value) {
-                    filtered.push(entry);
-                }
-            })
+        return collectionCopy.filter(entry =>
+            values.some(value => entry[property] === value)
         );
-
-        return filtered;
     };
 };
 
