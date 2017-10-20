@@ -7,10 +7,10 @@
 exports.isStar = true;
 
 var PRIORITY_OF_FUNCTIONS = {
-    filterIn: 1,
-    sortBy: 2,
-    or: 4,
-    and: 4,
+    or: 1,
+    and: 1,
+    filterIn: 3,
+    sortBy: 4,
     select: 5,
     limit: 6,
     format: 7
