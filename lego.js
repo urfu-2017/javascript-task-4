@@ -28,7 +28,7 @@ function sortFunctions(firstFunction, secondFunction) {
  */
 exports.query = function (collection, ...functions) {
     var sorted = functions.sort(sortFunctions);
-    var newCollection = collection.slice();
+    var newCollection = JSON.parse(JSON.stringify(collection));
     for (let func of sorted) {
         newCollection = func(newCollection);
     }
@@ -43,7 +43,7 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...margins) {
     return function select(collection) {
-        var friendList = collection.slice();
+        var friendList = JSON.parse(JSON.stringify(collection));
         let newFriendList = [];
         for (let entry of friendList) {
             let keys = Object.keys(entry);
@@ -90,7 +90,7 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
 
     return function sortBy(collection) {
-        var newCollection = collection.slice();
+        var newCollection = JSON.parse(JSON.stringify(collection));
 
         return newCollection.sort((x, y) => {
             if (order === 'asc') {
