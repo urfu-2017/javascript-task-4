@@ -157,13 +157,9 @@ if (exports.isStar) {
 
         return function or(collection) {
             var newCollection = JSON.parse(JSON.stringify(collection));
-            if (functions.length === 0) {
-                return newCollection;
-            }
-            var finalCollection = [];
-            for (let func of functions) {
-                finalCollection = finalCollection.concat(func(newCollection));
-            }
+
+            var finalCollection = newCollection.filter(x => functions
+                .some(f => (f([x]).length !== 0)));
 
             return finalCollection;
         };
