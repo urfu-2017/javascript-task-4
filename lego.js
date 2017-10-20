@@ -116,12 +116,13 @@ exports.format = function (property, formatter) {
 
         return newCollection.map(x => {
             let keys = Object.keys(x);
+            let newElement = JSON.parse(JSON.stringify(x));
             if (!keys.includes(property)) {
                 return x;
             }
-            x[property] = formatter(x[property]);
+            newElement[property] = formatter(x[property]);
 
-            return x;
+            return newElement;
         });
     };
 };
