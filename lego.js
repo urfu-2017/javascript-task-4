@@ -7,8 +7,8 @@ const OPERATION_PRIORITY = {
     and: 5,
     or: 4,
     sortBy: 3,
-    limit: 2,
-    select: 1,
+    select: 2,
+    limit: 1,
     format: 0
 };
 
