@@ -5,7 +5,7 @@ exports.isStar = true;
 const OPERATION_PRIORITY = ['filterIn', 'and', 'or', 'sortBy', 'select', 'limit', 'format'];
 const priority = name => OPERATION_PRIORITY.indexOf(name);
 
-const copyCollection = collection => [...collection];
+const copyCollection = collection => JSON.parse(JSON.stringify(collection));
 
 exports.query = (collection, ...params) =>
     params
