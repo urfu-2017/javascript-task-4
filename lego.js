@@ -74,13 +74,11 @@ if (exports.isStar) {
 
     exports.and = (...functions) => {
         return table => {
-            let res = [];
+            let newTable = new Table(table.collection);
             functions.forEach(func => {
-                let newTable = new Table(table.collection);
                 func(newTable);
-                res.push(newTable.execute());
             });
-            table.collection = res.reduce((a, b) => merge(a, b, false));
+            table.collection = newTable.collection;
         };
     };
 }
