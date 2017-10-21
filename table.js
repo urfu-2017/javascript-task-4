@@ -36,7 +36,15 @@ module.exports = class Table {
     }
 
     sort(field, order) {
-        this.collection.sort((i, j) => order ? i[field] > j[field] : i[field] <= j[field]);
+        this.collection.sort((i, j) => {
+            if (i[field] === j[field]) {
+                return 0;
+            } else if (i[field] > j[field] === order) {
+                return 1;
+            }
+
+            return -1;
+        });
     }
 
     setSelect(select) {
