@@ -37,7 +37,7 @@ exports.select = function (...properties) {
         return collection.map(function (obj) {
             let newObj = {};
             properties.forEach(function (property) {
-                if (property in obj) {
+                if (obj[property] !== undefined) {
                     newObj[property] = obj[property];
                 }
             });
@@ -69,10 +69,10 @@ exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.slice().sort(function (a, b) {
             if (a[property] > b[property]) {
-                return (order === 'asc') ? 1 : -1;
+                return order === 'asc' ? 1 : -1;
             }
             if (a[property] < b[property]) {
-                return (order === 'asc') ? -1 : 1;
+                return order === 'asc' ? -1 : 1;
             }
 
             return 0;
@@ -89,11 +89,12 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(function (obj) {
-            if (property in obj) {
-                obj[property] = formatter(obj[property]);
+            let newObj = Object.assign({}, obj);
+            if (newObj[property] !== undefined) {
+                newObj[property] = formatter(newObj[property]);
             }
 
-            return obj;
+            return newObj;
         });
     };
 };
