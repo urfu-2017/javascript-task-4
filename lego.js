@@ -67,14 +67,14 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        order = (order === 'asc') ? 1 : -1;
+        let numericOrder = (order === 'asc') ? 1 : -1;
 
         return collection.slice().sort(function (a, b) {
             if (a[property] > b[property]) {
-                return 1 * Number(order);
+                return 1 * Number(numericOrder);
             }
             if (a[property] < b[property]) {
-                return -1 * Number(order);
+                return -1 * Number(numericOrder);
             }
 
             return 0;
@@ -90,7 +90,7 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.reduce(function (acc, obj) {
+        return collection.slice().reduce(function (acc, obj) {
             obj[property] = formatter(obj[property]);
 
             return acc.concat(obj);
