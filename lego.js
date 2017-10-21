@@ -34,7 +34,7 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...properties) {
     return function select(collection) {
-        return collection.reduce(function (acc, obj) {
+        return collection.map(function (obj) {
             let newObj = {};
             properties.forEach(function (property) {
                 if (property in obj) {
@@ -42,8 +42,8 @@ exports.select = function (...properties) {
                 }
             });
 
-            return acc.concat(newObj);
-        }, []);
+            return newObj;
+        });
     };
 };
 
@@ -67,14 +67,12 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let numericOrder = (order === 'asc') ? 1 : -1;
-
         return collection.slice().sort(function (a, b) {
             if (a[property] > b[property]) {
-                return 1 * Number(numericOrder);
+                return (order === 'asc') ? 1 : -1;
             }
             if (a[property] < b[property]) {
-                return -1 * Number(numericOrder);
+                return (order === 'asc') ? -1 : 1;
             }
 
             return 0;
@@ -90,13 +88,13 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.reduce(function (acc, obj) {
+        return collection.map(function (obj) {
             if (property in obj) {
                 obj[property] = formatter(obj[property]);
             }
 
-            return acc.concat(obj);
-        }, []);
+            return obj;
+        });
     };
 };
 
