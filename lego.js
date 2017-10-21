@@ -34,8 +34,16 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...properties) {
     return function select(collection) {
-        return collection.reduce((acc, obj) =>
-            acc.concat(Object.assign({}, ...properties.map(prop => ({ [prop]: obj[prop] })))), []);
+        return collection.reduce(function (acc, obj) {
+            let newObj = {};
+            properties.forEach(function (property) {
+                if (property in obj) {
+                    newObj[property] = obj[property];
+                }
+            });
+
+            return acc.concat(newObj);
+        }, []);
     };
 };
 
