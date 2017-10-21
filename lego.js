@@ -6,6 +6,18 @@
  */
 exports.isStar = true;
 
+
+const functionsPriority = {
+    select: 1,
+    filterIn: 0,
+    sortBy: 0,
+    format: 2,
+    limit: 2,
+    or: 0,
+    and: 0
+};
+
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -15,14 +27,13 @@ exports.isStar = true;
 exports.query = function (collection) {
     collection = collection.slice();
     let methods = Array.from(arguments).slice(1);
-    for (let method of methods.sort((a, b) => {
-        return a.priority - b.priority;
-    })) {
-        collection = method.action(collection);
-    }
 
-    return collection;
+    return methods.sort((a, b) => functionsPriority[a.name] - functionsPriority[b.name])
+        . reduce((friends, method) => {
+            return method(friends);
+        }, collection);
 };
+
 
 /**
  * Выбор полей
@@ -32,23 +43,20 @@ exports.query = function (collection) {
 exports.select = function () {
     let selectedFields = Array.from(arguments);
 
-    return {
-        action:
-            function (collection) {
-                return collection.map(oldElement => {
-                    let element = {};
-                    for (let field of selectedFields) {
-                        if (field in oldElement) {
-                            element[field] = oldElement[field];
-                        }
-                    }
+    return function select(collection) {
+        return collection.map(oldElement => {
+            let element = {};
+            for (let field of selectedFields) {
+                if (field in oldElement) {
+                    element[field] = oldElement[field];
+                }
+            }
 
-                    return element;
-                });
-            },
-        priority: 1
+            return element;
+        });
     };
 };
+
 
 /**
  * Фильтрация поля по массиву значений
@@ -57,16 +65,11 @@ exports.select = function () {
  * @returns {{Function, Number}}
  */
 exports.filterIn = function (property, values) {
-    return {
-        action:
-            function (collection) {
-                return collection.filter(element => {
-                    return values.indexOf(element[property]) !== -1;
-                });
-            },
-        priority: 0
+    return function filterIn(collection) {
+        return collection.filter(element => values.includes(element[property]));
     };
 };
+
 
 /**
  * Сортировка коллекции по полю
@@ -77,21 +80,17 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     let sign = (order === 'asc') ? 1 : -1;
 
-    return {
-        action:
-            function (collection) {
-                return collection.sort((a, b) => {
-                    if (a[property] < b[property]) {
-                        return -sign;
-                    }
-                    if (a[property] > b[property]) {
-                        return sign;
-                    }
+    return function sortBy(collection) {
+        return collection.sort((a, b) => {
+            if (a[property] < b[property]) {
+                return -sign;
+            }
+            if (a[property] > b[property]) {
+                return sign;
+            }
 
-                    return 0;
-                });
-            },
-        priority: 0
+            return 0;
+        });
     };
 };
 
@@ -102,17 +101,13 @@ exports.sortBy = function (property, order) {
  * @returns {{Function, Number}}
  */
 exports.format = function (property, formatter) {
-    return {
-        action:
-            function (collection) {
-                return collection.map(oldElement => {
-                    let element = Object.assign({}, oldElement);
-                    element[property] = formatter(element[property]);
+    return function format(collection) {
+        return collection.map(oldElement => {
+            let element = Object.assign({}, oldElement);
+            element[property] = formatter(element[property]);
 
-                    return element;
-                });
-            },
-        priority: 2
+            return element;
+        });
     };
 };
 
@@ -122,12 +117,8 @@ exports.format = function (property, formatter) {
  * @returns {{Function, Number}}
  */
 exports.limit = function (count) {
-    return {
-        action:
-            function (collection) {
-                return collection.slice(0, count);
-            },
-        priority: 2
+    return function limit(collection) {
+        return collection.slice(0, count);
     };
 };
 
@@ -142,21 +133,10 @@ if (exports.isStar) {
     exports.or = function () {
         let methods = Array.from(arguments);
 
-        return {
-            action:
-                function (collection) {
-
-                    return collection.filter(element => {
-                        for (let method of methods) {
-                            if (method.action(collection).indexOf(element) !== -1) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    });
-                },
-            priority: 0
+        return function or(collection) {
+            return collection.filter(element => {
+                return methods.some(method => method(collection).includes(element));
+            });
         };
     };
 
@@ -169,21 +149,10 @@ if (exports.isStar) {
     exports.and = function () {
         let methods = Array.from(arguments);
 
-        return {
-            action:
-                function (collection) {
-
-                    return collection.filter(element => {
-                        for (let method of methods) {
-                            if (method.action(collection).indexOf(element) === -1) {
-                                return false;
-                            }
-                        }
-
-                        return true;
-                    });
-                },
-            priority: 0
+        return function and(collection) {
+            return collection.filter(element => {
+                return methods.every(method => method(collection).includes(element));
+            });
         };
     };
 }
