@@ -47,8 +47,6 @@ module.exports = class Table {
     copy() {
         let newTable = new Table(this.collection);
         newTable.select = this.select.slice();
-        newTable.formats = this.formats.slice();
-        newTable.limit = this.limit;
 
         return newTable;
     }
