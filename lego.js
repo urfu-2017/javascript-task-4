@@ -2,35 +2,28 @@
 
 exports.isStar = true;
 
-const OPERATION_PRIORITY = {
-    filterIn: 6,
-    and: 5,
-    or: 4,
-    sortBy: 3,
-    select: 2,
-    limit: 1,
-    format: 0
-};
+const OPERATION_PRIORITY = ['filterIn', 'and', 'or', 'sortBy', 'select', 'limit', 'format'];
+const priority = name => OPERATION_PRIORITY.indexOf(name);
 
-const copyCollection = (collection) => JSON.parse(JSON.stringify(collection));
+const copyCollection = collection => [...collection];
 
 exports.query = (collection, ...params) =>
     params
-        .sort((a, b) => OPERATION_PRIORITY[b.name] - OPERATION_PRIORITY[a.name])
+        .sort((a, b) => priority(a.name) - priority(b.name))
         .reduce((collectionCopy, param) => param(collectionCopy), copyCollection(collection));
 
 exports.select = (...params) =>
     function select(collection) {
-        return collection.map(entry => {
-            let newEntry = {};
-            params.forEach(function (param) { // can't make arrow func here
-                if (entry[param] !== undefined) {
-                    newEntry[param] = entry[param];
-                }
-            });
+        return collection.reduce((result, entry) => {
+            let newEntry = params.reduce((element, param) => {
+                element[param] = entry[param];
 
-            return newEntry;
-        });
+                return element;
+            }, {});
+            result.push(newEntry);
+
+            return result;
+        }, []);
     };
 
 exports.filterIn = (property, values) =>
