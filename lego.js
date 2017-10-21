@@ -21,7 +21,7 @@ exports.query = (collection, ...params) =>
 
 exports.select = (...params) =>
     function select(collection) {
-        return copyCollection(collection).map(entry => {
+        return collection.map(entry => {
             let newEntry = {};
             params.forEach(function (param) { // can't make arrow func here
                 if (entry[param] !== undefined) {
@@ -35,7 +35,7 @@ exports.select = (...params) =>
 
 exports.filterIn = (property, values) =>
     function filterIn(collection) {
-        return copyCollection(collection).filter(entry =>
+        return collection.filter(entry =>
             values.some(value => entry[property] === value)
         );
     };
@@ -44,15 +44,15 @@ exports.sortBy = (property, order) =>
     function sortBy(collection) {
         let copy = copyCollection(collection);
         if (order === 'asc') {
-            return copy.sort((a, b) => a[property] - b[property]);
+            return copy.sort((a, b) => a[property] > b[property]);
         }
 
-        return copy.sort((a, b) => b[property] - a[property]);
+        return copy.sort((a, b) => b[property] < a[property]);
     };
 
 exports.format = (property, formatter) =>
     function format(collection) {
-        return copyCollection(collection).map(entry => {
+        return collection.map(entry => {
             if (entry[property] !== undefined) {
                 entry[property] = formatter(entry[property]);
             }
@@ -63,20 +63,20 @@ exports.format = (property, formatter) =>
 
 exports.limit = (count) =>
     function limit(collection) {
-        return copyCollection(collection).slice(0, count);
+        return collection.slice(0, count);
     };
 
 if (exports.isStar) {
     exports.or = (...params) =>
         function or(collection) {
-            return copyCollection(collection).filter(entry =>
+            return collection.filter(entry =>
                 params.some(param => param([entry]).length)
             );
         };
 
     exports.and = (...params) =>
         function and(collection) {
-            return copyCollection(collection).filter(entry =>
+            return collection.filter(entry =>
                 params.every(param => param([entry]).length)
             );
         };
