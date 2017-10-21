@@ -66,7 +66,7 @@ if (exports.isStar) {
             functions.forEach(func => {
                 let newTable = new Table(table.collection);
                 func(newTable);
-                res.push(newTable.execute());
+                res.push(newTable.collection);
             });
             table.collection = res.reduce((a, b) => merge(a, b, true));
         };
