@@ -16,7 +16,9 @@ exports.select = (...params) =>
     function select(collection) {
         return collection.reduce((result, entry) => {
             let newEntry = params.reduce((element, param) => {
-                element[param] = entry[param];
+                if (entry[param] !== undefined) {
+                    element[param] = entry[param];
+                }
 
                 return element;
             }, {});
