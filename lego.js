@@ -7,10 +7,10 @@ let execFuncs = (table, functions) => {
     functions.forEach(func => func(table));
 };
 
-let merge = (a, b) => {
+let merge = (a, b, or) => {
     let c = a.slice();
     b.forEach(item => {
-        if (!c.includes(item)) {
+        if ((or && !c.includes(item)) || (!or && c.includes(item))) {
             c.push(item);
         }
     });
@@ -26,55 +26,52 @@ exports.query = (collection, ...functions) => {
 };
 
 exports.select = (...params) => {
-    return function select(table) {
+    return table => {
         table.select = params;
     };
 };
 
 exports.filterIn = (property, values) => {
-    return function filter(table) {
+    return table => {
         table.filter(property, values);
     };
 };
 
 exports.sortBy = (property, order) => {
-    return function sort(table) {
+    return table => {
         table.sort(property, order === 'asc');
     };
 };
 
 exports.format = (property, formatter) =>{
-    return function format(table) {
+    return table => {
         table.formats.push({ field: property, func: formatter });
     };
 };
 
 exports.limit = (count) => {
-    return function limit(table) {
+    return table => {
         table.limit = count;
     };
 };
 
 if (exports.isStar) {
+    let executeFuncs = (table, funcs, or) => {
+        let res = [];
+        funcs.forEach(func => {
+            let newTable = new Table(table.collection);
+            func(newTable);
+            res.push(newTable.execute());
+        });
+
+        table.collection = res.reduce((a, b) => merge(a, b, or));
+    };
+
     exports.or = (...functions) => {
-        return function or(table) {
-            let res = [];
-            functions.forEach(func => {
-                let newTable = new Table(table.collection);
-                func(newTable);
-                res.push(newTable.execute());
-            });
-            table.collection = res.reduce((a, b) => merge(a, b));
-        };
+        return table => executeFuncs(table, functions, true);
     };
 
     exports.and = (...functions) => {
-        return function and(table) {
-            let newTable = new Table(table.collection);
-            execFuncs(newTable, functions);
-            table.collection = newTable.collection;
-        };
+        return table => executeFuncs(table, functions, false);
     };
 }
-
-
