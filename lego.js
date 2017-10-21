@@ -90,8 +90,10 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.slice().reduce(function (acc, obj) {
-            obj[property] = formatter(obj[property]);
+        return collection.reduce(function (acc, obj) {
+            if (property in obj) {
+                obj[property] = formatter(obj[property]);
+            }
 
             return acc.concat(obj);
         }, []);
