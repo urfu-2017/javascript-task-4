@@ -3,19 +3,8 @@ exports.isStar = false;
 
 let Table = require('./table');
 
-const functionsOrder = {
-    filter: 0,
-    and: 1,
-    or: 2,
-    sort: 3,
-    select: 3,
-    limit: 3,
-    format: 3
-};
-
 let execFuncs = (table, functions) => {
-    functions.sort((a, b) => functionsOrder[a.name] > functionsOrder[b.name])
-        .forEach(func => func(table));
+    functions.forEach(func => func(table));
 };
 
 let merge = (a, b) => {

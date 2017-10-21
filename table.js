@@ -3,7 +3,9 @@ let selectMap = select => {
     return item => {
         let newItem = {};
         select.forEach(field => {
-            newItem[field] = item[field];
+            if (item[field]) {
+                newItem[field] = item[field];
+            }
         });
 
         return newItem;
