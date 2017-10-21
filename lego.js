@@ -1,5 +1,5 @@
 'use strict';
-exports.isStar = false;
+exports.isStar = true;
 
 let Table = require('./table');
 
