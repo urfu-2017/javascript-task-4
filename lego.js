@@ -12,24 +12,19 @@ const OPERATION_PRIORITY = {
     format: 0
 };
 
-exports.query = function (collection, ...params) {
-    let collectionCopy = [...collection];
+const copyCollection = (collection) => JSON.parse(JSON.stringify(collection));
 
+exports.query = (collection, ...params) =>
     params
         .sort((a, b) => OPERATION_PRIORITY[b.name] - OPERATION_PRIORITY[a.name])
-        .forEach(param => {
-            collectionCopy = param(collectionCopy);
-        });
-
-    return collectionCopy;
-};
+        .reduce((collectionCopy, param) => param(collectionCopy), copyCollection(collection));
 
 exports.select = (...params) =>
     function select(collection) {
-        return collection.map(entry => {
+        return copyCollection(collection).map(entry => {
             let newEntry = {};
             params.forEach(function (param) { // can't make arrow func here
-                if (entry[param]) {
+                if (entry[param] !== undefined) {
                     newEntry[param] = entry[param];
                 }
             });
@@ -39,18 +34,16 @@ exports.select = (...params) =>
     };
 
 
-exports.filterIn = (property, values) => {
-
-    return function filterIn(collectionCopy) {
-        return collectionCopy.filter(entry =>
+exports.filterIn = (property, values) =>
+    function filterIn(collection) {
+        return copyCollection(collection).filter(entry =>
             values.some(value => entry[property] === value)
         );
     };
-};
 
 exports.sortBy = (property, order) =>
     function sortBy(collection) {
-        let copy = [...collection];
+        let copy = copyCollection(collection);
         if (order === 'asc') {
             return copy.sort((a, b) => a[property] - b[property]);
         }
@@ -60,8 +53,10 @@ exports.sortBy = (property, order) =>
 
 exports.format = (property, formatter) =>
     function format(collection) {
-        return collection.map(entry => {
-            entry[property] = formatter(entry[property]);
+        return copyCollection(collection).map(entry => {
+            if (entry[property] !== undefined) {
+                entry[property] = formatter(entry[property]);
+            }
 
             return entry;
         });
@@ -69,13 +64,13 @@ exports.format = (property, formatter) =>
 
 exports.limit = (count) =>
     function limit(collection) {
-        return collection.slice(0, count);
+        return copyCollection(collection).slice(0, count);
     };
 
 if (exports.isStar) {
     exports.or = (...params) =>
         function or(collection) {
-            return collection.filter(entry =>
+            return copyCollection(collection).filter(entry =>
                 params.some(param =>
                     param(collection).indexOf(entry) !== -1
                 )
@@ -84,7 +79,7 @@ if (exports.isStar) {
 
     exports.and = (...params) =>
         function and(collection) {
-            return collection.filter(entry =>
+            return copyCollection(collection).filter(entry =>
                 params.every(param =>
                     param(collection).indexOf(entry) !== -1
                 )
