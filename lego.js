@@ -21,7 +21,7 @@ exports.query = (collection, ...params) =>
 
 exports.select = (...params) =>
     function select(collection) {
-        return collection.map(entry => {
+        return copyCollection(collection).map(entry => {
             let newEntry = {};
             params.forEach(function (param) { // can't make arrow func here
                 if (entry[param] !== undefined) {
@@ -33,10 +33,9 @@ exports.select = (...params) =>
         });
     };
 
-
 exports.filterIn = (property, values) =>
     function filterIn(collection) {
-        return collection.filter(entry =>
+        return copyCollection(collection).filter(entry =>
             values.some(value => entry[property] === value)
         );
     };
@@ -53,7 +52,7 @@ exports.sortBy = (property, order) =>
 
 exports.format = (property, formatter) =>
     function format(collection) {
-        return collection.map(entry => {
+        return copyCollection(collection).map(entry => {
             if (entry[property] !== undefined) {
                 entry[property] = formatter(entry[property]);
             }
@@ -64,25 +63,21 @@ exports.format = (property, formatter) =>
 
 exports.limit = (count) =>
     function limit(collection) {
-        return collection.slice(0, count);
+        return copyCollection(collection).slice(0, count);
     };
 
 if (exports.isStar) {
     exports.or = (...params) =>
         function or(collection) {
-            return collection.filter(entry =>
-                params.some(param =>
-                    param(collection).indexOf(entry) !== -1
-                )
+            return copyCollection(collection).filter(entry =>
+                params.some(param => param([entry]).length)
             );
         };
 
     exports.and = (...params) =>
         function and(collection) {
-            return collection.filter(entry =>
-                params.every(param =>
-                    param(collection).indexOf(entry) !== -1
-                )
+            return copyCollection(collection).filter(entry =>
+                params.every(param => param([entry]).length)
             );
         };
 }
