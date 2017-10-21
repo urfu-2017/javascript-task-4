@@ -7,15 +7,17 @@ let execFuncs = (table, functions) => {
     functions.forEach(func => func(table));
 };
 
-let merge = (a, b, or) => {
-    let c = a.slice();
-    b.forEach(item => {
-        if ((or && !c.includes(item)) || (!or && c.includes(item))) {
-            c.push(item);
+let merge = (a, b) => {
+    let copyA = a.map(item => JSON.stringify(item));
+    let copyB = b.map(item => JSON.stringify(item));
+    let res = copyA.slice();
+    copyB.forEach(item => {
+        if (!res.includes(item)) {
+            res.push(item);
         }
     });
 
-    return c;
+    return res.map(item => JSON.parse(item));
 };
 
 exports.query = (collection, ...functions) => {
@@ -56,22 +58,23 @@ exports.limit = (count) => {
 };
 
 if (exports.isStar) {
-    let executeFuncs = (table, funcs, or) => {
-        let res = [];
-        funcs.forEach(func => {
-            let newTable = new Table(table.collection);
-            func(newTable);
-            res.push(newTable.execute());
-        });
-
-        table.collection = res.reduce((a, b) => merge(a, b, or));
-    };
-
     exports.or = (...functions) => {
-        return table => executeFuncs(table, functions, true);
+        return table => {
+            let res = [];
+            functions.forEach(func => {
+                let newTable = new Table(table.collection);
+                func(newTable);
+                res.push(newTable.execute());
+            });
+            table.collection = res.reduce((a, b) => merge(a, b));
+        };
     };
 
     exports.and = (...functions) => {
-        return table => executeFuncs(table, functions, false);
+        return table => {
+            execFuncs(table, functions);
+        };
     };
 }
+
+
