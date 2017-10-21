@@ -24,6 +24,7 @@ let merge = (a, b, or) => {
 };
 
 exports.query = (collection, ...functions) => {
+
     let table = new Table(collection);
     execFuncs(table, functions);
 
@@ -31,9 +32,7 @@ exports.query = (collection, ...functions) => {
 };
 
 exports.select = (...params) => {
-    return table => {
-        table.select = params;
-    };
+    return table => table.setSelect(params);
 };
 
 exports.filterIn = (property, values) => {

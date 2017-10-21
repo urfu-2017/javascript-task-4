@@ -39,6 +39,16 @@ module.exports = class Table {
         this.collection.sort((i, j) => order ? i[field] > j[field] : i[field] <= j[field]);
     }
 
+    setSelect(select) {
+        let newSelect = [];
+        select.forEach(item => {
+            if (this.select.includes(item)) {
+                newSelect.push(item);
+            }
+        });
+        this.select = newSelect;
+    }
+
     execute() {
         return this.collection
             .map(selectMap(this.select))
