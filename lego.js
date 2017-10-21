@@ -35,9 +35,7 @@ exports.select = (...params) =>
 
 exports.filterIn = (property, values) =>
     function filterIn(collection) {
-        return collection.filter(entry =>
-            values.some(value => entry[property] === value)
-        );
+        return collection.filter(entry => values.includes(entry[property]));
     };
 
 exports.sortBy = (property, order) =>
@@ -47,7 +45,7 @@ exports.sortBy = (property, order) =>
             return copy.sort((a, b) => a[property] > b[property]);
         }
 
-        return copy.sort((a, b) => b[property] < a[property]);
+        return copy.sort((a, b) => a[property] < b[property]);
     };
 
 exports.format = (property, formatter) =>
