@@ -43,11 +43,4 @@ module.exports = class Table {
             .map(formatMap(this.formats))
             .slice(0, this.limit);
     }
-
-    copy() {
-        let newTable = new Table(this.collection);
-        newTable.select = this.select.slice();
-
-        return newTable;
-    }
 };

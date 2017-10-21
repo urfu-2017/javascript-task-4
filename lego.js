@@ -3,43 +3,64 @@ exports.isStar = true;
 
 let Table = require('./table');
 
+const functionsOrder = {
+    filter: 0,
+    and: 1,
+    or: 2,
+    sort: 3,
+    select: 3,
+    limit: 3,
+    format: 3
+};
+
+let execFuncs = (table, functions) => {
+    functions.sort((a, b) => functionsOrder[a.name] > functionsOrder[b.name])
+        .forEach(func => func(table));
+};
+
 exports.query = (collection, ...functions) => {
     let table = new Table(collection);
-    functions.forEach(func => func(table));
+    execFuncs(table, functions);
 
     return table.execute();
 };
 
 exports.select = (...params) => {
-    return table => {
+    return function select(table) {
         table.select = params;
     };
 };
 
 exports.filterIn = (property, values) => {
-    return table => table.filter(property, values);
+    return function filter(table) {
+        table.filter(property, values);
+    };
 };
 
 exports.sortBy = (property, order) => {
-    return table => table.sort(property, order === 'asc');
+    return function sort(table) {
+        table.sort(property, order === 'asc');
+    };
 };
 
 exports.format = (property, formatter) =>{
-    return table => table.formats.push({ field: property, func: formatter });
+    return function format(table) {
+        table.formats.push({ field: property, func: formatter });
+    };
 };
 
 exports.limit = (count) => {
-    return table => {
+    return function limit(table) {
         table.limit = count;
     };
 };
 
 if (exports.isStar) {
     exports.or = (...functions) => {
-        return table => {
+        return function or(table) {
             let res = [];
             functions.forEach(func => {
-                let newTable = table.copy();
+                let newTable = new Table(table.collection);
                 func(newTable);
                 res.push(newTable.execute());
             });
@@ -48,6 +69,10 @@ if (exports.isStar) {
     };
 
     exports.and = (...functions) => {
-        return table => functions.forEach(func => func(table));
+        return function and(table) {
+            let newTable = new Table(table.collection);
+            execFuncs(newTable, functions);
+            table.collection = newTable.collection;
+        };
     };
 }
