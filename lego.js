@@ -36,12 +36,12 @@ exports.query = function (collection, ...functions) {
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function (...params) {
+exports.select = function (...fields) {
     return function select(collection) {
         collection.forEach(record => {
             for (var field in record) {
                 if (record.hasOwnProperty(field) &&
-                    params.indexOf(field) === -1) {
+                    !fields.includes(field)) {
                     delete record[field];
                 }
             }
@@ -59,7 +59,7 @@ exports.select = function (...params) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filter(record => values.indexOf(record[property]) !== -1);
+        return collection.filter(record => values.includes(record[property]));
     };
 };
 
@@ -131,17 +131,13 @@ if (exports.isStar) {
      */
     exports.or = function (...filterFunctions) {
         return function or(collection) {
-            let resultCollection = [];
-            filterFunctions.forEach(filter => {
-                let filtredCollection = filter(collection);
-                filtredCollection.forEach(record => {
-                    if (resultCollection.indexOf(record) === -1) {
-                        resultCollection.push(record);
-                    }
-                });
-            });
+            return collection.filter(record =>
+                filterFunctions.some(filter => {
+                    let filtredCollection = filter(collection);
 
-            return resultCollection;
+                    return filtredCollection.includes(record);
+                })
+            );
         };
     };
 
