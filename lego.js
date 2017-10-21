@@ -13,58 +13,117 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection) {
-    return collection;
+    let funcs = [...arguments].slice(1);
+    let selectors = [];
+    let newCollection = collection;
+    for (let func of funcs) {
+        if (func.name === 'selector') {
+            selectors.push(func);
+            continue;
+        }
+        newCollection = func(newCollection);
+    }
+    for (let selector of selectors) {
+        newCollection = selector(newCollection);
+    }
+
+    return newCollection;
 };
 
 /**
  * Выбор полей
  * @params {...String}
+ * @returns {Function}
  */
 exports.select = function () {
-    return;
+    let fields = [...arguments];
+
+    return function selector(collection) {
+        return collection.map(element => {
+            let newElement = {};
+            for (let arg of fields) {
+                if (arg in element) {
+                    newElement[arg] = element[arg];
+                }
+            }
+
+            return newElement;
+        });
+    };
 };
 
 /**
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
+ * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
+    return function (collection) {
+        values = new Set(values);
 
-    return;
+        return collection.filter(elem => values.has(elem[property]));
+    };
 };
 
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
-
-    return;
+    return function (collection) {
+        return collection.sort(createComparatorByProperty(property, order));
+    };
 };
+
+function createComparatorByProperty(property, order) {
+    return function (a, b) {
+        let invertor = order === 'asc' ? 1 : -1;
+        if (a[property] < b[property]) {
+            return invertor * -1;
+        }
+        if (a[property] > b[property]) {
+            return invertor;
+        }
+
+        return 0;
+    };
+}
 
 /**
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
+ * @returns {Function}
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
+    return function (collection) {
+        return collection.map(el => {
+            let newElem = {};
+            let props = Object.keys(el);
+            for (let prop of props) {
+                newElem[prop] = el[prop];
+                if (prop === property) {
+                    newElem[prop] = prop === property ? formatter(newElem[prop]) : newElem[prop];
+                }
+            }
 
-    return;
+            return newElem;
+        });
+    };
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
+ * @returns {Function}
  */
 exports.limit = function (count) {
-    console.info(count);
-
-    return;
+    return function (collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
@@ -73,17 +132,38 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.or = function () {
-        return;
+        let filters = [...arguments];
+
+        return function (collection) {
+            let set = new Set();
+            for (let filter of filters) {
+                let newSet = new Set(filter(collection));
+                set = new Set([...set].concat([...newSet]));
+            }
+
+            return [...set];
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.and = function () {
-        return;
+        let filters = [...arguments];
+
+        return function (collection) {
+            let newCollection = collection;
+            for (let filter of filters) {
+                newCollection = filter(newCollection);
+            }
+
+            return newCollection;
+        };
     };
 }
