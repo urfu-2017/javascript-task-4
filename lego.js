@@ -18,6 +18,17 @@ let execFuncs = (table, functions) => {
         .forEach(func => func(table));
 };
 
+let merge = (a, b) => {
+    let c = a.slice();
+    b.forEach(item => {
+        if (!c.includes(item)) {
+            c.push(item);
+        }
+    });
+
+    return c;
+};
+
 exports.query = (collection, ...functions) => {
     let table = new Table(collection);
     execFuncs(table, functions);
@@ -64,7 +75,7 @@ if (exports.isStar) {
                 func(newTable);
                 res.push(newTable.execute());
             });
-            table.collection = res.reduce((a, b) => a.concat(b));
+            table.collection = res.reduce((a, b) => merge(a, b));
         };
     };
 
@@ -76,3 +87,5 @@ if (exports.isStar) {
         };
     };
 }
+
+
