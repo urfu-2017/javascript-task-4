@@ -41,8 +41,8 @@ exports.query = function (collection) {
             return priority[a.name] > priority[b.name];
         })
         .forEach(f => {
-            return cloneCollection = f(cloneCollection);
-        } );
+            cloneCollection = f(cloneCollection);
+        });
 
     return cloneCollection;
 };
@@ -54,6 +54,7 @@ exports.query = function (collection) {
  */
 exports.select = function () {
     var selectors = [].slice.call(arguments);
+
     return function select(collection) {
         return collection.map(
             elem => selectors.reduce(
