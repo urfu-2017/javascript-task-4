@@ -15,20 +15,33 @@ exports.isStar = true;
 exports.query = function (collection) {
     let funcs = [...arguments].slice(1);
     let selectors = [];
+    let limiters = [];
     let newCollection = collection;
     for (let func of funcs) {
         if (func.name === 'selector') {
             selectors.push(func);
             continue;
         }
+        if (func.name === 'limiter') {
+            limiters.push(func);
+            continue;
+        }
         newCollection = func(newCollection);
     }
-    for (let selector of selectors) {
-        newCollection = selector(newCollection);
-    }
+    newCollection = applyFunctions(newCollection, selectors);
+    newCollection = applyFunctions(newCollection, limiters);
 
     return newCollection;
 };
+
+function applyFunctions(collection, functions) {
+    let newCollection = collection;
+    for (let func of functions) {
+        newCollection = func(newCollection);
+    }
+
+    return newCollection;
+}
 
 /**
  * Выбор полей
@@ -121,7 +134,7 @@ exports.format = function (property, formatter) {
  * @returns {Function}
  */
 exports.limit = function (count) {
-    return function (collection) {
+    return function limiter(collection) {
         return collection.slice(0, count);
     };
 };
