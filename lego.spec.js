@@ -84,6 +84,34 @@ describe('lego.query', function () {
         ]);
     });
 
+    it('должен вернуть копию коллекции', function () {
+        var result = lego.query(
+            friends
+        );
+
+        assert.deepStrictEqual(result, friends);
+        assert.notEqual(result, friends);
+    });
+
+    it('метод select должен игнорировать несуществующие поля', function () {
+        var result = lego.query(
+            [{ field: 'value' }],
+            lego.select('field', 'nonexistent')
+        );
+        let expected = [{ field: 'value' }];
+        assert.deepStrictEqual(result, expected);
+    });
+
+    it('несколько методов select как один с пересечением аргументов', function () {
+        var result = lego.query(
+            [{ field1: 'value1', field2: 'value2', field3: 'value3' }],
+            lego.select('field1', 'field2'),
+            lego.select('field1', 'field3')
+        );
+        let expected = [{ field1: 'value1' }];
+        assert.deepStrictEqual(result, expected);
+    });
+
     if (lego.isStar) {
         it('должен поддерживать операторы or и and', function () {
             var result = lego.query(
