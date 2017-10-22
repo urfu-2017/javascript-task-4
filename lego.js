@@ -142,18 +142,27 @@ exports.format = function (property, formatter) {
 
     return function format(collection) {
 
-        if (!(collection.every(friend => property in friend))) {
+        // if (!(collection.every(friend => property in friend))) {
+        //
+        //     return collection;
+        //
+        // }
 
-            return collection;
+        // return collection.map(obj => {
+        //
+        //     obj[property] = formatter(obj[property]);
+        //
+        //     return obj;
+        // });
 
-        }
+        return collection.map(item =>
 
-        return collection.map(obj => {
+            Object.assign({}, item, {
 
-            obj[property] = formatter(obj[property]);
+                [property]: formatter(item[property])
+            })
 
-            return obj;
-        });
+        );
     };
 };
 
