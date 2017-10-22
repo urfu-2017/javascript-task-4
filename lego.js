@@ -39,12 +39,11 @@ exports.query = function (collection, ...functions) {
 exports.select = function (...fields) {
     return function select(collection) {
         collection.forEach(record => {
-            for (var field in record) {
-                if (record.hasOwnProperty(field) &&
-                    !fields.includes(field)) {
+            Object.keys(record).forEach(field => {
+                if (!fields.includes(field)) {
                     delete record[field];
                 }
-            }
+            });
         });
 
         return collection;
