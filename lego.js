@@ -6,6 +6,16 @@
  */
 exports.isStar = true;
 
+let FUNC_PRIORITETS = {
+    'format': 0,
+    'limit': 0,
+    'select': 1,
+    'sortBy': 2,
+    'filterIn': 2,
+    'or': 2,
+    'and': 2
+};
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -14,34 +24,14 @@ exports.isStar = true;
  */
 exports.query = function (collection) {
     let funcs = [...arguments].slice(1);
-    let selectors = [];
-    let limiters = [];
+    funcs = funcs.sort((a, b) => FUNC_PRIORITETS[b.name] - FUNC_PRIORITETS[a.name]);
     let newCollection = collection;
     for (let func of funcs) {
-        if (func.name === 'selector') {
-            selectors.push(func);
-            continue;
-        }
-        if (func.name === 'limiter') {
-            limiters.push(func);
-            continue;
-        }
         newCollection = func(newCollection);
     }
-    newCollection = applyFunctions(newCollection, selectors);
-    newCollection = applyFunctions(newCollection, limiters);
 
     return newCollection;
 };
-
-function applyFunctions(collection, functions) {
-    let newCollection = collection;
-    for (let func of functions) {
-        newCollection = func(newCollection);
-    }
-
-    return newCollection;
-}
 
 /**
  * Выбор полей
@@ -51,7 +41,7 @@ function applyFunctions(collection, functions) {
 exports.select = function () {
     let fields = [...arguments];
 
-    return function selector(collection) {
+    return function select(collection) {
         return collection.map(element => {
             let newElement = {};
             for (let arg of fields) {
@@ -72,7 +62,7 @@ exports.select = function () {
  * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    return function (collection) {
+    return function filterIn(collection) {
         values = new Set(values);
 
         return collection.filter(elem => values.has(elem[property]));
@@ -86,7 +76,7 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    return function (collection) {
+    return function sortBy(collection) {
         return collection.sort(createComparatorByProperty(property, order));
     };
 };
@@ -112,7 +102,7 @@ function createComparatorByProperty(property, order) {
  * @returns {Function}
  */
 exports.format = function (property, formatter) {
-    return function (collection) {
+    return function format(collection) {
         return collection.map(el => {
             let newElem = {};
             let props = Object.keys(el);
@@ -134,7 +124,7 @@ exports.format = function (property, formatter) {
  * @returns {Function}
  */
 exports.limit = function (count) {
-    return function limiter(collection) {
+    return function limit(collection) {
         return collection.slice(0, count);
     };
 };
@@ -150,7 +140,7 @@ if (exports.isStar) {
     exports.or = function () {
         let filters = [...arguments];
 
-        return function (collection) {
+        return function or(collection) {
             let set = new Set();
             for (let filter of filters) {
                 let newSet = new Set(filter(collection));
@@ -170,7 +160,7 @@ if (exports.isStar) {
     exports.and = function () {
         let filters = [...arguments];
 
-        return function (collection) {
+        return function and(collection) {
             let newCollection = collection;
             for (let filter of filters) {
                 newCollection = filter(newCollection);
