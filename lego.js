@@ -6,14 +6,12 @@ const OPERATION_PRIORITY = ['filterIn', 'and', 'or', 'sortBy', 'select', 'limit'
 const priority = name => OPERATION_PRIORITY.indexOf(name);
 
 const copyCollection = collection => JSON.parse(JSON.stringify(collection));
+const getFuncName = func => func.toString().split(/[^A-Za-z]/)[4];
 
 exports.query = (collection, ...params) =>
     params
-        .sort((a, b) => priority(a.toString().split(/[^A-Za-z]/)[4]) -
-        priority(b.toString().split(/[^A-Za-z]/)[4]))
-        .reduce((collectionCopy, param) => {
-            return param(collectionCopy);
-        }, copyCollection(collection));
+        .sort((a, b) => priority(getFuncName(a)) - priority(getFuncName(b)))
+        .reduce((collectionCopy, param) => param(collectionCopy), copyCollection(collection));
 
 function select(collection, params) {
     return collection.reduce((result, entry) => {
@@ -31,7 +29,6 @@ function select(collection, params) {
 }
 
 exports.select = (...params) => collection => select(collection, params);
-
 
 const filterIn = (collection, property, values) => collection
     .filter(entry => values.includes(entry[property]));
@@ -72,7 +69,6 @@ if (exports.isStar) {
         );
 
     exports.or = (...params) => collection => or(collection, params);
-
 
     const and = (collection, params) =>
         collection.filter(entry =>
