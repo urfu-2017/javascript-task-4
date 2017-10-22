@@ -25,13 +25,17 @@ let FUNC_PRIORITETS = {
 exports.query = function (collection) {
     let funcs = [...arguments].slice(1);
     funcs = funcs.sort((a, b) => FUNC_PRIORITETS[b.name] - FUNC_PRIORITETS[a.name]);
-    let newCollection = collection;
+    let newCollection = createObjectCopy(collection);
     for (let func of funcs) {
         newCollection = func(newCollection);
     }
 
     return newCollection;
 };
+
+function createObjectCopy(object) {
+    return JSON.parse(JSON.stringify(object));
+}
 
 /**
  * Выбор полей
