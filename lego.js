@@ -21,13 +21,13 @@ exports.isStar = true;
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Function} – Функции для запроса
+ * @params {...filters} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection, ...selectors) {
+exports.query = function (collection, ...filters) {
     let collectionCopy = JSON.parse(JSON.stringify(collection));
 
-    return selectors
+    return filters
         .sort((firstFunc, secondFunc) =>
             getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
         .reduce((summary, delegate) => delegate(summary), collectionCopy);
