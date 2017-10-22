@@ -66,4 +66,11 @@ module.exports = class Table {
             .map(formatMap(this.formats))
             .slice(0, this.limit);
     }
+
+    copy() {
+        let table = new Table(this.collection);
+        table.collection = this.collection;
+
+        return table;
+    }
 };
