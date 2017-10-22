@@ -63,9 +63,7 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        values = new Set(values);
-
-        return collection.filter(elem => values.has(elem[property]));
+        return collection.filter(elem => values.indexOf(elem[property]) !== -1);
     };
 };
 
