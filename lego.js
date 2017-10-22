@@ -101,14 +101,8 @@ function createComparatorByProperty(property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(el => {
-            let newElem = {};
-            let props = Object.keys(el);
-            for (let prop of props) {
-                newElem[prop] = el[prop];
-                if (prop === property) {
-                    newElem[prop] = formatter(newElem[prop]);
-                }
-            }
+            let newElem = createObjectCopy(el);
+            newElem[property] = formatter(newElem[property]);
 
             return newElem;
         });
