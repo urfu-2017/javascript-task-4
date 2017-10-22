@@ -26,7 +26,10 @@ let formatMap = formats => {
 module.exports = class Table {
     constructor(collection) {
         this.collection = collection.map(item => Object.assign(item));
-        this.select = Object.keys(collection[0]);
+        this.select = [];
+        if (collection.length) {
+            this.select = Object.keys(collection[0]);
+        }
         this.formats = [];
         this.limit = this.collection.length;
     }
