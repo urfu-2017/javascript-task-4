@@ -1,89 +1,75 @@
 'use strict';
-
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
 exports.isStar = true;
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
-exports.query = function (collection) {
-    return collection;
+let Table = require('./table');
+
+let execFuncs = (table, functions) => {
+    functions.forEach(func => func(table));
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
-exports.select = function () {
-    return;
+exports.query = (collection, ...functions) => {
+
+    let table = new Table(collection);
+    execFuncs(table, functions);
+
+    return table.execute();
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
-
-    return;
+exports.select = (...params) => {
+    return table => table.setSelect(params);
 };
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
-
-    return;
+exports.filterIn = (property, values) => {
+    return table => {
+        table.filter(property, values);
+    };
 };
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
-    return;
+exports.sortBy = (property, order) => {
+    return table => {
+        table.sort(property, order === 'asc');
+    };
 };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
-exports.limit = function (count) {
-    console.info(count);
+exports.format = (property, formatter) =>{
+    return table => {
+        table.formats.push({ field: property, func: formatter });
+    };
+};
 
-    return;
+exports.limit = (count) => {
+    return table => {
+        table.limit = count;
+    };
 };
 
 if (exports.isStar) {
+    exports.or = (...functions) => {
+        return table => {
+            table.collection = table.collection.filter(element => {
 
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.or = function () {
-        return;
+                return functions.some(method => {
+                    let newTable = table.copy();
+                    method(newTable);
+
+                    return newTable.collection.includes(element);
+                });
+            });
+        };
     };
 
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.and = function () {
-        return;
+    exports.and = (...functions) => {
+        return table => {
+            table.collection = table.collection.filter(element => {
+
+                return functions.every(method => {
+                    let newTable = table.copy();
+                    method(newTable);
+
+                    return newTable.collection.includes(element);
+                });
+            });
+        };
     };
 }
+

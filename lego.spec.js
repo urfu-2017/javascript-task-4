@@ -55,7 +55,7 @@ var friends = [
     },
     {
         name: 'Стелла',
-        age: 25,
+        age: 3,
         gender: 'Женский',
         email: 'waltersguzman@example.com',
         phone: '+7 (555) 415-3100',
