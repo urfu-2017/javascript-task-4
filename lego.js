@@ -2,12 +2,12 @@
 
 /**
  * Получить приоритет операции
- * @param {Function} func
+ * @param {Function} operation
  * @returns {Number}
  */
-function getOperationPriority(func) {
+function getOperationPriority(operation) {
     const priotities = { 'format': 0, 'limit': 1, 'select': 2 };
-    let priority = priotities[func.name];
+    let priority = priotities[operation.name];
 
     return priority === undefined ? Infinity : priority;
 }
@@ -28,7 +28,8 @@ exports.query = function (collection, ...selectors) {
     let collectionCopy = JSON.parse(JSON.stringify(collection));
 
     return selectors
-        .sort((x, y) => getOperationPriority(y) - getOperationPriority(x))
+        .sort((firstFunc, secondFunc) =>
+            getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
         .reduce((summary, delegate) => delegate(summary), collectionCopy);
 };
 
@@ -41,10 +42,10 @@ exports.select = function (...fields) {
     let select = collection => collection
         .map(record => fields
             .filter(field => field in record)
-            .reduce((filtered, field) => {
-                filtered[field] = record[field];
+            .reduce((filteredRecord, field) => {
+                filteredRecord[field] = record[field];
 
-                return filtered;
+                return filteredRecord;
             }, {})
         );
 
@@ -75,7 +76,9 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
     let orderType = { 'asc': 1, 'desc': -1 };
     let sortBy = collection => collection
-        .sort((x, y) => (x[property] > y[property] ? 1 : -1) * orderType[order]);
+        .sort((firstRecord, secondRecord) =>
+            (firstRecord[property] > secondRecord[property] ? 1 : -1) * orderType[order]
+        );
 
     return sortBy;
 };
@@ -89,7 +92,9 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     console.info(property, formatter);
     let format = collection =>
-        collection.map(x=> Object.assign(x, { [property]: formatter(x[property]) }));
+        collection.map(
+            record => Object.assign(record, { [property]: formatter(record[property]) })
+        );
 
     return format;
 };
@@ -111,12 +116,12 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @params {...filters} – Фильтрующие функции
      * @returns {Function}
      */
     exports.or = function (...filters) {
         let or = collection => collection
-            .filter(item => filters.some(selector => selector([item]).length > 0)
+            .filter(record => filters.some(filter => filter([record]).length > 0)
             );
 
         return or;
@@ -125,12 +130,12 @@ if (exports.isStar) {
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @params {...filters} – Фильтрующие функции
      * @returns {Function}
      */
     exports.and = function (...filters) {
         let and = collection => collection
-            .filter(item => filters.every(selector => selector([item]).length > 0)
+            .filter(record => filters.every(filter => filter([record]).length > 0)
             );
 
         return and;
