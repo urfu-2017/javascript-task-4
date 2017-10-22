@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-var OPERATORS_ORDER = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
+var OPERATORS_ORDER = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
 function copyCollection(collection) {
     return collection.map(function (record) {
@@ -68,7 +68,7 @@ exports.filterIn = function (property, values) {
 };
 
 function compare(a, b) {
-    return a - b;
+    return a > b ? 1 : -1;
 }
 
 /**
