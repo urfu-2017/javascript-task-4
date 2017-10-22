@@ -132,13 +132,7 @@ if (exports.isStar) {
         let filters = [...arguments];
 
         return function or(collection) {
-            let set = new Set();
-            for (let filter of filters) {
-                let newSet = new Set(filter(collection));
-                set = new Set([...set].concat([...newSet]));
-            }
-
-            return [...set];
+            return collection.filter(el => filters.some(filter => filter([el]).includes(el)));
         };
     };
 
