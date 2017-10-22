@@ -38,11 +38,11 @@ exports.query = function (collection) {
     var cloneCollection = collection.map(x => clone(x));
     [].slice.call(arguments, 1)
         .sort((a, b) => {
-            return priority[a.name] > priority[b.name]
+            return priority[a.name] > priority[b.name];
         })
         .forEach(f => {
             return cloneCollection = f(cloneCollection);
-        });
+        } );
 
     return cloneCollection;
 };
@@ -59,8 +59,9 @@ exports.select = function () {
             elem => selectors.reduce(
                 (result, selector) => {
                     if (elem.hasOwnProperty(selector)) {
-                        result[selector] = elem[selector]
+                        result[selector] = elem[selector];
                     }
+
                     return result;
                 }, {}));
     };
@@ -76,7 +77,7 @@ exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter(
             elem => {
-                return values.indexOf(elem[property]) !== -1
+                return values.indexOf(elem[property]) !== -1;
             });
     };
 };
@@ -90,9 +91,9 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort((a, b) => {
-                return (a[property] > b[property]) && (order === "asc") ||
-                    (a[property] < b[property]) && (order === "desc");
-            });
+            return (a[property] > b[property]) && (order === 'asc') ||
+                (a[property] < b[property]) && (order === 'desc');
+        });
     };
 };
 
@@ -107,6 +108,7 @@ exports.format = function (property, formatter) {
         return collection.map(
             elem => {
                 elem[property] = formatter(elem[property]);
+
                 return elem;
             });
     };
@@ -118,7 +120,7 @@ exports.format = function (property, formatter) {
  * @returns {function}
  */
 exports.limit = function (count) {
-    return function limit(collection){
+    return function limit(collection) {
         return collection.slice(0, count);
     };
 };
@@ -133,6 +135,7 @@ if (exports.isStar) {
      */
     exports.or = function () {
         var functions = [].slice.call(arguments);
+
         return function or(collection) {
             return collection.filter(
                 elem => functions.some(
