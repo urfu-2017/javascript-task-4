@@ -9,68 +9,75 @@ const copyCollection = collection => JSON.parse(JSON.stringify(collection));
 
 exports.query = (collection, ...params) =>
     params
-        .sort((a, b) => priority(a.name) - priority(b.name))
-        .reduce((collectionCopy, param) => param(collectionCopy), copyCollection(collection));
+        .sort((a, b) => priority(a.toString().split(/[^A-Za-z]/)[4]) -
+        priority(b.toString().split(/[^A-Za-z]/)[4]))
+        .reduce((collectionCopy, param) => {
+            return param(collectionCopy);
+        }, copyCollection(collection));
 
-exports.select = (...params) =>
-    function select(collection) {
-        return collection.reduce((result, entry) => {
-            let newEntry = params.reduce((element, param) => {
-                if (entry[param] !== undefined) {
-                    element[param] = entry[param];
-                }
-
-                return element;
-            }, {});
-            result.push(newEntry);
-
-            return result;
-        }, []);
-    };
-
-exports.filterIn = (property, values) =>
-    function filterIn(collection) {
-        return collection.filter(entry => values.includes(entry[property]));
-    };
-
-exports.sortBy = (property, order) =>
-    function sortBy(collection) {
-        let copy = copyCollection(collection);
-        if (order === 'asc') {
-            return copy.sort((a, b) => a[property] > b[property]);
-        }
-
-        return copy.sort((a, b) => a[property] < b[property]);
-    };
-
-exports.format = (property, formatter) =>
-    function format(collection) {
-        return collection.map(entry => {
-            if (entry[property] !== undefined) {
-                entry[property] = formatter(entry[property]);
+function select(collection, params) {
+    return collection.reduce((result, entry) => {
+        let newEntry = params.reduce((element, param) => {
+            if (entry[param] !== undefined) {
+                element[param] = entry[param];
             }
 
-            return entry;
-        });
-    };
+            return element;
+        }, {});
+        result.push(newEntry);
 
-exports.limit = (count) =>
-    function limit(collection) {
-        return collection.slice(0, count);
-    };
+        return result;
+    }, []);
+}
+
+exports.select = (...params) => collection => select(collection, params);
+
+
+const filterIn = (collection, property, values) => collection
+    .filter(entry => values.includes(entry[property]));
+
+exports.filterIn = (property, values) => collection => filterIn(collection, property, values);
+
+const sortBy = (collection, property, order) => {
+    let copy = copyCollection(collection);
+    if (order === 'asc') {
+        return copy.sort((a, b) => a[property] > b[property]);
+    }
+
+    return copy.sort((a, b) => a[property] < b[property]);
+};
+
+exports.sortBy = (property, order) => collection => sortBy(collection, property, order);
+
+const format = (collection, property, formatter) =>
+    collection.map(entry => {
+        if (entry[property] !== undefined) {
+            entry[property] = formatter(entry[property]);
+        }
+
+        return entry;
+    });
+
+
+exports.format = (property, formatter) => collection => format(collection, property, formatter);
+
+const limit = (collection, count) => collection.slice(0, count);
+
+exports.limit = count => collection => limit(collection, count);
 
 if (exports.isStar) {
-    exports.or = (...params) =>
-        function or(collection) {
-            return collection.filter(entry =>
-                params.some(param => param([entry]).length)
-            );
-        };
+    const or = (collection, params) =>
+        collection.filter(entry =>
+            params.some(param => param([entry]).length)
+        );
 
-    exports.and = (...params) =>
-        function and(collection) {
-            return collection.filter(entry =>
-                params.every(param => param([entry]).length)
-            );
-        };
+    exports.or = (...params) => collection => or(collection, params);
+
+
+    const and = (collection, params) =>
+        collection.filter(entry =>
+            params.every(param => param([entry]).length)
+        );
+
+    exports.and = (...params) => collection => and(collection, params);
 }
