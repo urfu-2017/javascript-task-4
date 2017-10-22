@@ -67,7 +67,7 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filter(elem => values.indexOf(elem[property]) !== -1);
+        return collection.filter(elem => values.includes(elem[property]));
     };
 };
 
@@ -86,14 +86,9 @@ exports.sortBy = function (property, order) {
 function createComparatorByProperty(property, order) {
     return function (a, b) {
         let invertor = order === 'asc' ? 1 : -1;
-        if (a[property] < b[property]) {
-            return invertor * -1;
-        }
-        if (a[property] > b[property]) {
-            return invertor;
-        }
+        let compare = a[property] <= b[property] ? -1 : 1;
 
-        return 0;
+        return invertor * compare;
     };
 }
 
@@ -111,7 +106,7 @@ exports.format = function (property, formatter) {
             for (let prop of props) {
                 newElem[prop] = el[prop];
                 if (prop === property) {
-                    newElem[prop] = prop === property ? formatter(newElem[prop]) : newElem[prop];
+                    newElem[prop] = formatter(newElem[prop]);
                 }
             }
 
