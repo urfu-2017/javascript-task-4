@@ -95,7 +95,9 @@ exports.sortBy = (property, order) => {
 exports.format = (property, formatter) => {
     return function format(collection) {
         return collection.map(person => {
-            person[property] = formatter(person[property]);
+            if (property in person) {
+                person[property] = formatter(person[property]);
+            }
 
             return person;
         });
@@ -109,7 +111,7 @@ exports.format = (property, formatter) => {
  */
 exports.limit = (count) => {
     return function limit(collection) {
-        return collection.slice(0, count);
+        return count > 0 ? collection.slice(0, count) : [];
     };
 };
 
