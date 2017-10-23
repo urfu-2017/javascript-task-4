@@ -9,7 +9,9 @@ exports.isStar = false;
 let PRIORITET = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
 
 function copyPaste(collection) {
-    return JSON.parse(JSON.stringify(collection));
+    return collection.map((item) => {
+        return Object.assign({}, item);
+    });
 }
 
 /**
@@ -103,13 +105,14 @@ exports.sortBy = function (property, order) {
 
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.map(item => {
-            let itemCopy = copyPaste(item);
-            if (itemCopy[property]) {
-                itemCopy[property] = formatter(itemCopy[property]);
+        let copyCollection = copyPaste(collection);
+
+        return copyCollection.map(item => {
+            if (item[property]) {
+                item[property] = formatter(item[property]);
             }
 
-            return itemCopy;
+            return item;
         });
     };
 };
