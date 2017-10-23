@@ -2,35 +2,32 @@
 
 exports.isStar = true;
 
-function deepCopy(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
-const operatorOrder = ['undefined', 'limit', 'format', 'select'];
-
 exports.query = function (collection, ...queries) {
     return queries
-        .sort((x, y) => operatorOrder.indexOf(x.type) - operatorOrder.indexOf(y.type))
-        .reduce((acc, x) => x(acc), deepCopy(collection));
+        .sort((x, y) => (x.priority || 0) - (y.priority || 0))
+        .reduce((acc, x) => x(acc), collection.map(x => x));
 };
 
 exports.select = function (...fields) {
-    var result = list => deepCopy(list).map(x => {
-        var existing = fields.filter(f => f in x);
+    var result = list => list.map(x => {
+        var elem = {};
+        for (var field of fields.filter(f => f in x)) {
+            elem[field] = x[field];
+        }
 
-        return Object.assign({}, ...existing.map(e => ({ [e]: x[e] })));
+        return elem;
     });
 
-    return Object.assign(result, { type: 'select' });
+    return Object.assign(result, { priority: 3 });
 };
 
 exports.filterIn = function (property, values) {
-    return list => deepCopy(list).filter(x => values.includes(x[property]));
+    return list => list.filter(x => values.includes(x[property]));
 };
 
 
 exports.sortBy = function (property, order) {
-    return list => deepCopy(list).sort(({ [property]: x }, { [property]: y }) => {
+    return list => list.map(x => x).sort(({ [property]: x }, { [property]: y }) => {
         if (x === y) {
             return 0;
         }
@@ -40,26 +37,26 @@ exports.sortBy = function (property, order) {
 };
 
 exports.format = function (property, formatter) {
-    var result = list => deepCopy(list).map(
-        x => Object.assign(x, { [property]: formatter(x[property]) })
+    var result = list => list.map(
+        x => Object.assign({}, x, { [property]: formatter(x[property]) })
     );
 
-    return Object.assign(result, { type: 'format' });
+    return Object.assign(result, { priority: 2 });
 };
 
 exports.limit = function (count) {
-    var result = list => deepCopy(list).filter((x, i) => i < count);
+    var result = list => list.filter((x, i) => i < count);
 
-    return Object.assign(result, { type: 'limit' });
+    return Object.assign(result, { priority: 1 });
 };
 
 if (exports.isStar) {
 
     exports.or = function (...filters) {
-        return list => deepCopy(list).filter(x => filters.some(f => f([x]).length));
+        return list => list.filter(x => filters.some(f => f([x]).length));
     };
 
     exports.and = function (...filters) {
-        return list => deepCopy(list).filter(x => filters.every(f => f([x]).length));
+        return list => list.filter(x => filters.every(f => f([x]).length));
     };
 }
