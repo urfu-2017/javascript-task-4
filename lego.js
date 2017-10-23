@@ -13,6 +13,15 @@ function getOperationPriority(operation) {
 }
 
 /**
+ * Получить копию обьекта
+ * @param {Array} collection
+ * @returns {Array}
+ */
+function getDeepCopy(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
+/**
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
@@ -24,14 +33,10 @@ exports.isStar = true;
  * @params {...filters} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection, ...filters) {
-    let collectionCopy = JSON.parse(JSON.stringify(collection));
-
-    return filters
-        .sort((firstFunc, secondFunc) =>
-            getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
-        .reduce((summary, delegate) => delegate(summary), collectionCopy);
-};
+exports.query = (collection, ...filters) => filters
+    .sort((firstFunc, secondFunc) =>
+        getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
+    .reduce((summary, delegate) => delegate(summary), getDeepCopy(collection));
 
 /**
  * Выбор полей
@@ -81,7 +86,6 @@ exports.format = (property, formatter) => function format(collection) {
         record => Object.assign(record, { [property]: formatter(record[property]) })
     );
 };
-
 
 /**
  * Ограничение количества элементов в коллекции
