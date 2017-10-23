@@ -39,7 +39,7 @@ exports.select = function (...selectedProperties) {
     return function select(collection) {
         return collection.map(item => {
             return selectedProperties
-                .filter(property => Object.keys(item).includes(property))
+                .filter(property => item.hasOwnProperty(property))
                 .reduce((result, property) => {
                     result[property] = item[property];
 
@@ -90,7 +90,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(item => {
-            if (item.hasOwnProperty) {
+            if (item.hasOwnProperty(property)) {
                 item[property] = formatter(item[property]);
             }
 
