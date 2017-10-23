@@ -13,6 +13,15 @@ function getOperationPriority(operation) {
 }
 
 /**
+ * Получить копию обьекта
+ * @param {Array} collection
+ * @returns {Array}
+ */
+function getDeepCopy(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
+/**
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
@@ -27,7 +36,7 @@ exports.isStar = true;
 exports.query = (collection, ...filters) => filters
     .sort((firstFunc, secondFunc) =>
         getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
-    .reduce((summary, delegate) => delegate(summary), collection.map(x => x));
+    .reduce((summary, delegate) => delegate(summary), getDeepCopy(collection));
 
 /**
  * Выбор полей
