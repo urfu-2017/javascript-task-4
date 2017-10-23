@@ -1,7 +1,7 @@
 'use strict';
 
 const ORDER_TYPE = { 'asc': 1, 'desc': -1 };
-const priotities = { 'format': 0, 'limit': 1, 'select': 2 };
+const PRIORITIES = { 'format': 0, 'limit': 1, 'select': 2 };
 
 /**
  * Получить приоритет операции
@@ -9,7 +9,7 @@ const priotities = { 'format': 0, 'limit': 1, 'select': 2 };
  * @returns {Number}
  */
 function getOperationPriority(operation) {
-    return priotities.hasOwnProperty(operation.name) ? priotities[operation.name] : Infinity;
+    return PRIORITIES.hasOwnProperty(operation.name) ? PRIORITIES[operation.name] : Infinity;
 }
 
 /**
