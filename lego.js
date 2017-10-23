@@ -16,7 +16,7 @@ const ORDER_FINAL = 99;
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let result = collection.slice();
+    let result = deepCopy(collection);
     functions.sort((a, b) => {
         return a.order - b.order;
     });
@@ -41,7 +41,7 @@ exports.select = function (...selectFields) {
                 .filter(field => !selectFields.includes(field));
 
             return collection.map(item => {
-                const itemCopy = Object.assign({}, item);
+                const itemCopy = deepCopy(item);
                 fieldsToDelete.forEach(field => {
                     delete itemCopy[field];
                 });
@@ -59,8 +59,6 @@ exports.select = function (...selectFields) {
  * @returns {Object} - Операция фильтрации
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
-
     return {
         order: ORDER_NORMAL,
         operation: function (collection) {
@@ -76,8 +74,6 @@ exports.filterIn = function (property, values) {
  * @returns {Object} - Операция сортировки
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
-
     return {
         order: ORDER_NORMAL,
         operation: function (collection) {
@@ -109,13 +105,11 @@ exports.sortBy = function (property, order) {
  * @returns {Object} - Операция форматирования
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
     return {
         order: ORDER_FINAL,
         operation: function (collection) {
             return collection.map(item => {
-                const itemCopy = Object.assign({}, item);
+                const itemCopy = deepCopy(item);
                 itemCopy[property] = formatter(item[property]);
 
                 return itemCopy;
@@ -130,8 +124,6 @@ exports.format = function (property, formatter) {
  * @returns {Object} - Операция ограничения количества элементов
  */
 exports.limit = function (count) {
-    console.info(count);
-
     return {
         order: ORDER_FINAL,
         operation: function (collection) {
@@ -188,4 +180,8 @@ function getAllFields(collection) {
 
 function unique(array) {
     return [...new Set(array)];
+}
+
+function deepCopy(object) {
+    return JSON.parse(JSON.stringify(object));
 }
