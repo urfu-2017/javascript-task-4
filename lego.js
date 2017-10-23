@@ -42,16 +42,15 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...selectFields) {
     return function select(collection) {
-        const fieldsToDelete = getAllFields(collection)
-            .filter(field => !selectFields.includes(field));
-
         return collection.map(item => {
-            const itemCopy = deepCopy(item);
-            fieldsToDelete.forEach(field => {
-                delete itemCopy[field];
-            });
+            const result = {};
+            Object.keys(item)
+                .filter(key => selectFields.includes(key))
+                .forEach(key => {
+                    result[key] = item[key];
+                });
 
-            return itemCopy;
+            return result;
         });
     };
 };
@@ -151,10 +150,6 @@ if (exports.isStar) {
             return functions.reduce((result, func) => func(result), collection);
         };
     };
-}
-
-function getAllFields(collection) {
-    return unique(collection.map(item => Object.keys(item)).reduce((a, b) => a.concat(b), []));
 }
 
 function unique(array) {
