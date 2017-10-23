@@ -133,9 +133,7 @@ if (exports.isStar) {
      */
     exports.or = function (...functions) {
         return function or(collection) {
-            return unique(functions
-                .map(func => func(collection))
-                .reduce((c1, c2) => c1.concat(c2), []));
+            return collection.filter(item => functions.some(func => func([item]).length > 0));
         };
     };
 
@@ -150,10 +148,6 @@ if (exports.isStar) {
             return functions.reduce((result, func) => func(result), collection);
         };
     };
-}
-
-function unique(array) {
-    return [...new Set(array)];
 }
 
 function deepCopy(object) {
