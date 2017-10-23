@@ -161,14 +161,7 @@ if (exports.isStar) {
         return {
             order: ORDER_NORMAL,
             operation: function (collection) {
-                const itemCounts = new Map();
-                functions
-                    .map(({ operation }) => operation(collection))
-                    .forEach(result => result.forEach(
-                        item => itemCounts.set(item, (itemCounts.get(item) || 0) + 1)));
-
-                return [...itemCounts.keys()]
-                    .filter(item => itemCounts.get(item) === functions.length);
+                return functions.reduce((result, { operation }) => operation(result), collection);
             }
         };
     };
