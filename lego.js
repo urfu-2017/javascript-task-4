@@ -149,6 +149,9 @@ if (exports.isStar) {
     exports.or = function (...actions) {
         return function (collection) {
             let newCollection = [];
+            if (actions.length === 0) {
+                return collection;
+            }
 
             return newCollection.concat(...actions.map(action => action(collection)));
         };
