@@ -40,14 +40,21 @@ exports.query = function (collection) {
  * @returns {Function}
  */
 exports.select = function (...fields) {
+    function getNewPerson(person) {
+        let newPerson = {};
+        for (let field of fields) {
+            if (Object.keys(person).includes(field)) {
+                newPerson[field] = person[field];
+            }
+        }
+
+        return newPerson;
+    }
+
     return function select(collection) {
         let result = [];
         for (let person of collection) {
-            let selectedPerson = {};
-            for (let field of fields) {
-                selectedPerson[field] = person[field];
-            }
-            result.push(selectedPerson);
+            result.push(getNewPerson(person));
         }
 
         return result;
@@ -88,7 +95,18 @@ exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
         return collection.slice()
-            .sort((a, b) => (a[property] - b[property]) * sign);
+            .sort((a, b) => {
+                let first = a[property];
+                let second = b[property];
+                if (first < second) {
+                    return -sign;
+                }
+                if (first > second) {
+                    return sign;
+                }
+
+                return 0;
+            });
     };
 };
 
