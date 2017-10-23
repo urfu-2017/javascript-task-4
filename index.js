@@ -1,8 +1,8 @@
 'use strict';
 
-var lego = require('./lego');
+let lego = require('./lego');
 
-var friends = [
+let friends = [
     {
         name: 'Сэм',
         age: 29,
@@ -62,7 +62,7 @@ var friends = [
 ];
 
 // Находим настоящих друзей
-var bestFriends = lego.query(
+let bestFriends = lego.query(
 
     // среди всех друзей.
     friends,
