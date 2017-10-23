@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -70,14 +70,11 @@ exports.select = function (...fields) {
  * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    let fil = function (collection) {
+    return function (collection) {
         return collection.filter(person => {
             return values.indexOf(person[property]) !== -1;
         });
     };
-    fil.isFilter = true;
-
-    return fil;
 };
 
 /**
@@ -91,7 +88,8 @@ exports.sortBy = function (property, order) {
     if (order === 'desc') {
         ord = 1;
     }
-    let sorting = function (collection) {
+
+    return function (collection) {
         return collection.sort((firstPerson, secondPerson) => {
             if (firstPerson[property] < secondPerson[property]) {
                 return ord;
@@ -103,9 +101,6 @@ exports.sortBy = function (property, order) {
             return 0;
         });
     };
-    sorting.isSort = true;
-
-    return sorting;
 };
 
 /**
@@ -148,18 +143,31 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @params {...Function} actions – Фильтрующие функции
+     * @returns {Function}
      */
-    exports.or = function () {
-        return;
+    exports.or = function (...actions) {
+        return function (collection) {
+            let newCollection = [];
+
+            return newCollection.concat(...actions.map(action => action(collection)));
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @params {...Function} actions – Фильтрующие функции
+     * @returns {Function}
      */
-    exports.and = function () {
-        return;
+    exports.and = function (...actions) {
+        return function (collection) {
+            let newCollection = [...collection];
+            for (let action of actions) {
+                newCollection = action(newCollection);
+            }
+
+            return newCollection;
+        };
     };
 }
