@@ -7,11 +7,10 @@ const OPERATION_PRIORITY = ['filterIn', 'and', 'or', 'sortBy', 'select', 'limit'
 const copyCollection = collection => JSON.parse(JSON.stringify(collection));
 const getOrder = priority => OPERATION_PRIORITY.indexOf(priority);
 
-exports.query = (collection, ...params) => {
-    return params
+exports.query = (collection, ...params) =>
+    params
         .sort((a, b) => a.priority - b.priority)
         .reduce((collectionCopy, param) => param.func(collectionCopy), copyCollection(collection));
-};
 
 const select = (collection, params) =>
     collection.reduce((result, entry) => {
