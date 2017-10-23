@@ -121,7 +121,7 @@ exports.query = function (collection, ...queries) {
 /**
  * Выбор полей
  * @params {...String}
- * @returns {Object} - запрос
+ * @returns {Query} - Запрос
  */
 exports.select = function (...fields) {
     return new Query('select', 3, fields, select);
@@ -131,7 +131,7 @@ exports.select = function (...fields) {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
- * @returns {Object} - запрос
+ * @returns {Query} - Запрос
  */
 exports.filterIn = function (property, values) {
     return new Query('filterIn', 1, [property, values], filterIn);
@@ -141,7 +141,7 @@ exports.filterIn = function (property, values) {
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- * @returns {Object} - запрос
+ * @returns {Query} - Запрос
  */
 exports.sortBy = function (property, order) {
     return new Query('sortBy', 2, [property, order], sortBy);
@@ -151,7 +151,7 @@ exports.sortBy = function (property, order) {
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
- * @returns {Object} - запрос
+ * @returns {Query} - Запрос
  */
 exports.format = function (property, formatter) {
     return new Query('format', 4, [property, formatter], format);
@@ -160,7 +160,7 @@ exports.format = function (property, formatter) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} max – Максимальное количество элементов
- * @returns {Object} - запрос
+ * @returns {Query} - Запрос
  */
 exports.limit = function (max) {
     return new Query('limit', 5, max, limit);
@@ -172,7 +172,7 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {Object} - запрос
+     * @returns {Query} - Запрос
      */
     exports.or = function (...filters) {
         return new Query('or', 0, filters, or);
@@ -182,7 +182,7 @@ if (exports.isStar) {
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {Object} - запрос
+     * @returns {Query} - Запрос
      */
     exports.and = function (...filters) {
         return new Query('and', 0, filters, and);
