@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -148,9 +148,13 @@ if (exports.isStar) {
      */
     exports.or = function (...actions) {
         return function (collection) {
-            let newCollection = [];
+            let newCollection = [].concat(...actions.map(action => action(collection)));
+            let compareList = newCollection.map(person => JSON.stringify(person));
+            newCollection = newCollection.filter((person, pos) => {
+                return compareList.indexOf(JSON.stringify(person)) === pos;
+            });
 
-            return newCollection.concat(...actions.map(action => action(collection)));
+            return newCollection;
         };
     };
 
