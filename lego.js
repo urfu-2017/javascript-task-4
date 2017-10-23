@@ -23,8 +23,9 @@ const APPLICATION_SEQUENCE = {
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    return functions.sort((a, b) => APPLICATION_SEQUENCE[a.name] - APPLICATION_SEQUENCE[b.name])
-        .reduce((acc, fun) => fun(acc), collection);
+    return functions
+        .sort((a, b) => APPLICATION_SEQUENCE[a.name] - APPLICATION_SEQUENCE[b.name])
+        .reduce((acc, func) => func(acc), collection);
 };
 
 /**
@@ -34,16 +35,14 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...properties) {
     return function select(collection) {
-        return collection.map(function (obj) {
-            let newObj = {};
-            properties.forEach(function (property) {
+        return collection.map(obj =>
+            properties.reduce((newObj, property) => {
                 if (obj[property] !== undefined) {
                     newObj[property] = obj[property];
                 }
-            });
 
-            return newObj;
-        });
+                return newObj;
+            }, {}));
     };
 };
 
@@ -67,7 +66,7 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.slice().sort(function (a, b) {
+        return collection.slice().sort((a, b) => {
             if (a[property] > b[property]) {
                 return order === 'asc' ? 1 : -1;
             }
@@ -88,14 +87,12 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.map(function (obj) {
-            let newObj = Object.assign({}, obj);
-            if (newObj[property] !== undefined) {
-                newObj[property] = formatter(newObj[property]);
-            }
+        return collection.map(obj =>
+            Object.keys(obj).reduce((newObj, curKey) => {
+                newObj[curKey] = (curKey === property) ? formatter(obj[curKey]) : obj[curKey];
 
-            return newObj;
-        });
+                return newObj;
+            }, {}));
     };
 };
 
@@ -120,7 +117,8 @@ if (exports.isStar) {
      */
     exports.or = function (...functions) {
         return function or(collection) {
-            return collection.filter(obj => functions.some(fun => fun(collection).includes(obj)));
+            return collection.filter(obj =>
+                functions.some(func => func(collection).includes(obj)));
         };
     };
 
@@ -132,7 +130,8 @@ if (exports.isStar) {
      */
     exports.and = function (...functions) {
         return function and(collection) {
-            return collection.filter(obj => functions.every(fun => fun(collection).includes(obj)));
+            return collection.filter(obj =>
+                functions.every(func => func(collection).includes(obj)));
         };
     };
 }
