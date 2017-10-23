@@ -5,6 +5,7 @@ exports.isStar = true;
 const OPERATION_PRIORITY = ['filterIn', 'and', 'or', 'sortBy', 'select', 'limit', 'format'];
 
 const copyCollection = collection => JSON.parse(JSON.stringify(collection));
+const getOrder = priority => OPERATION_PRIORITY.indexOf(priority);
 
 exports.query = (collection, ...params) => {
     return params
@@ -27,7 +28,7 @@ const select = (collection, params) =>
     }, []);
 
 exports.select = (...params) => ({
-    priority: OPERATION_PRIORITY.indexOf('select'),
+    priority: getOrder('select'),
     func: collection => select(collection, params)
 });
 
@@ -35,7 +36,7 @@ const filterIn = (collection, property, values) => collection
     .filter(entry => values.includes(entry[property]));
 
 exports.filterIn = (property, values) => ({
-    priority: OPERATION_PRIORITY.indexOf('filterIn'),
+    priority: getOrder('filterIn'),
     func: collection => filterIn(collection, property, values)
 });
 
@@ -49,7 +50,7 @@ const sortBy = (collection, property, order) => {
 };
 
 exports.sortBy = (property, order) => ({
-    priority: OPERATION_PRIORITY.indexOf('sortBy'),
+    priority: getOrder('sortBy'),
     func: collection => sortBy(collection, property, order)
 });
 
@@ -64,14 +65,14 @@ const format = (collection, property, formatter) =>
 
 
 exports.format = (property, formatter) => ({
-    priority: OPERATION_PRIORITY.indexOf('format'),
+    priority: getOrder('format'),
     func: collection => format(collection, property, formatter)
 });
 
 const limit = (collection, count) => collection.slice(0, count);
 
 exports.limit = count => ({
-    priority: OPERATION_PRIORITY.indexOf('limit'),
+    priority: getOrder('limit'),
     func: collection => limit(collection, count)
 });
 
@@ -82,7 +83,7 @@ if (exports.isStar) {
         );
 
     exports.or = (...params) => ({
-        priority: OPERATION_PRIORITY.indexOf('or'),
+        priority: getOrder('or'),
         func: collection => or(collection, params)
     });
 
@@ -92,7 +93,7 @@ if (exports.isStar) {
         );
 
     exports.and = (...params) => ({
-        priority: OPERATION_PRIORITY.indexOf('and'),
+        priority: getOrder('and'),
         func: collection => and(collection, params)
     });
 }
