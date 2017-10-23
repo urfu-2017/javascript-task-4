@@ -6,8 +6,15 @@
  */
 exports.isStar = true;
 
-const ORDER_NORMAL = 0;
-const ORDER_FINAL = 99;
+const FUNCTIONS_ORDER = {
+    'filter': 0,
+    'and': 0,
+    'or': 0,
+    'sort': 1,
+    'select': 2,
+    'format': 3,
+    'limit': 4
+};
 
 /**
  * Запрос к коллекции
@@ -18,11 +25,11 @@ const ORDER_FINAL = 99;
 exports.query = function (collection, ...functions) {
     let result = deepCopy(collection);
     functions.sort((a, b) => {
-        return a.order - b.order;
+        return FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name];
     });
 
-    for (const { operation } of functions) {
-        result = operation(result);
+    for (const func of functions) {
+        result = func(result);
     }
 
     return result;
@@ -34,21 +41,18 @@ exports.query = function (collection, ...functions) {
  * @returns {Object} - Операция выбора
  */
 exports.select = function (...selectFields) {
-    return {
-        order: ORDER_FINAL + 1,
-        operation: function (collection) {
-            const fieldsToDelete = getAllFields(collection)
-                .filter(field => !selectFields.includes(field));
+    return function select(collection) {
+        const fieldsToDelete = getAllFields(collection)
+            .filter(field => !selectFields.includes(field));
 
-            return collection.map(item => {
-                const itemCopy = deepCopy(item);
-                fieldsToDelete.forEach(field => {
-                    delete itemCopy[field];
-                });
-
-                return itemCopy;
+        return collection.map(item => {
+            const itemCopy = deepCopy(item);
+            fieldsToDelete.forEach(field => {
+                delete itemCopy[field];
             });
-        }
+
+            return itemCopy;
+        });
     };
 };
 
@@ -59,11 +63,8 @@ exports.select = function (...selectFields) {
  * @returns {Object} - Операция фильтрации
  */
 exports.filterIn = function (property, values) {
-    return {
-        order: ORDER_NORMAL,
-        operation: function (collection) {
-            return collection.filter(item => values.includes(item[property]));
-        }
+    return function filter(collection) {
+        return collection.filter(item => values.includes(item[property]));
     };
 };
 
@@ -74,27 +75,24 @@ exports.filterIn = function (property, values) {
  * @returns {Object} - Операция сортировки
  */
 exports.sortBy = function (property, order) {
-    return {
-        order: ORDER_NORMAL,
-        operation: function (collection) {
-            const collectionCopy = collection.slice();
-            collectionCopy.sort((a, b) => {
-                let result = 0;
-                if (a[property] < b[property]) {
-                    result = -1;
-                }
-                if (a[property] > b[property]) {
-                    result = 1;
-                }
-                if (order === 'desc') {
-                    result *= -1;
-                }
+    return function sort(collection) {
+        const collectionCopy = collection.slice();
+        collectionCopy.sort((a, b) => {
+            let result = 0;
+            if (a[property] < b[property]) {
+                result = -1;
+            }
+            if (a[property] > b[property]) {
+                result = 1;
+            }
+            if (order === 'desc') {
+                result *= -1;
+            }
 
-                return result;
-            });
+            return result;
+        });
 
-            return collectionCopy;
-        }
+        return collectionCopy;
     };
 };
 
@@ -105,16 +103,13 @@ exports.sortBy = function (property, order) {
  * @returns {Object} - Операция форматирования
  */
 exports.format = function (property, formatter) {
-    return {
-        order: ORDER_FINAL,
-        operation: function (collection) {
-            return collection.map(item => {
-                const itemCopy = deepCopy(item);
-                itemCopy[property] = formatter(item[property]);
+    return function format(collection) {
+        return collection.map(item => {
+            const itemCopy = deepCopy(item);
+            itemCopy[property] = formatter(item[property]);
 
-                return itemCopy;
-            });
-        }
+            return itemCopy;
+        });
     };
 };
 
@@ -124,11 +119,8 @@ exports.format = function (property, formatter) {
  * @returns {Object} - Операция ограничения количества элементов
  */
 exports.limit = function (count) {
-    return {
-        order: ORDER_FINAL,
-        operation: function (collection) {
-            return collection.slice(0, count);
-        }
+    return function limit(collection) {
+        return collection.slice(0, count);
     };
 };
 
@@ -141,13 +133,10 @@ if (exports.isStar) {
      * @returns {Object} - Операция OR для фильтрующих функций
      */
     exports.or = function (...functions) {
-        return {
-            order: ORDER_NORMAL,
-            operation: function (collection) {
-                return unique(functions
-                    .map(({ operation }) => operation(collection))
-                    .reduce((c1, c2) => c1.concat(c2), []));
-            }
+        return function or(collection) {
+            return unique(functions
+                .map(func => func(collection))
+                .reduce((c1, c2) => c1.concat(c2), []));
         };
     };
 
@@ -158,11 +147,8 @@ if (exports.isStar) {
      * @returns {Object} - Операция AND для фильтрующих функций
      */
     exports.and = function (...functions) {
-        return {
-            order: ORDER_NORMAL,
-            operation: function (collection) {
-                return functions.reduce((result, { operation }) => operation(result), collection);
-            }
+        return function and(collection) {
+            return functions.reduce((result, func) => func(result), collection);
         };
     };
 }
