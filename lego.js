@@ -1,5 +1,7 @@
 'use strict';
 
+const ORDER_TYPE = { 'asc': 1, 'desc': -1 };
+
 /**
  * Получить приоритет операции
  * @param {Function} operation
@@ -38,18 +40,16 @@ exports.query = function (collection, ...filters) {
  * @params {...fields}
  * @returns {Function}
  */
-exports.select = function (...fields) {
-    let select = collection => collection
-        .map(record => fields
-            .filter(field => field in record)
-            .reduce((filteredRecord, field) => {
+exports.select = (...fields) => function select(collection) {
+    return collection.map(record => fields
+        .reduce((filteredRecord, field) => {
+            if (record.hasOwnProperty(field)) {
                 filteredRecord[field] = record[field];
+            }
 
-                return filteredRecord;
-            }, {})
-        );
-
-    return select;
+            return filteredRecord;
+        }, {})
+    );
 };
 
 /**
@@ -58,13 +58,8 @@ exports.select = function (...fields) {
  * @param {Array} values – Доступные значения
  * @returns {Function}
  */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
-    let filterIn = collection => collection
-        .filter(record => values.includes(record[property]));
-
-    return filterIn;
-};
+exports.filterIn = (property, values) =>
+    collection => collection.filter(record => values.includes(record[property]));
 
 /**
  * Сортировка коллекции по полю
@@ -72,16 +67,10 @@ exports.filterIn = function (property, values) {
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  * @returns {Function}
  */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
-    let orderType = { 'asc': 1, 'desc': -1 };
-    let sortBy = collection => collection
-        .sort((firstRecord, secondRecord) =>
-            (firstRecord[property] > secondRecord[property] ? 1 : -1) * orderType[order]
-        );
-
-    return sortBy;
-};
+exports.sortBy = (property, order) =>
+    collection => collection.sort(
+        (record, other) => (record[property] > other[property] ? 1 : -1) * ORDER_TYPE[order]
+    );
 
 /**
  * Форматирование поля
@@ -89,26 +78,20 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  * @returns {Function}
  */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
-    let format = collection =>
-        collection.map(
-            record => Object.assign(record, { [property]: formatter(record[property]) })
-        );
-
-    return format;
+exports.format = (property, formatter) => function format(collection) {
+    return collection.map(
+        record => Object.assign(record, { [property]: formatter(record[property]) })
+    );
 };
+
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  * @returns {Function}
  */
-exports.limit = function (count) {
-    console.info(count);
-    let limit = collection => collection.slice(0, count);
-
-    return limit;
+exports.limit = (count) => function limit(collection) {
+    return collection.slice(0, count);
 };
 
 if (exports.isStar) {
@@ -119,13 +102,8 @@ if (exports.isStar) {
      * @params {...filters} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function (...filters) {
-        let or = collection => collection
-            .filter(record => filters.some(filter => filter([record]).length > 0)
-            );
-
-        return or;
-    };
+    exports.or = (...filters) => collection => collection
+        .filter(record => filters.some(filter => filter([record]).length > 0));
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
@@ -133,11 +111,6 @@ if (exports.isStar) {
      * @params {...filters} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function (...filters) {
-        let and = collection => collection
-            .filter(record => filters.every(filter => filter([record]).length > 0)
-            );
-
-        return and;
-    };
+    exports.and = (...filters) => collection => collection
+        .filter(record => filters.every(filter => filter([record]).length > 0));
 }
