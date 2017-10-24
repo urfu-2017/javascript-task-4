@@ -36,7 +36,7 @@ exports.isStar = true;
 exports.query = (collection, ...filters) => filters
     .sort((firstFunc, secondFunc) =>
         getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
-    .reduce((summary, delegate) => delegate(summary), collection);
+    .reduce((summary, delegate) => delegate(summary), collection.slice());
 
 /**
  * Выбор полей
