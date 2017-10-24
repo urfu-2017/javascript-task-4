@@ -38,6 +38,7 @@ exports.select = function (...args) {
             return collection
                 .map(element => {
                     let newElement = {};
+
                     fields.forEach(filed => {
                         if (element[filed] !== undefined) {
                             newElement[filed] = element[filed];
@@ -135,7 +136,7 @@ if (exports.isStar) {
 
                 return collection.filter(
                     element => collections
-                        .filter(c => collectionContainObject(c, element) !== -1)
+                        .filter(c => findObjectInCollection(c, element) !== -1)
                         .length !== 0
                 );
             }.bind(null, filters)
@@ -158,7 +159,7 @@ if (exports.isStar) {
 
                 return collection.filter(
                     element => collections
-                        .filter(c => collectionContainObject(c, element) !== -1)
+                        .filter(c => findObjectInCollection(c, element) !== -1)
                         .length === collections.length
                 );
             }.bind(null, filters)
@@ -166,7 +167,13 @@ if (exports.isStar) {
     };
 }
 
-function collectionContainObject(collection, object) {
+/**
+ * Находит объект в коллекции
+ * @param {Object[]} collection
+ * @param {Object} object
+ * @returns {number} - первая встреченная позиция на которой содержится object
+ */
+function findObjectInCollection(collection, object) {
     for (let index = 0; index < collection.length; index++) {
         let element = collection[index];
 
@@ -183,6 +190,11 @@ function collectionContainObject(collection, object) {
     return -1;
 }
 
+/**
+ * Поверхностная копия массива объектов
+ * @param {Object[]} collection
+ * @returns {Object[]}
+ */
 function shallowClone(collection) {
     return collection.map(element => Object.assign({}, element));
 }
