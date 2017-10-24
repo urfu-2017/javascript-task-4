@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let priority = {
+const PRIORITY = {
     'and': 0,
     'or': 1,
     'filterIn': 2,
@@ -17,9 +17,10 @@ let priority = {
 };
 
 function sortMethods(methods) {
-    return methods.sort(function (methodOne, methodTwo) {
-        return priority[methodOne.name] - priority[methodTwo.name];
-    });
+    return methods.sort(
+        (methodOne, methodTwo) =>
+            PRIORITY[methodOne.name] - PRIORITY[methodTwo.name]
+    );
 }
 
 /**
@@ -29,16 +30,14 @@ function sortMethods(methods) {
  * @returns {Array}
  */
 exports.query = function (collection) {
-    let copiedCollection = JSON.parse(JSON.stringify(collection));
-
     let methods = [].slice.call(arguments, 1);
-    let sortedMethods = sortMethods(methods);
 
-    sortedMethods.forEach(function (method) {
-        copiedCollection = method(copiedCollection);
-    });
-
-    return copiedCollection;
+    return sortMethods(methods)
+        .reduce(
+            (resultCollection, method) =>
+                method(resultCollection),
+            collection
+        );
 };
 
 /**
@@ -47,20 +46,22 @@ exports.query = function (collection) {
  * @returns {Function} - Функция, выбирающая поля
  */
 exports.select = function () {
-    let args = [].slice.call(arguments);
+    let selectableProperties = [].slice.call(arguments);
 
     return function select(collection) {
-        collection.forEach(function (person) {
-            let personArgs = Object.keys(person);
+        return collection.map(
+            person =>
+                selectableProperties.reduce(
+                    (newPerson, property) => {
+                        if (property in person) {
+                            newPerson[property] = person[property];
+                        }
 
-            personArgs.forEach(function (arg) {
-                if (args.indexOf(arg) === -1) {
-                    delete person[arg];
-                }
-            });
-        });
-
-        return collection;
+                        return newPerson;
+                    },
+                    {}
+                )
+        );
     };
 };
 
@@ -72,9 +73,10 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filter(function (person) {
-            return values.indexOf(person[property]) !== -1;
-        });
+        return collection.filter(
+            person =>
+                values.indexOf(person[property]) !== -1
+        );
     };
 };
 
@@ -86,18 +88,20 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort(function (personOne, personTwo) {
-            let propertyOne = personOne[property];
-            let propertyTwo = personTwo[property];
+        return collection.sort(
+            (personOne, personTwo) => {
+                let propertyOne = personOne[property];
+                let propertyTwo = personTwo[property];
 
-            if (propertyOne === propertyTwo) {
-                return 0;
+                if (propertyOne === propertyTwo) {
+                    return 0;
+                }
+
+                let propertyOrder = propertyOne > propertyTwo ? 1 : -1;
+
+                return order === 'asc' ? propertyOrder : -propertyOrder;
             }
-
-            let propertyOrder = propertyOne > propertyTwo ? 1 : -1;
-
-            return order === 'asc' ? propertyOrder : -propertyOrder;
-        });
+        );
     };
 };
 
@@ -109,11 +113,10 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        collection.forEach(function (person) {
-            person[property] = formatter(person[property]);
-        });
-
-        return collection;
+        return collection.map(
+            person =>
+                Object.assign({}, person, { [property]: formatter(person[property]) })
+        );
     };
 };
 
@@ -140,11 +143,13 @@ if (exports.isStar) {
         let methods = [].slice.call(arguments);
 
         return function or(collection) {
-            return collection.filter(function (person) {
-                return methods.some(function (method) {
-                    return method(collection).indexOf(person) !== -1;
-                });
-            });
+            return collection.filter(
+                person =>
+                    methods.some(
+                        method =>
+                            method(collection).indexOf(person) !== -1
+                    )
+            );
         };
     };
 
@@ -158,11 +163,13 @@ if (exports.isStar) {
         let methods = [].slice.call(arguments);
 
         return function and(collection) {
-            return collection.filter(function (person) {
-                return methods.every(function (method) {
-                    return method(collection).indexOf(person) !== -1;
-                });
-            });
+            return collection.filter(
+                person =>
+                    methods.every(
+                        method =>
+                            method(collection).indexOf(person) !== -1
+                    )
+            );
         };
     };
 }
