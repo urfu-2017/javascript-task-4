@@ -5,8 +5,11 @@ exports.isStar = false;
 function putFunctionsInOrder(functions) {
     var functionsInOrder = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
 
-    return functions.sort((a, b) =>
-        functionsInOrder.indexOf(a.name) > functionsInOrder.indexOf(b.name));
+    return functions.sort((a, b) => {
+
+        return functionsInOrder.indexOf(a.name) <
+        functionsInOrder.indexOf(b.name) ? -1 : 1;
+    });
 }
 
 /**
@@ -17,7 +20,7 @@ function putFunctionsInOrder(functions) {
  */
 
 exports.query = function (collection, ...functions) {
-    var collectionCopy = collection;
+    var collectionCopy = JSON.parse(JSON.stringify(collection));
     functions = putFunctionsInOrder(functions);
     functions.forEach(fun => {
         collectionCopy = fun(collectionCopy);
@@ -36,11 +39,11 @@ exports.select = function (...selected) {
 
     return function select(collection) {
         collection.forEach(partner => {
-            Object.keys(partner).forEach(key => {
+            for (var key in partner) {
                 if (selected.indexOf(key) === -1) {
                     delete partner[key];
                 }
-            });
+            }
         });
 
         return collection;
