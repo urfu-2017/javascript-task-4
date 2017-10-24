@@ -59,10 +59,14 @@ exports.isStar = true;
  */
 exports.query = function (collection, ...queries) {
     const selectQueries = queries.filter(query => query.name === 'select');
-    const selectQuery = selectQueriesUnion(selectQueries);
-    queries = queries.filter(query => query.name !== 'select');
 
-    queries.push(selectQuery);
+    if (selectQueries.length > 1) {
+        const selectQuery = selectQueriesUnion(selectQueries);
+        queries = queries.filter(query => query.name !== 'select');
+
+        queries.push(selectQuery);
+    }
+
     queries.sort((q1, q2) => QUERIES_PRIORITY[q1.name] - QUERIES_PRIORITY[q2.name]);
 
     return queries.reduce((coll, query) => query(coll), collection);
@@ -128,7 +132,7 @@ exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(obj => {
             if (Object.keys(obj).includes(property)) {
-                obj = Object.assign(obj);
+                obj = Object.assign({}, obj);
                 obj[property] = formatter(obj[property]);
             }
 
