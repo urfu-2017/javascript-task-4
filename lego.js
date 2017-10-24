@@ -15,6 +15,12 @@ exports.isStar = false;
 exports.query = function (collection, ...functions) {
     let collectionCopy = JSON.parse(JSON.stringify(collection));
     let instructions = functions.sort((a, b) => {
+        if (a.priority < b.priority) {
+            return -1;
+        } else if (a.priority > b.priority) {
+            return 1;
+        }
+
         return a - b;
     });
 
