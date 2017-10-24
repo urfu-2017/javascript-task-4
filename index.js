@@ -112,6 +112,9 @@ if (lego.isStar) {
                 lego.filterIn('gender', ['Женский'])
             ),
             lego.or(
+                lego.filterIn('gender', ['Женский'])
+            ),
+            lego.or(
                 lego.filterIn('gender', ['Мужской'])
             )
 

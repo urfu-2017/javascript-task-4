@@ -148,13 +148,17 @@ if (exports.isStar) {
         return {
             priority: 0,
             exec: collection => {
-                // return functions.reduce((acc, filter) => {
-                //     acc.push(...filter.exec(collection));
-                //
-                //     return acc;
-                // }, []);
-                return collection.filter(friend =>
-                    functions.some(filter => filter.exec(collection).includes(friend)));
+                return functions.reduce((acc, filter) => {
+                    filter.exec(collection).forEach(friend => {
+                        if (!acc.includes(friend)) {
+                            acc.push(friend);
+                        }
+                    });
+
+                    return acc;
+                }, []);
+                // return collection.filter(friend =>
+                //     functions.some(filter => filter.exec(collection).includes(friend)));
             }
         };
     };
@@ -174,8 +178,6 @@ if (exports.isStar) {
 
                     return acc;
                 }, collection);
-                // return collection.filter(friend =>
-                //     functions.every(filter => filter.exec(collection).includes(friend)));
             }
         };
     };
