@@ -166,7 +166,7 @@ if (exports.isStar) {
      */
     exports.and = (...filters) => {
         return function and(collection) {
-            return filters.reduce((coll, filter) => filter(coll), collection);
+            return collection.filter(elem => filters.every(ft => ft(collection).includes(elem)));
         };
     };
 }
