@@ -17,10 +17,8 @@ function getOperationPriority(operation) {
  * @param {Array} collection
  * @returns {Array}
  */
-
 function getDeepCopy(collection) {
-    // return JSON.parse(JSON.stringify(collection));
-    return collection.map(x => x);
+    return Object.assign([], collection);
 }
 
 /**
