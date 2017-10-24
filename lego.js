@@ -36,9 +36,13 @@ exports.query = function (collection, ...functions) {
 exports.select = function (...properties) {
     return function select(collection) {
         return collection.map(obj =>
-            properties.reduce((newObj, property) =>
-                (Object.assign(newObj, { [property]: obj[property] })), {}
-            ));
+            properties.reduce((newObj, property) => {
+                if (obj[property] !== undefined) {
+                    newObj[property] = obj[property];
+                }
+
+                return newObj;
+            }, {}));
     };
 };
 
