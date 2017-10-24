@@ -12,16 +12,47 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    return collection;
+exports.query = function (collection, ...functions) {
+    let instructions = functions.sort((a, b) => {
+        if (a.priority < b.priority) {
+            return -1;
+        } else if (a.priority > b.priority) {
+            return 1;
+        }
+
+        return 0;
+    });
+
+    return instructions.reduce((acc, func) => {
+        acc = func.exec(acc);
+
+        return acc;
+    }, collection);
 };
 
 /**
  * Выбор полей
  * @params {...String}
  */
-exports.select = function () {
-    return;
+
+exports.select = function (...selectors) {
+    return {
+        priority: 3,
+        exec: collection => {
+            return collection.reduce((acc, friend) => {
+                acc.push(selectors.reduce((selection, selector) => {
+                    if (friend.hasOwnProperty(selector)) {
+                        selection[selector] = friend[selector];
+                    }
+
+                    return selection;
+                }, {}));
+
+                return acc;
+
+            }, []);
+        }
+    };
 };
 
 /**
@@ -29,10 +60,22 @@ exports.select = function () {
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
  */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
 
-    return;
+exports.filterIn = function (property, values) {
+    return {
+        priority: 1,
+        exec: collection => {
+            return collection.filter(friend => {
+                for (let value of values) {
+                    if (friend[property] === value) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+        }
+    };
 };
 
 /**
@@ -40,10 +83,27 @@ exports.filterIn = function (property, values) {
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
 
-    return;
+exports.sortBy = function (property, order) {
+    return {
+        priority: 2,
+        exec: collection => {
+            let sortedCollection = collection.sort((a, b) => {
+                if (a[property] < b[property]) {
+                    return -1;
+                } else if (a[property] > b[property]) {
+                    return 1;
+                }
+
+                return 0;
+            });
+            if (order === 'desc') {
+                return sortedCollection.reverse();
+            }
+
+            return sortedCollection;
+        }
+    };
 };
 
 /**
@@ -51,20 +111,40 @@ exports.sortBy = function (property, order) {
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
  */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
 
-    return;
+exports.format = function (property, formatter) {
+    return {
+        priority: 4,
+        exec: collection => {
+            return collection.map(friend => {
+                if (friend.hasOwnProperty(property)) {
+                    friend[property] = formatter(friend[property]);
+                }
+
+                return friend;
+            });
+        }
+    };
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  */
-exports.limit = function (count) {
-    console.info(count);
 
-    return;
+exports.limit = function (count) {
+    return {
+        priority: 4,
+        exec: collection => {
+            return collection.reduce((acc, friend, index) => {
+                if (index < count) {
+                    acc.push(friend);
+                }
+
+                return [...acc];
+            }, []);
+        }
+    };
 };
 
 if (exports.isStar) {
@@ -74,8 +154,20 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.or = function () {
-        return;
+
+    exports.or = function (...functions) {
+        return {
+            priority: 0,
+            exec: collection => {
+                return functions.reduce((acc, filter) => {
+                    acc.push(...filter.exec(collection));
+
+                    return acc;
+                }, []).filter((item, pos, self) => {
+                    return self.indexOf(item) === pos;
+                });
+            }
+        };
     };
 
     /**
@@ -83,7 +175,17 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.and = function () {
-        return;
+
+    exports.and = function (...functions) {
+        return {
+            priority: 0,
+            exec: collection => {
+                return functions.reduce((acc, filter) => {
+                    acc = filter.exec(acc);
+
+                    return acc;
+                }, collection);
+            }
+        };
     };
 }
