@@ -19,12 +19,11 @@ const FUNCTIONS_ORDER = {
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Function} – Функции для запроса
+ * @params {...Function} ...functions – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    let functions = Array.from(arguments).slice(1)
-        .sort((a, b) => FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name]);
+exports.query = function (collection, ...functions) {
+    functions = functions.sort((a, b) => FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name]);
     let result = collection.slice();
     for (let func of functions) {
         result = func(result);
@@ -89,9 +88,6 @@ exports.sortBy = function (property, order) {
         desc: -1
     };
     let sign = signToNum[order];
-    if (!sign) {
-        throw new RangeError('Order is invalid');
-    }
 
     return function sortBy(collection) {
         return collection.slice()
@@ -142,32 +138,6 @@ exports.limit = function (count) {
     };
 };
 
-function peopleAreEqual(person1, person2) {
-    return person1.name === person2.name &&
-        person1.phone === person2.phone &&
-        person1.email === person2.email;
-}
-
-function arrayIncludesObject(array, obj) {
-    for (let item of array) {
-        if (peopleAreEqual(item, obj)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function allArraysIncludeObject(arrays, obj) {
-    for (let array of arrays) {
-        if (!arrayIncludesObject(array, obj)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 if (exports.isStar) {
 
     /**
@@ -177,29 +147,10 @@ if (exports.isStar) {
      * @returns {Function}
      */
     exports.or = function (...funcs) {
-
-        /**
-         * Функция, добавляющая obj в array, если он там ещё не содержится
-         * @param {Array} array
-         * @param {Object} obj
-         */
-        function addUniqueElement(array, obj) {
-            if (!arrayIncludesObject(array, obj)) {
-                array.push(obj);
-            }
-        }
-
         return function or(collection) {
             let copy = collection.slice();
-            let collections = funcs.map(func => func(copy));
-            let result = [];
-            for (let arg of collections) {
-                for (let person of arg) {
-                    addUniqueElement(result, person);
-                }
-            }
 
-            return result;
+            return copy.filter(item => funcs.some(func => Boolean(func([item]).length)));
         };
     };
 
@@ -210,32 +161,10 @@ if (exports.isStar) {
      * @returns {Function}
      */
     exports.and = function (...funcs) {
-
-        /**
-         * Функция, добавляющая в result объект obj,
-         * если он содержится во всех подмассивах массива sources
-         * @param {Array} result
-         * @param {Object} obj
-         * @param {Array} sources
-         */
-        function addElementFromAllArrays(result, obj, sources) {
-            if (!arrayIncludesObject(result, obj) &&
-                allArraysIncludeObject(sources, obj)) {
-                result.push(obj);
-            }
-        }
-
         return function and(collection) {
             let copy = collection.slice();
-            let tempResults = funcs.map(func => func(copy));
-            let result = [];
-            for (let tempResult of tempResults) {
-                for (let person of tempResult) {
-                    addElementFromAllArrays(result, person, tempResults);
-                }
-            }
 
-            return result;
+            return copy.filter(item => funcs.every(func => Boolean(func([item]).length)));
         };
     };
 }
