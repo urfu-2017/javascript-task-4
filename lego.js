@@ -142,7 +142,7 @@ exports.limit = function (count) {
                     acc.push(friend);
                 }
 
-                return [...acc];
+                return acc;
             }, []);
         }
     };
