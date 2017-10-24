@@ -124,9 +124,7 @@ exports.sortBy = (property, order) => {
 exports.format = (property, formatter) => {
     return function format(collection) {
         return collection.map(obj => {
-            if (Object.keys(obj).includes(property)) {
-                obj[property] = formatter(obj[property]);
-            }
+            obj[property] = formatter(obj[property]);
 
             return obj;
         });
@@ -166,7 +164,7 @@ if (exports.isStar) {
      */
     exports.and = (...filters) => {
         return function and(collection) {
-            return collection.filter(elem => filters.every(ft => ft(collection).includes(elem)));
+            return filters.reduce((coll, filter) => filter(coll), collection);
         };
     };
 }
