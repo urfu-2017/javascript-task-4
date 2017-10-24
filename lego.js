@@ -28,13 +28,9 @@ function getCollectionCopy(collection) {
  */
 exports.query = function (collection, ...functions) {
     functions = functions.sort((a, b) => FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name]);
-    let result = getCollectionCopy(collection);
-    for (let func of functions) {
-        result = func(result);
-    }
+    let copy = getCollectionCopy(collection);
 
-    return result;
-
+    return functions.reduce((result, func) => func(result), copy);
 };
 
 /**
@@ -116,9 +112,9 @@ exports.format = function (property, formatter) {
 
     return function format(collection) {
         let result = getCollectionCopy(collection);
-        for (let person of result) {
+        result.forEach(person => {
             person[property] = formatter(person[property]);
-        }
+        });
 
         return result;
     };
