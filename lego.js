@@ -1,5 +1,5 @@
 'use strict';
-
+var lodash = require('./node_modules/lodash');
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
@@ -22,7 +22,7 @@ exports.query = function (collection) {
         'limit': 6,
         'format': 7
     };
-    var cloneCollection = collection.map(x => Object.assign(x, {}));
+    var cloneCollection = collection.map(x => lodash.cloneDeep(x));
     [].slice.call(arguments, 1)
         .sort((a, b) => {
             return priority[a.name] > priority[b.name];
