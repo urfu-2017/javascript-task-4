@@ -133,10 +133,10 @@ if (exports.isStar) {
                     filter => (filter.callback || filter)(collection)
                 );
 
-                return collections.reduce(
-                    (flatCollection, nextCollection) =>
-                        removeDuplicate(nextCollection, flatCollection).concat(nextCollection),
-                    []
+                return collection.filter(
+                    element => collections
+                        .filter(c => collectionContainObject(c, element) !== -1)
+                        .length !== 0
                 );
             }.bind(null, filters)
         };
@@ -156,22 +156,14 @@ if (exports.isStar) {
                     filter => (filter.callback || filter)(collection)
                 );
 
-                return collections.reduce(
-                    (prevIntersection, nextCollection) =>
-                        getIntersection(nextCollection, prevIntersection),
-                    collections[0]
+                return collection.filter(
+                    element => collections
+                        .filter(c => collectionContainObject(c, element) !== -1)
+                        .length === collections.length
                 );
             }.bind(null, filters)
         };
     };
-}
-
-function removeDuplicate(collection1, collection2) {
-    return collection2.filter(element => collectionContainObject(collection1, element) === -1);
-}
-
-function getIntersection(collection1, collection2) {
-    return collection1.filter(element => collectionContainObject(collection2, element) !== -1);
 }
 
 function collectionContainObject(collection, object) {
