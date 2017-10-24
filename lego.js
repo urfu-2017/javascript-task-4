@@ -148,13 +148,13 @@ if (exports.isStar) {
         return {
             priority: 0,
             exec: collection => {
-                // return functions.reduce((acc, filter) => {
-                //     acc.push(...filter.exec(collection));
-                //
-                //     return acc;
-                // }, []);
-                return collection.filter(friend =>
-                    functions.some(filter => filter.exec(collection).includes(friend)));
+                return functions.reduce((acc, filter) => {
+                    acc.push(...filter.exec(collection));
+
+                    return acc;
+                }, []);
+                // return collection.filter(friend =>
+                //     functions.some(filter => filter.exec(collection).includes(friend)));
             }
         };
     };
