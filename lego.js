@@ -53,7 +53,7 @@ exports.select = function () {
             person =>
                 selectableProperties.reduce(
                     (newPerson, property) => {
-                        if (person[property] !== undefined) {
+                        if (property in person) {
                             newPerson[property] = person[property];
                         }
 
@@ -88,7 +88,7 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort(
+        return collection.slice().sort(
             (personOne, personTwo) => {
                 let propertyOne = personOne[property];
                 let propertyTwo = personTwo[property];
