@@ -30,12 +30,6 @@ function compareObjectsBy(key) {
     };
 }
 
-function uniteSelectQueries(selectQueries) {
-    let fields = [...new Set(selectQueries.reduce((prev, cur) => prev.concat(cur.params), []))];
-
-    return exports.select(...fields);
-}
-
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
@@ -49,19 +43,9 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = (collection, ...queries) => {
-    collection = copy(collection);
-    const selectQueries = queries.filter(query => query.name === 'select');
-
-    if (selectQueries.length > 1) {
-        const selectQuery = uniteSelectQueries(selectQueries);
-        queries = queries.filter(query => query.name !== 'select');
-
-        queries.push(selectQuery);
-    }
-
-    queries.sort((q1, q2) => QUERIES_PRIORITY[q1.name] - QUERIES_PRIORITY[q2.name]);
-
-    return queries.reduce((coll, query) => query(coll), collection);
+    return queries
+        .sort((q1, q2) => QUERIES_PRIORITY[q1.name] - QUERIES_PRIORITY[q2.name])
+        .reduce((coll, query) => query(coll), copy(collection));
 };
 
 /**
