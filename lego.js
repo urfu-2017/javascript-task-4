@@ -1,12 +1,14 @@
 'use strict';
 
-function Query(name, priority, params, handler) {
-    this.name = name;
-    this.priority = priority;
-    this.params = params;
-    this.handler = handler;
-    this.execute = (collection) => this.handler(collection, this.params);
-}
+const QUERIES_PRIORITY = {
+    'and': 1,
+    'or': 2,
+    'filterIn': 3,
+    'sortBy': 4,
+    'select': 5,
+    'format': 6,
+    'limit': 7
+};
 
 /**
  * Количество одинаковых объектов в коллекции
@@ -43,58 +45,6 @@ function selectQueriesUnion(selectQueries) {
     return exports.select(...fields);
 }
 
-function select(collection, fields) {
-    return collection.map(obj => {
-        let newObj = {};
-
-        for (const key of Object.keys(obj)) {
-            if (fields.includes(key)) {
-                newObj[key] = obj[key];
-            }
-        }
-
-        return newObj;
-    });
-}
-
-function filterIn(collection, [property, values]) {
-    return collection.filter(obj => values.includes(obj[property]));
-}
-
-function sortBy(collection, [property, order]) {
-    return order === 'asc'
-        ? collection.sort(compareObjectsBy(property))
-        : collection.sort(compareObjectsBy(property)).reverse();
-}
-
-function format(collection, [property, formatter]) {
-    return collection.map(obj => {
-        if (Object.keys(obj).includes(property)) {
-            obj = Object.assign(obj);
-            obj[property] = formatter(obj[property]);
-        }
-
-        return obj;
-    });
-}
-
-function limit(collection, max) {
-    return collection.slice(0, max);
-}
-
-function or(collection, filters) {
-    let result = filters.reduce(
-        (elements, filter) => elements.concat(filter.execute(collection)),
-        []
-    );
-
-    return result.filter(elem => count(elem, result) === 1);
-}
-
-function and(collection, filters) {
-    return filters.reduce((coll, filter) => filter.execute(coll), collection);
-}
-
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
@@ -104,7 +54,7 @@ exports.isStar = true;
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Query} – Запросы
+ * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
 exports.query = function (collection, ...queries) {
@@ -113,57 +63,89 @@ exports.query = function (collection, ...queries) {
     queries = queries.filter(query => query.name !== 'select');
 
     queries.push(selectQuery);
-    queries.sort((query1, query2) => query1.priority - query2.priority);
+    queries.sort((q1, q2) => QUERIES_PRIORITY[q1.name] - QUERIES_PRIORITY[q2.name]);
 
-    return queries.reduce((coll, query) => query.execute(coll), collection);
+    return queries.reduce((coll, query) => query(coll), collection);
 };
 
 /**
  * Выбор полей
  * @params {...String}
- * @returns {Query} - Запрос
+ * @returns {Function}
  */
 exports.select = function (...fields) {
-    return new Query('select', 3, fields, select);
+    const func = function select(collection) {
+        return collection.map(obj => {
+            let newObj = {};
+
+            for (const key of Object.keys(obj)) {
+                if (fields.includes(key)) {
+                    newObj[key] = obj[key];
+                }
+            }
+
+            return newObj;
+        });
+    };
+    func.params = fields;
+
+    return func;
 };
 
 /**
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
- * @returns {Query} - Запрос
+ * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    return new Query('filterIn', 1, [property, values], filterIn);
+    return function filterIn(collection) {
+        return collection.filter(obj => values.includes(obj[property]));
+    };
 };
 
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- * @returns {Query} - Запрос
+ * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    return new Query('sortBy', 2, [property, order], sortBy);
+    return function sortBy(collection) {
+        return order === 'asc'
+            ? collection.sort(compareObjectsBy(property))
+            : collection.sort(compareObjectsBy(property)).reverse();
+    };
 };
 
 /**
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
- * @returns {Query} - Запрос
+ * @returns {Function}
  */
 exports.format = function (property, formatter) {
-    return new Query('format', 4, [property, formatter], format);
+    return function format(collection) {
+        return collection.map(obj => {
+            if (Object.keys(obj).includes(property)) {
+                obj = Object.assign(obj);
+                obj[property] = formatter(obj[property]);
+            }
+
+            return obj;
+        });
+    };
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} max – Максимальное количество элементов
- * @returns {Query} - Запрос
+ * @returns {Function}
  */
 exports.limit = function (max) {
-    return new Query('limit', 5, max, limit);
+    return function limit(collection) {
+        return collection.slice(0, max);
+    };
 };
 
 if (exports.isStar) {
@@ -172,19 +154,28 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {Query} - Запрос
+     * @returns {Function}
      */
     exports.or = function (...filters) {
-        return new Query('or', 0, filters, or);
+        return function or(collection) {
+            let result = filters.reduce(
+                (elements, filter) => elements.concat(filter(collection)),
+                []
+            );
+
+            return result.filter(elem => count(elem, result) === 1);
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {Query} - Запрос
+     * @returns {Function}
      */
     exports.and = function (...filters) {
-        return new Query('and', 0, filters, and);
+        return function and(collection) {
+            return filters.reduce((coll, filter) => filter(coll), collection);
+        };
     };
 }
