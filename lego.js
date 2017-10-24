@@ -17,10 +17,11 @@ function getOperationPriority(operation) {
  * @param {Array} collection
  * @returns {Array}
  */
-/*
+
 function getDeepCopy(collection) {
-    return JSON.parse(JSON.stringify(collection));
-}*/
+    // return JSON.parse(JSON.stringify(collection));
+    return collection.map(x => x);
+}
 
 /**
  * Сделано задание на звездочку
@@ -37,7 +38,7 @@ exports.isStar = true;
 exports.query = (collection, ...filters) => filters
     .sort((firstFunc, secondFunc) =>
         getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
-    .reduce((summary, delegate) => delegate(summary), collection.slice(0));
+    .reduce((summary, delegate) => delegate(summary), getDeepCopy(collection));
 
 /**
  * Выбор полей
