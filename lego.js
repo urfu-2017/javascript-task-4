@@ -53,7 +53,7 @@ exports.select = function () {
             person =>
                 selectableProperties.reduce(
                     (newPerson, property) => {
-                        if (property in person) {
+                        if (person[property]) {
                             newPerson[property] = person[property];
                         }
 
