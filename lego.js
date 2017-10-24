@@ -13,6 +13,7 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
+    let collectionCopy = JSON.parse(JSON.stringify(collection));
     let instructions = functions.sort((a, b) => {
         if (a.priority < b.priority) {
             return -1;
@@ -27,7 +28,7 @@ exports.query = function (collection, ...functions) {
         acc = func.exec(acc);
 
         return acc;
-    }, collection);
+    }, collectionCopy);
 };
 
 /**
