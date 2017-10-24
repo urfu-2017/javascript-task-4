@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -21,7 +21,7 @@ exports.query = function (collection, ...functions) {
             return 1;
         }
 
-        return a - b;
+        return a.priority - b.priority;
     });
 
     return instructions.reduce((acc, func) => {
