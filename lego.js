@@ -154,7 +154,7 @@ if (exports.isStar) {
 
                 return collections.reduce(
                     (prevIntersection, nextCollection) =>
-                        getIntersection(prevIntersection, nextCollection),
+                        getIntersection(nextCollection, prevIntersection),
                     collections[0]
                 );
             }.bind(null, filters)
