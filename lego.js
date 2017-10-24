@@ -17,7 +17,7 @@ const FUNCTION_ORDER = {
 };
 
 function copyCollection(collection) {
-    return collection.slice();
+    return collection.map(person => Object.assign({}, person));
 }
 
 /**
