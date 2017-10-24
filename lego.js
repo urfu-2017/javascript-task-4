@@ -155,14 +155,12 @@ if (exports.isStar) {
             priority: 0,
             exec: collection => {
                 return functions.reduce((acc, filter) => {
-                    filter.exec(collection).forEach(friend => {
-                        if (!acc.includes(friend)) {
-                            acc.push(friend);
-                        }
-                    });
+                    acc.push(...filter.exec(collection));
 
                     return acc;
-                }, []);
+                }, []).filter((item, pos, self) => {
+                    return self.indexOf(item) === pos;
+                });
             }
         };
     };
@@ -181,7 +179,9 @@ if (exports.isStar) {
                     acc = filter.exec(acc);
 
                     return acc;
-                }, collection);
+                }, collection).filter((item, pos, self) => {
+                    return self.indexOf(item) === pos;
+                });
             }
         };
     };
