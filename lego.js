@@ -29,7 +29,7 @@ exports.query = function (collection, ...selectors) {
  */
 exports.select = function (...args) {
     return {
-        priority: 1,
+        priority: 2,
         callback: function (fields, collection) {
             return collection
                 .map(element => {
@@ -69,7 +69,7 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return {
-        priority: 0,
+        priority: 1,
         callback: function (bindProperty, bindOrder, collection) {
             let numberOrder = bindOrder === 'asc' ? 1 : -1;
 
@@ -87,7 +87,7 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return {
-        priority: 3,
+        priority: 4,
         callback: function (bindProperty, bindFormatter, collection) {
             return shallowClone(collection)
                 .map(element => {
@@ -106,7 +106,7 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     return {
-        priority: 2,
+        priority: 3,
         callback: function (bindCount, collection) {
             return collection.slice(0, bindCount);
         }.bind(null, count)
