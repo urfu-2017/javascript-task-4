@@ -51,9 +51,6 @@ exports.select = (...params) => {
                     tempPerson[prop] = person[prop];
                 }
             });
-            if (Object.keys(tempPerson).length === 0) {
-                return person;
-            }
 
             return tempPerson;
         });
