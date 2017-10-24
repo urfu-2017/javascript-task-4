@@ -173,9 +173,7 @@ if (exports.isStar) {
                     acc = filter.exec(acc);
 
                     return acc;
-                }, collection).filter((item, pos, self) => {
-                    return self.indexOf(item) === pos;
-                });
+                }, collection);
                 // return collection.filter(friend =>
                 //     functions.every(filter => filter.exec(collection).includes(friend)));
             }
