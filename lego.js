@@ -28,13 +28,9 @@ function copyCollection(collection) {
  */
 exports.query = function (collection, ...params) {
     let collectionCopy = copyCollection(collection);
-    params.sort((a, b) => FUNCTION_ORDER[a.name] - FUNCTION_ORDER[b.name])
-        .forEach(func => {
-            collectionCopy = func(collectionCopy);
-            console.info(collectionCopy);
-        });
 
-    return collectionCopy;
+    return params.sort((a, b) => FUNCTION_ORDER[a.name] - FUNCTION_ORDER[b.name])
+        .reduce((col, func) => func(col), collectionCopy);
 };
 
 /**
@@ -65,12 +61,10 @@ exports.select = (...params) => {
  */
 exports.filterIn = (property, values) => {
     return function filterIn(collection) {
-        let tempCollection = [];
-        tempCollection = collection.filter(person => {
-            return values.some(item => person[property] === item);
-        });
 
-        return tempCollection;
+        return collection.filter(person =>
+            values.some(item => person[property] === item)
+        );
     };
 };
 
@@ -86,7 +80,7 @@ exports.sortBy = (property, order) => {
             let compare = order === 'asc' ? 1 : -1;
             if (a[property] > b[property]) {
                 return compare;
-            } else if (a < b) {
+            } else if (a[property] < b[property]) {
                 return -1 * compare;
             }
 
