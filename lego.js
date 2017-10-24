@@ -155,12 +155,14 @@ if (exports.isStar) {
             priority: 0,
             exec: collection => {
                 return functions.reduce((acc, filter) => {
-                    acc.push(...filter.exec(collection));
+                    filter.exec(collection).forEach(friend => {
+                        if (!acc.includes(friend)) {
+                            acc.push(friend);
+                        }
+                    });
 
                     return acc;
-                }, []).filter((item, pos, self) => {
-                    return self.indexOf(item) === pos;
-                });
+                }, []);
             }
         };
     };
