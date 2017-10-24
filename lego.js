@@ -15,6 +15,10 @@ exports.isStar = true;
 exports.query = function (collection, ...selectors) {
     selectors.sort((a, b) => a.priority > b.priority ? 1 : -1);
 
+    if (selectors.length === 0) {
+        return shallowClone(collection);
+    }
+
     return selectors.reduce(
         (nextCollection, nextSelector) => nextSelector.callback(nextCollection),
         collection
@@ -131,7 +135,7 @@ if (exports.isStar) {
 
                 return collections.reduce(
                     (flatCollection, nextCollection) =>
-                        removeDublicate(nextCollection, flatCollection).concat(nextCollection),
+                        removeDuplicate(nextCollection, flatCollection).concat(nextCollection),
                     []
                 );
             }.bind(null, filters)
@@ -162,8 +166,8 @@ if (exports.isStar) {
     };
 }
 
-function removeDublicate(collection1, collection2) {
-    return collection2.filter(element => collectionContainObject(element, collection1) === -1);
+function removeDuplicate(collection1, collection2) {
+    return collection2.filter(element => collectionContainObject(collection1, element) === -1);
 }
 
 function getIntersection(collection1, collection2) {
