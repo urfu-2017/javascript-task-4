@@ -16,6 +16,10 @@ const FUNCTIONS_ORDER = {
     format: 3
 };
 
+function getCollectionCopy(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -24,7 +28,7 @@ const FUNCTIONS_ORDER = {
  */
 exports.query = function (collection, ...functions) {
     functions = functions.sort((a, b) => FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name]);
-    let result = collection.slice();
+    let result = getCollectionCopy(collection);
     for (let func of functions) {
         result = func(result);
     }
@@ -41,9 +45,9 @@ exports.query = function (collection, ...functions) {
 exports.select = function (...fields) {
     function getNewPerson(person) {
         let newPerson = {};
-        for (let field of fields) {
-            if (Object.keys(person).includes(field)) {
-                newPerson[field] = person[field];
+        for (let property of Object.keys(person)) {
+            if (fields.includes(property)) {
+                newPerson[property] = person[property];
             }
         }
 
@@ -51,12 +55,7 @@ exports.select = function (...fields) {
     }
 
     return function select(collection) {
-        let result = [];
-        for (let person of collection) {
-            result.push(getNewPerson(person));
-        }
-
-        return result;
+        return getCollectionCopy(collection).map(getNewPerson);
     };
 };
 
@@ -70,7 +69,7 @@ exports.filterIn = function (property, values) {
     console.info(property, values);
 
     return function filterIn(collection) {
-        return collection.slice()
+        return getCollectionCopy(collection)
             .filter(person => values.includes(person[property]));
     };
 };
@@ -90,7 +89,7 @@ exports.sortBy = function (property, order) {
     let sign = signToNum[order];
 
     return function sortBy(collection) {
-        return collection.slice()
+        return getCollectionCopy(collection)
             .sort((a, b) => {
                 let first = a[property];
                 let second = b[property];
@@ -116,7 +115,7 @@ exports.format = function (property, formatter) {
     console.info(property, formatter);
 
     return function format(collection) {
-        let result = collection.slice();
+        let result = getCollectionCopy(collection);
         for (let person of result) {
             person[property] = formatter(person[property]);
         }
@@ -134,7 +133,7 @@ exports.limit = function (count) {
     console.info(count);
 
     return function limit(collection) {
-        return collection.slice(0, count);
+        return getCollectionCopy(collection).slice(0, count);
     };
 };
 
@@ -148,7 +147,7 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         return function or(collection) {
-            let copy = collection.slice();
+            let copy = getCollectionCopy(collection);
 
             return copy.filter(item => funcs.some(func => Boolean(func([item]).length)));
         };
@@ -162,7 +161,7 @@ if (exports.isStar) {
      */
     exports.and = function (...funcs) {
         return function and(collection) {
-            let copy = collection.slice();
+            let copy = getCollectionCopy(collection);
 
             return copy.filter(item => funcs.every(func => Boolean(func([item]).length)));
         };
