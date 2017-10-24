@@ -82,7 +82,16 @@ exports.filterIn = (property, values) => {
  */
 exports.sortBy = (property, order) => {
     return function sortBy(collection) {
-        return collection.sort((a, b) => (a[property] - b[property]) * (order === 'asc' ? 1 : -1));
+        return collection.sort((a, b) => {
+            let compare = order === 'asc' ? 1 : -1;
+            if (a[property] > b[property]) {
+                return compare;
+            } else if (a < b) {
+                return -1 * compare;
+            }
+
+            return 0;
+        });
     };
 };
 
