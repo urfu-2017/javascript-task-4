@@ -85,11 +85,15 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
 
     return function format(collection) {
-        collection.forEach(partner => {
-            partner[property] = formatter(partner[property]);
-        });
+        var collectionCopy = collection;
 
-        return collection;
+        return collectionCopy.map(partner => {
+            if (partner[property]) {
+                partner[property] = formatter(partner[property]);
+            }
+
+            return partner;
+        });
     };
 };
 
