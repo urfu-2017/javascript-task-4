@@ -16,21 +16,12 @@ var PRIORITY_FUNC = {
     filterIn: 6
 };
 
-function copeElement(item) {
-
-    return Object.keys(item).reduce(function (newObject, key) {
-        newObject[key] = item[key];
-
-        return newObject;
-    }, {});
-}
-
-exports.query = function (collection) {
+exports.query = function (collection, ... keyFunction) {
     var masElements = collection.map(function (item) {
-        return copeElement(item);
+
+        return Object.assign({}, item);
     });
-    var keyFunc = [].slice.call(arguments, 1);
-    keyFunc.sort(sortFunc)
+    keyFunction.sort(sortFunc)
         .forEach(function (item) {
             masElements = item(masElements);
         });
@@ -48,15 +39,14 @@ function sortFunc(elementForCompare1, elementForCompare2) {
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function () {
-    var fields = [].slice.call(arguments, 0);
+exports.select = function (... fields) {
 
     return function select(masElements) {
 
         return masElements.map(function (item) {
 
             return Object.keys(item).reduce(function (newItem, key) {
-                if (fields.indexOf(key) !== -1) {
+                if (fields.includes(key)) {
                     newItem[key] = item[key];
                 }
 
@@ -149,8 +139,7 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function () {
-        var functions = [].slice.call(arguments, 0);
+    exports.or = function (... functions) {
 
         return function or(masElements) {
             return masElements.filter(function (element) {
@@ -169,8 +158,7 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function () {
-        var functions = [].slice.call(arguments, 0);
+    exports.and = function (... functions) {
 
         return function and(masElements) {
 
