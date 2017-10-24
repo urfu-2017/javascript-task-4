@@ -1,5 +1,7 @@
 'use strict';
+
 var lodash = require('./node_modules/lodash');
+
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
