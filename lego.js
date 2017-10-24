@@ -9,9 +9,9 @@ exports.query = function (collection, ...queries) {
 };
 
 exports.select = function (...fields) {
-    var result = list => list.map(x => {
-        var elem = {};
-        for (var field of fields.filter(f => f in x)) {
+    let result = list => list.map(x => {
+        let elem = {};
+        for (let field of fields.filter(f => f in x)) {
             elem[field] = x[field];
         }
 
@@ -37,7 +37,7 @@ exports.sortBy = function (property, order) {
 };
 
 exports.format = function (property, formatter) {
-    var result = list => list.map(
+    let result = list => list.map(
         x => Object.assign({}, x, { [property]: formatter(x[property]) })
     );
 
@@ -45,7 +45,7 @@ exports.format = function (property, formatter) {
 };
 
 exports.limit = function (count) {
-    var result = list => list.filter((x, i) => i < count);
+    let result = list => list.filter((x, i) => i < count);
 
     return Object.assign(result, { priority: 1 });
 };
