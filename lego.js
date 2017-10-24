@@ -10,40 +10,27 @@ const QUERIES_PRIORITY = {
     'limit': 7
 };
 
-/**
- * Количество одинаковых объектов в коллекции
- * @param {Object} element
- * @param {Array} collection
- * @returns {Number}
- */
-function count(element, collection) {
-    return collection.reduce((prev, curr) => prev + Number(equals(element, curr)), 0);
-}
-
 function copy(collection) {
     return collection.map(elem => Object.assign({}, elem));
-}
-
-function equals(obj1, obj2) {
-    const [keys1, keys2] = [Object.keys(obj1), Object.keys(obj2)];
-
-    return keys1.length === keys2.length &&
-        keys1.every(key => keys2.includes(key) && obj1[key] === obj2[key]);
 }
 
 function compareObjectsBy(key) {
     return (obj1, obj2) => {
         [obj1, obj2] = [obj1[key], obj2[key]];
 
-        if (typeof obj1 === 'number' && typeof obj2 === 'number') {
-            return obj1 - obj2;
+        if (obj1 > obj2) {
+            return 1;
         }
 
-        return obj1.localeCompare(obj2);
+        if (obj1 < obj2) {
+            return -1;
+        }
+
+        return 0;
     };
 }
 
-function selectQueriesUnion(selectQueries) {
+function uniteSelectQueries(selectQueries) {
     let fields = [...new Set(selectQueries.reduce((prev, cur) => prev.concat(cur.params), []))];
 
     return exports.select(...fields);
@@ -61,12 +48,12 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection, ...queries) {
+exports.query = (collection, ...queries) => {
     collection = copy(collection);
     const selectQueries = queries.filter(query => query.name === 'select');
 
     if (selectQueries.length > 1) {
-        const selectQuery = selectQueriesUnion(selectQueries);
+        const selectQuery = uniteSelectQueries(selectQueries);
         queries = queries.filter(query => query.name !== 'select');
 
         queries.push(selectQuery);
@@ -82,7 +69,7 @@ exports.query = function (collection, ...queries) {
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function (...fields) {
+exports.select = (...fields) => {
     const func = function select(collection) {
         return collection.map(obj => {
             let newObj = {};
@@ -96,6 +83,7 @@ exports.select = function (...fields) {
             return newObj;
         });
     };
+
     func.params = fields;
 
     return func;
@@ -107,7 +95,7 @@ exports.select = function (...fields) {
  * @param {Array} values – Доступные значения
  * @returns {Function}
  */
-exports.filterIn = function (property, values) {
+exports.filterIn = (property, values) => {
     return function filterIn(collection) {
         return collection.filter(obj => values.includes(obj[property]));
     };
@@ -119,7 +107,7 @@ exports.filterIn = function (property, values) {
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  * @returns {Function}
  */
-exports.sortBy = function (property, order) {
+exports.sortBy = (property, order) => {
     return function sortBy(collection) {
         return order === 'asc'
             ? collection.sort(compareObjectsBy(property))
@@ -133,7 +121,7 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  * @returns {Function}
  */
-exports.format = function (property, formatter) {
+exports.format = (property, formatter) => {
     return function format(collection) {
         return collection.map(obj => {
             if (Object.keys(obj).includes(property)) {
@@ -150,7 +138,7 @@ exports.format = function (property, formatter) {
  * @param {Number} max – Максимальное количество элементов
  * @returns {Function}
  */
-exports.limit = function (max) {
+exports.limit = (max) => {
     return function limit(collection) {
         return collection.slice(0, max);
     };
@@ -164,14 +152,9 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function (...filters) {
+    exports.or = (...filters) => {
         return function or(collection) {
-            let result = filters.reduce(
-                (elements, filter) => elements.concat(filter(collection)),
-                []
-            );
-
-            return result.filter(elem => count(elem, result) === 1);
+            return collection.filter(elem => filters.some(ft => ft(collection).includes(elem)));
         };
     };
 
@@ -181,7 +164,7 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function (...filters) {
+    exports.and = (...filters) => {
         return function and(collection) {
             return filters.reduce((coll, filter) => filter(coll), collection);
         };
