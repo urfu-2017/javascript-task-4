@@ -53,7 +53,7 @@ exports.select = function () {
             person =>
                 selectableProperties.reduce(
                     (newPerson, property) => {
-                        if (person[property]) {
+                        if (person[property] !== undefined) {
                             newPerson[property] = person[property];
                         }
 
