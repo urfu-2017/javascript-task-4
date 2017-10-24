@@ -36,7 +36,7 @@ exports.isStar = true;
 exports.query = (collection, ...filters) => filters
     .sort((firstFunc, secondFunc) =>
         getOperationPriority(secondFunc) - getOperationPriority(firstFunc))
-    .reduce((summary, delegate) => delegate(summary), collection.slice());
+    .reduce((summary, delegate) => delegate(summary), collection);
 
 /**
  * Выбор полей
@@ -71,7 +71,7 @@ exports.filterIn = (property, values) =>
  * @returns {Function}
  */
 exports.sortBy = (property, order) =>
-    collection => collection.sort(
+    collection => collection.slice().sort(
         (record, other) => (record[property] > other[property] ? 1 : -1) * ORDER_TYPE[order]
     );
 
