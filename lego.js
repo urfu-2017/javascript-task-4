@@ -131,13 +131,7 @@ exports.limit = function (count) {
     return {
         priority: 4,
         exec: collection => {
-            return collection.reduce((acc, friend, index) => {
-                if (index < count) {
-                    acc.push(friend);
-                }
-
-                return acc;
-            }, []);
+            return collection.slice(0, count);
         }
     };
 };
@@ -154,13 +148,13 @@ if (exports.isStar) {
         return {
             priority: 0,
             exec: collection => {
-                return functions.reduce((acc, filter) => {
-                    acc.push(...filter.exec(collection));
-
-                    return acc;
-                }, []).filter((item, pos, self) => {
-                    return self.indexOf(item) === pos;
-                });
+                // return functions.reduce((acc, filter) => {
+                //     acc.push(...filter.exec(collection));
+                //
+                //     return acc;
+                // }, []);
+                return collection.filter(friend =>
+                    functions.some(filter => filter.exec(collection).includes(friend)));
             }
         };
     };
@@ -175,13 +169,15 @@ if (exports.isStar) {
         return {
             priority: 0,
             exec: collection => {
-                return functions.reduce((acc, filter) => {
-                    acc = filter.exec(acc);
-
-                    return acc;
-                }, collection).filter((item, pos, self) => {
-                    return self.indexOf(item) === pos;
-                });
+                // return functions.reduce((acc, filter) => {
+                //     acc = filter.exec(acc);
+                //
+                //     return acc;
+                // }, collection).filter((item, pos, self) => {
+                //     return self.indexOf(item) === pos;
+                // });
+                return collection.filter(friend =>
+                    functions.every(filter => filter.exec(collection).includes(friend)));
             }
         };
     };
