@@ -14,11 +14,10 @@ exports.isStar = true;
  */
 exports.query = function (collection, ...functions) {
     let collectionCopy = JSON.parse(JSON.stringify(collection));
-    let instructions = functions.sort((a, b) => {
-        return a.priority - b.priority;
-    });
 
-    return instructions.reduce((acc, func) => {
+    return functions.sort((a, b) => {
+        return a.priority - b.priority;
+    }).reduce((acc, func) => {
         acc = func.exec(acc);
 
         return acc;
@@ -148,17 +147,17 @@ if (exports.isStar) {
         return {
             priority: 0,
             exec: collection => {
-                return functions.reduce((acc, filter) => {
-                    filter.exec(collection).forEach(friend => {
-                        if (!acc.includes(friend)) {
-                            acc.push(friend);
-                        }
-                    });
-
-                    return acc;
-                }, []);
-                // return collection.filter(friend =>
-                //     functions.some(filter => filter.exec(collection).includes(friend)));
+                // return functions.reduce((acc, filter) => {
+                //     filter.exec(collection).forEach(friend => {
+                //         if (!acc.includes(friend)) {
+                //             acc.push(friend);
+                //         }
+                //     });
+                //
+                //     return acc;
+                // }, []);
+                return collection.filter(friend =>
+                    functions.some(filter => filter.exec(collection).includes(friend)));
             }
         };
     };

@@ -84,27 +84,27 @@ describe('lego.query', function () {
         ]);
     });
 
-    // if (lego.isStar) {
-    it('должен поддерживать операторы or и and', function () {
-        var result = lego.query(
-            friends,
-            lego.select('name'),
-            lego.or(
-                lego.and(
-                    lego.filterIn('gender', ['Мужской']),
-                    lego.filterIn('favoriteFruit', ['Картофель'])
-                ),
-                lego.and(
-                    lego.filterIn('gender', ['Женский']),
-                    lego.filterIn('favoriteFruit', ['Яблоко'])
+    if (lego.isStar) {
+        it('должен поддерживать операторы or и and', function () {
+            var result = lego.query(
+                friends,
+                lego.select('name'),
+                lego.or(
+                    lego.and(
+                        lego.filterIn('gender', ['Мужской']),
+                        lego.filterIn('favoriteFruit', ['Картофель'])
+                    ),
+                    lego.and(
+                        lego.filterIn('gender', ['Женский']),
+                        lego.filterIn('favoriteFruit', ['Яблоко'])
+                    )
                 )
-            )
-        );
+            );
 
-        assert.deepStrictEqual(result, [
-            { name: 'Сэм' },
-            { name: 'Эмили' }
-        ]);
-    });
-    // }
+            assert.deepStrictEqual(result, [
+                { name: 'Сэм' },
+                { name: 'Эмили' }
+            ]);
+        });
+    }
 });
