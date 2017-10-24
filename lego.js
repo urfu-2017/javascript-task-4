@@ -36,13 +36,9 @@ exports.query = function (collection, ...functions) {
 exports.select = function (...properties) {
     return function select(collection) {
         return collection.map(obj =>
-            properties.reduce((newObj, property) => {
-                if (obj[property] !== undefined) {
-                    newObj[property] = obj[property];
-                }
-
-                return newObj;
-            }, {}));
+            properties.reduce((newObj, property) =>
+                (Object.assign(newObj, { [property]: obj[property] })), {}
+            ));
     };
 };
 
@@ -88,11 +84,8 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(obj =>
-            Object.keys(obj).reduce((newObj, curKey) => {
-                newObj[curKey] = (curKey === property) ? formatter(obj[curKey]) : obj[curKey];
-
-                return newObj;
-            }, {}));
+            Object.assign({}, obj, { [property]: formatter(obj[property]) })
+        );
     };
 };
 
