@@ -6,19 +6,6 @@
  */
 exports.isStar = true;
 
-function clone(obj) {
-    return Object.keys(obj).reduce(
-        (newObj, property) => {
-            if (typeof obj[property] === 'object') {
-                newObj[property] = clone(obj[property]);
-            } else {
-                newObj[property] = obj[property];
-            }
-
-            return newObj;
-        }, {});
-}
-
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -35,7 +22,7 @@ exports.query = function (collection) {
         'limit': 6,
         'format': 7
     };
-    var cloneCollection = collection.map(x => clone(x));
+    var cloneCollection = collection.map(x => Object.assign(x,{}));
     [].slice.call(arguments, 1)
         .sort((a, b) => {
             return priority[a.name] > priority[b.name];
