@@ -76,20 +76,25 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortFunc(collection) {
         collection.sort(function (item1, item2) {
+            let orderSwitch = (order === DESCENDING_ORDER ? -1 : 1);
             if (typeof item1[property] === 'number' || typeof item2[property] === 'number') {
-                let orderSwitch = (order === DESCENDING_ORDER ? -1 : 1);
-
                 return orderSwitch * (item1[property] - item2[property]);
             }
 
-            return DESCENDING_ORDER
-                ? item1[property] > item2[property]
-                : item1[property] < item2[property];
+            return orderSwitch * compareValues(item1[property], item2[property]);
         });
 
         return collection;
     };
 };
+
+function compareValues(value1, value2) {
+    if (value1 === value2) {
+        return 0;
+    }
+
+    return value1 > value2 ? 1 : -1;
+}
 
 /**
  * Форматирование поля
