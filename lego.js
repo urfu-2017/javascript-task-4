@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -15,13 +15,7 @@ exports.isStar = true;
 exports.query = function (collection, ...functions) {
     let collectionCopy = JSON.parse(JSON.stringify(collection));
     let instructions = functions.sort((a, b) => {
-        if (a.priority < b.priority) {
-            return -1;
-        } else if (a.priority > b.priority) {
-            return 1;
-        }
-
-        return 0;
+        return a - b;
     });
 
     return instructions.reduce((acc, func) => {
