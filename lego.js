@@ -78,7 +78,8 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        collection.sort((a, b) => {
+        let collectionClone = collection.slice();
+        collectionClone.sort((a, b) => {
             if (a[property] < b[property]) {
                 return -1;
             }
@@ -90,10 +91,10 @@ exports.sortBy = function (property, order) {
         });
 
         if (order === 'desc') {
-            collection.reverse();
+            collectionClone.reverse();
         }
 
-        return collection;
+        return collectionClone;
     };
 };
 
@@ -158,7 +159,7 @@ if (exports.isStar) {
     exports.and = function () {
         const filterIns = Array.from(arguments);
 
-        return function or(collection) {
+        return function and(collection) {
             return collection.filter(friend => {
                 for (let i = 0; i < filterIns.length; i += 1) {
                     if (!filterIns[i](collection).includes(friend)) {
