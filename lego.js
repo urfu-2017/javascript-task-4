@@ -21,7 +21,18 @@ exports.query = function (collection) {
  * @params {...String}
  */
 exports.select = function () {
-    return;
+    return collection => collection.reduce((acc, object) => {
+        let strippedObject = {};
+
+        for (let field of arguments) {
+            if (field in object) {
+                strippedObject[field] = object[field];
+            }
+        }
+        acc.push(strippedObject);
+
+        return acc;
+    }, []);
 };
 
 /**
