@@ -20,6 +20,10 @@ function count(element, collection) {
     return collection.reduce((prev, curr) => prev + Number(equals(element, curr)), 0);
 }
 
+function copy(collection) {
+    return collection.map(elem => Object.assign({}, elem));
+}
+
 function equals(obj1, obj2) {
     const [keys1, keys2] = [Object.keys(obj1), Object.keys(obj2)];
 
@@ -58,6 +62,7 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...queries) {
+    collection = copy(collection);
     const selectQueries = queries.filter(query => query.name === 'select');
 
     if (selectQueries.length > 1) {
@@ -132,7 +137,6 @@ exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(obj => {
             if (Object.keys(obj).includes(property)) {
-                obj = Object.assign({}, obj);
                 obj[property] = formatter(obj[property]);
             }
 
