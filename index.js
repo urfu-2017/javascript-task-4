@@ -60,20 +60,8 @@ var friends = [
         favoriteFruit: 'Картофель'
     }
 ];
-var friends1 = [
-    {
-        name: 'Сэм',
-        age: 29,
-        gender: 'Мужской',
-        email: 'luisazamora@example.com',
-        phone: '+7 (555) 505-3570',
-        favoriteFruit: 'Картофель'
-    }
-];
-// Находим настоящих друзей
-var hehe = lego.query(friends1);
-var bestFriends = lego.query(
 
+var bestFriends = lego.query(
     // среди всех друзей.
     friends,
 
