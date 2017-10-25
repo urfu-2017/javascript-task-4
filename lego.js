@@ -14,18 +14,9 @@ exports.isStar = true;
  */
 exports.query = function (collection) {
     let functions = [].slice.call(arguments, 1);
-
-    if (functions.length === 0) {
-        return collection;
-    }
-
     functions.sort((first, second) => first.priority - second.priority);
 
-    for (let func of functions) {
-        collection = func(collection);
-    }
-
-    return collection;
+    return functions.reduce((prevCollection, nextFunc) => nextFunc(prevCollection), collection);
 };
 
 /**
@@ -95,17 +86,13 @@ exports.sortBy = function (property, order) {
  * @returns {Function} – Функция применяющая форматирование к полям объектов коллекции
  */
 exports.format = function (property, propertyFormatter) {
-    let formatter = collection => {
-        if (!(collection.every(object => property in object))) {
-            return collection;
+    let formatter = collection => collection.map(object => {
+        if (property in object) {
+            object[property] = propertyFormatter(object[property]);
         }
 
-        return collection.map(object => {
-            object[property] = propertyFormatter(object[property]);
-
-            return object;
-        });
-    };
+        return object;
+    });
     formatter.priority = 4;
 
     return formatter;
