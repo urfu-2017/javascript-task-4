@@ -1,5 +1,5 @@
 'use strict';
-const { fromEntriesToObject, containsIn, mutateCollection } = require('./utils');
+const { containsIn, mutateCollection } = require('./utils');
 
 /**
  * Сделано задание на звездочку
@@ -10,9 +10,10 @@ exports.isStar = true;
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Function} args – Функции для запроса
+ * @param {...Function} args – Функции для запроса
  * @returns {Array}
  */
+// eslint-disable-next-line no-unused-vars
 exports.query = function (collection, ...args) {
     return collection;
 };
@@ -20,6 +21,7 @@ exports.query = function (collection, ...args) {
 /**
  * Выбор полей
  * @params {...String}
+ * @returns {Function}
  */
 exports.select = function (...args) {
     return collection => mutateCollection(collection,
@@ -30,6 +32,7 @@ exports.select = function (...args) {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
+ * @returns {Function}
  */
 exports.filterIn = function (property, values) {
 
@@ -52,6 +55,7 @@ exports.sortBy = function (property, order) {
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
+ * @returns {Function}
  */
 exports.format = function (property, formatter) {
     return collection => mutateCollection(collection,
