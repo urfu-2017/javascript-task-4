@@ -1,10 +1,13 @@
+/* eslint-disable valid-jsdoc */
 'use strict';
 
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
+
+let EXPR_ORDER = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
@@ -12,16 +15,36 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    return collection;
+exports.query = function (collection, ...q) {
+    let potatoCollection = collection;
+    q = q.sort(function (a, b) {
+        return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
+    });
+    for (let i = 0; i < q.length; i++) {
+        potatoCollection = q[i](potatoCollection);
+    }
+
+    return potatoCollection;
 };
+
 
 /**
  * Выбор полей
  * @params {...String}
  */
-exports.select = function () {
-    return;
+exports.select = function (...q) {
+    return function select(collection) {
+        return collection.map(el =>{
+            let newObjOfFriends = {};
+            q.forEach((field) => {
+                if (el[field]) {
+                    newObjOfFriends[field] = el[field];
+                }
+            });
+
+            return newObjOfFriends;
+        });
+    };
 };
 
 /**
@@ -32,7 +55,16 @@ exports.select = function () {
 exports.filterIn = function (property, values) {
     console.info(property, values);
 
-    return;
+    return function (collection) {
+        let potatoColection = [];
+        for (let i = 0; i < collection.length; i++) {
+            if (values.indexOf(collection[i][property]) !== -1) {
+                potatoColection.push(collection[i]);
+            }
+        }
+
+        return potatoColection;
+    };
 };
 
 /**
@@ -43,7 +75,34 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     console.info(property, order);
 
-    return;
+    return function (collection) {
+        let potatoCollection = collection;
+        if (order === 'asc') {
+            collection.sort(function (a, b) {
+                if (a[property] < b[property]) {
+                    return -1;
+                }
+                if (a[property] > b[property]) {
+                    return 1;
+                }
+
+                return 0;
+            });
+        } else if (order === 'desc') {
+            collection.reverse().sort(function (a, b) {
+                if (a.property < b.property) {
+                    return -1;
+                }
+                if (a.property > b.property) {
+                    return 1;
+                }
+
+                return 0;
+            });
+        }
+
+        return potatoCollection;
+    };
 };
 
 /**
@@ -54,7 +113,15 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     console.info(property, formatter);
 
-    return;
+    return function (collection) {
+        let potatoCollection = [];
+        for (let i = 0; i < collection.length; i++) {
+            potatoCollection.push(collection[i]);
+            potatoCollection[i][property] = formatter(collection[i][property]);
+        }
+
+        return potatoCollection;
+    };
 };
 
 /**
@@ -64,7 +131,14 @@ exports.format = function (property, formatter) {
 exports.limit = function (count) {
     console.info(count);
 
-    return;
+    return function (collection) {
+        let potatoCollection = [];
+        for (let i = 0; i < count; i++) {
+            potatoCollection.push(collection[i]);
+        }
+
+        return potatoCollection;
+    };
 };
 
 if (exports.isStar) {
@@ -87,3 +161,5 @@ if (exports.isStar) {
         return;
     };
 }
+
+
