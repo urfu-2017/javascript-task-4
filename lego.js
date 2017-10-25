@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -19,11 +19,12 @@ exports.query = function (collection, ...functions) {
 
     functions.sort((first, second) => first.priority - second.priority);
 
+    let collectionCopy = collection.slice(0);
     for (let func of functions) {
-        collection = func(collection);
+        collectionCopy = func(collectionCopy);
     }
 
-    return collection;
+    return collectionCopy;
 };
 
 /**
