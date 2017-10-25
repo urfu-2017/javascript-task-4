@@ -16,7 +16,8 @@ function formArgs(args) {
 }
 function checkArgs(args) {
     var out = [];
-    var acceptable = ['name','age','gender','email','phone','favouriteFruit'];
+    var acceptable = ['name', 'age', 'gender', 'email', 'phone',
+        'favouriteFruit'];
     for (var p = 0; p < args.length; p++) {
         if (acceptable.includes(args[p])) {
             out.push(args[p]);
