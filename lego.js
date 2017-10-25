@@ -15,27 +15,12 @@ exports.isStar = true;
 exports.query = function (collection, ...actions) {
     var result = collection;
     actions.forEach(function (action) {
-        if (action.type === 'filter') {
+        if (action.type !== 'format' && action.type !== 'limit') {
             result = action.func(result);
         }
     });
     actions.forEach(function (action) {
-        if (action.type === 'sort') {
-            result = action.func(result);
-        }
-    });
-    actions.forEach(function (action) {
-        if (action.type === 'limit') {
-            result = action.func(result);
-        }
-    });
-    actions.forEach(function (action) {
-        if (action.type === 'select') {
-            result = action.func(result);
-        }
-    });
-    actions.forEach(function (action) {
-        if (action.type === 'format') {
+        if (action.type === 'format' || action.type === 'limit') {
             result = action.func(result);
         }
     });
