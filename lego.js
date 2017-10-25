@@ -22,12 +22,9 @@ exports.isStar = false;
 
 exports.query = function (collection, ...values) {
     var ar = (Array.from(values));
-    console.info(ar);
     var clone = Object.assign([], collection);
     const methods = ar
         .sort((a, b) => functionWeight[a.name] - functionWeight[b.name]);
-
-    console.info(methods);
 
     return methods.reduce((result, func) =>
         func(result), clone);
