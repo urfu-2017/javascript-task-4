@@ -1,5 +1,5 @@
 'use strict';
-const { fromEntriesToObject, containsIn } = require('./utils');
+const { fromEntriesToObject, containsIn, mutateCollection } = require('./utils');
 
 /**
  * Сделано задание на звездочку
@@ -22,10 +22,8 @@ exports.query = function (collection, ...args) {
  * @params {...String}
  */
 exports.select = function (...args) {
-    return collection => Array.from(collection
-        .map(Object.entries)
-        .map(entries => entries.filter(containsIn(args)))
-        .map(fromEntriesToObject));
+    return collection => mutateCollection(collection,
+        entries => entries.filter(containsIn(args)));
 };
 
 /**
@@ -56,14 +54,11 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  */
 exports.format = function (property, formatter) {
-
-    return collection => Array.from(collection
-        .map(Object.entries)
-        .map(entries => entries.map(([key, value]) => key === property
-            ? [key, formatter(value)]
-            : [key, value]))
-
-        .map(fromEntriesToObject));
+    return collection => mutateCollection(collection,
+        entries => entries.map(
+            ([key, value]) => key === property
+                ? [key, formatter(value)]
+                : [key, value]));
 };
 
 /**
