@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 const PRIORYTY_ARGUMENTS = {
     and: 0,
@@ -108,11 +108,12 @@ exports.format = function (property, formatter) {
     return function format(collection) {
 
         return collection.map(function (person) {
+            var newPerson = Object.assign({}, person);
             if (person[property] !== undefined) {
-                person[property] = formatter(person[property]);
+                newPerson[property] = formatter(newPerson[property]);
             }
 
-            return person;
+            return newPerson;
         });
     };
 };
