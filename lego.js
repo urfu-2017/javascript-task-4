@@ -10,7 +10,7 @@ let priority = {
     'filterIn': 0,
     'format': 3,
     'sortBy': 1,
-    'limit': 3
+    'limit': 4
 };
 
 /**
@@ -41,8 +41,8 @@ exports.select = function () {
     return function select(copyCollection) {
         return copyCollection.map(function (copyCollectionItem) {
             let answer = {};
-            for (let field in copyCollectionItem) {
-                if (selectArgs.indexOf(field) !== -1) {
+            for (let field of selectArgs) {
+                if (field in copyCollectionItem) {
                     answer[field] = copyCollectionItem[field];
                 }
             }
@@ -76,26 +76,20 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    if (order === 'asc') {
-        return function sortBy(copyCollection) {
-            for (let item of copyCollection) {
-                if (!(property in item)) {
-                    return copyCollection;
-                }
-            }
-
-            return copyCollection.sort((a, b) => a[property] > b[property]);
-        };
-    }
 
     return function sortBy(copyCollection) {
-        for (let item of copyCollection) {
-            if (!(property in item)) {
-                return copyCollection;
-            }
-        }
+        let collection = copyCollection.slice();
 
-        return copyCollection.sort((a, b) => a[property] < b[property]);
+        return collection.sort((a, b) => {
+            if (a[property] > b[property]) {
+                return (order === 'asc') ? 1 : -1;
+            }
+            if (a[property] < b[property]) {
+                return (order === 'asc') ? -1 : 1;
+            }
+
+            return 0;
+        });
     };
 };
 
