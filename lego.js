@@ -181,12 +181,9 @@ if (exports.isStar) {
 
         var actions = Array.prototype.slice.call(arguments);
         var orFunction = function (friends) {
-            if (actions.length === 0) {
-                return [];
-            }
             var partysToUnite = actions.map((action) => action.func(friends));
 
-            return partysToUnite.reduce(unitePartys, []);
+            return partysToUnite.reduce(unitePartys);
         };
 
         return { type: 'filter', func: orFunction };
@@ -205,12 +202,9 @@ if (exports.isStar) {
 
         var actions = Array.prototype.slice.call(arguments);
         var andFunction = function (friends) {
-            if (actions.length === 0) {
-                return [];
-            }
             var partysToUnite = actions.map((action) => action.func(friends));
 
-            return partysToUnite.reduce(intersectPartys, partysToUnite[0]);
+            return partysToUnite.reduce(intersectPartys);
         };
 
         return { type: 'filter', func: andFunction };
