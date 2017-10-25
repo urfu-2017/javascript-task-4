@@ -53,23 +53,23 @@ function parseArguments(args) { // eslint-disable-line complexity
 
     return operands;
 }
-function applyOperands(data, operands) {
+function applyOperands(data, operands) { // eslint-disable-line complexity
     if (operands.sort !== undefined) {
-        data = sort1(data, operands['sort']);
+        data = sort1(data, operands.sort);
     }
     if (operands.filter !== undefined) {
-        for (var o = 0; o < operands['filter'].length; o++) {
-            data = filter1(data, operands['filter'][o]);
+        for (var o = 0; o < operands.filter.length; o++) {
+            data = filter1(data, operands.filter[o]);
         }
     }
     if (operands.select !== undefined) {
-        data = select1(data, operands['select']);
+        data = select1(data, operands.select);
     }
     if (operands.limit !== undefined) {
-        data = limit1(data, operands['limit']);
+        data = limit1(data, operands.limit);
     }
     if (operands.format !== undefined) {
-        data = format1(data, operands['format']);
+        data = format1(data, operands.format);
     }
 
     return data;
@@ -100,12 +100,17 @@ exports.select = function () {
     return ['SELECT', arguments];
 };
 
+function helper(data, q, el, key) {
+    if (!key.includes(el)) {
+        delete data[q][el];
+    }
+
+    return data;
+}
 function select1(data, key) {
     for (var q = 0; q < data.length; q++) {
         for (var el in data[q]) {
-            if (!key.includes(el)) {
-               delete data[q][el];
-            }
+            helper(data, q, el, key)
         }
     }
 
@@ -133,6 +138,7 @@ function filter1(data, args) {
 
     return data;
 }
+
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
@@ -174,6 +180,7 @@ function sort1(data, args) {
     return data;
 
 }
+
 /**
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
@@ -193,6 +200,7 @@ function format1(data, args) {
 
     return data;
 }
+
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
@@ -202,7 +210,7 @@ exports.limit = function (count) {
     return ['LIMIT', [count]];
 };
 
-function limit1 (data, count) {
+function limit1(data, count) {
     var out = [];
     if (count <= data.length) {
         for (var y = 0; y < count; y++) {
@@ -222,6 +230,7 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Array}
      */
     exports.or = function () {
         return ['FILTER1', arguments];
@@ -231,6 +240,7 @@ if (exports.isStar) {
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Array}
      */
     exports.and = function () {
         return ['FILTER1', arguments];
