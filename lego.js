@@ -19,12 +19,11 @@ exports.query = function (collection, ...functions) {
 
     functions.sort((first, second) => first.priority - second.priority);
 
-    let collectionCopy = collection.slice(0);
     for (let func of functions) {
-        collectionCopy = func(collectionCopy);
+        collection = func(collection);
     }
 
-    return collectionCopy;
+    return collection;
 };
 
 /**
@@ -93,7 +92,9 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, propertyFormatter) {
     let formatter = collection => collection.map(object => {
-        object[property] = propertyFormatter(object[property]);
+        if (property in object) {
+            object[property] = propertyFormatter(object[property]);
+        }
 
         return object;
     });
