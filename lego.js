@@ -1,4 +1,5 @@
 'use strict';
+const { fromEntriesToObject, containsIn } = require('./utils');
 
 /**
  * Сделано задание на звездочку
@@ -9,10 +10,10 @@ exports.isStar = true;
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Function} – Функции для запроса
+ * @params {...Function} args – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
+exports.query = function (collection, ...args) {
     return collection;
 };
 
@@ -20,8 +21,11 @@ exports.query = function (collection) {
  * Выбор полей
  * @params {...String}
  */
-exports.select = function () {
-    return;
+exports.select = function (...args) {
+    return collection => Array.from(collection
+        .map(Object.entries)
+        .map(x => x.filter(containsIn(args)))
+        .map(fromEntriesToObject));
 };
 
 /**
