@@ -12,12 +12,16 @@ exports.isStar = false;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
+
+function fullCopy(collection) {
+    return collection.map(friend => Object.assign({}, friend));
+}
+
 exports.query = function (collection) {
     let functions = [].slice.call(arguments).slice(1);
 
     return handlingOfFunctions(functions)
-        .reduce((_collection, _function) => _function(_collection),
-            collection.map(friend => Object.assign({}, friend)));
+        .reduce((_collection, _function) => _function(_collection), fullCopy(collection));
 };
 
 /**
@@ -51,13 +55,7 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function _filterIn(collection) {
-        for (let friend of collection) {
-            if (!(values.includes(friend[property]))) {
-                collection.splice(collection.indexOf(friend), 1);
-            }
-        }
-
-        return collection;
+        return collection.filter(friend => values.includes(friend[property]));
     };
 };
 
