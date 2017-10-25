@@ -39,7 +39,7 @@ exports.select = function () {
     let selectArgs = [].slice.call(arguments);
 
     return function select(copyCollection) {
-        return copyCollection.map(function (copyCollectionItem) {
+        return copyCollection.map(copyCollectionItem => {
             let answer = {};
             for (let field of selectArgs) {
                 if (field in copyCollectionItem) {
@@ -109,9 +109,10 @@ exports.format = function (property, formatter) {
         }
 
         return copyCollection.map(copyCollectionItem => {
-            copyCollectionItem[property] = formatter(copyCollectionItem[property]);
+            let newСopyCollectionItem = Object.assign({}, copyCollectionItem);
+            newСopyCollectionItem[property] = formatter(newСopyCollectionItem[property]);
 
-            return copyCollectionItem;
+            return newСopyCollectionItem;
         });
     };
 };
