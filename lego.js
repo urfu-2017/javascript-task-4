@@ -1,5 +1,5 @@
 'use strict';
-
+// Useless comment
 exports.isStar = true;
 
 const commands = {
