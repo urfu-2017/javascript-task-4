@@ -104,7 +104,10 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     return function limit(collection) {
-        return collection.slice(0, count);
+        if (collection !== undefined) {
+            return collection.slice(0, count);
+        }
+        return [];
     };
 };
 
