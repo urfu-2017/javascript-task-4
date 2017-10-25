@@ -22,7 +22,7 @@ exports.isStar = false;
 
 exports.query = function (collection, ...values) {
     var ar = (Array.from(values));
-    var clone = Object.assign([], collection);
+    var clone = JSON.parse(JSON.stringify(collection));
     const methods = ar
         .sort((a, b) => functionWeight[a.name] - functionWeight[b.name]);
 
@@ -137,5 +137,6 @@ if (exports.isStar) {
         return;
     };
 }
+
 
 
