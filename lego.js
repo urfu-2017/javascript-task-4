@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -179,7 +179,7 @@ if (exports.isStar) {
             return result;
         }
 
-        var actions = Array.prototype.slice.call(arguments);
+        var actions = arguments;
         var orFunction = function (friends) {
             var partysToUnite = actions.map((action) => action.func(friends));
 
@@ -200,7 +200,7 @@ if (exports.isStar) {
             return firstParty.filter(friend => friendInParty(friend, secondParty));
         }
 
-        var actions = Array.prototype.slice.call(arguments);
+        var actions = arguments;
         var andFunction = function (friends) {
             var partysToUnite = actions.map((action) => action.func(friends));
 
