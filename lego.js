@@ -89,14 +89,15 @@ exports.sortBy = function (property, order) {
  * @returns {Function}
  */
 exports.format = function (property, formatter) {
-
     return function format(copyCollection) {
-        return copyCollection.map(copyCollectionItem => {
-            if (property in copyCollectionItem) {
-                copyCollectionItem[property] = formatter(copyCollectionItem[property]);
-
-                return copyCollectionItem;
+        for (let item of copyCollection) {
+            if (!(property in item)) {
+                return copyCollection;
             }
+        }
+
+        return copyCollection.map(copyCollectionItem => {
+            copyCollectionItem[property] = formatter(copyCollectionItem[property]);
 
             return copyCollectionItem;
         });
