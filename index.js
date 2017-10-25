@@ -126,5 +126,6 @@ if (lego.isStar) {
          { name: 'Сэм' },
          { name: 'Эмили' }
      ]
+     
      */
 }
