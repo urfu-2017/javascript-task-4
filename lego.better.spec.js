@@ -2,7 +2,7 @@
 'use strict';
 
 const assert = require('assert');
-const { select, filterIn, format, limit } = require('./lego');
+const { select, filterIn, format, limit, sortBy } = require('./lego');
 
 
 describe('lego.select', function () {
@@ -55,10 +55,51 @@ describe('lego.format', function () {
 
 
 describe('lego.limit', function () {
-    it('должен вернуть только указанное число', function () {
+    it('должен вернуть только указанное число элементов', function () {
         let collection = Array(100).fill({});
 
         let actual = limit(3)(collection);
         assert.equal(actual.length, 3);
     });
+
+    it('должен вернуть всю коллекцию, если указано число большее длины коллекции', function () {
+        let collection = Array(3).fill({});
+
+        let actual = limit(100)(collection);
+        assert.equal(actual.length, 3);
+    });
 });
+
+
+describe('lego.sortBy', function () {
+    let collection = [
+        { a: 5 },
+        { a: 1 },
+        { a: 4 },
+        { a: 3 },
+        { a: 2 }
+    ];
+
+    it('должен вернуть отсортированный по возрастанию список', function () {
+        let actual = sortBy('a', 'asc')(collection);
+        assert.deepStrictEqual(actual, [
+            { a: 1 },
+            { a: 2 },
+            { a: 3 },
+            { a: 4 },
+            { a: 5 }
+        ]);
+    });
+
+    it('должен вернуть отсортированный по убыванию список', function () {
+        let actual = sortBy('a', 'desc')(collection);
+        assert.deepStrictEqual(actual, [
+            { a: 5 },
+            { a: 4 },
+            { a: 3 },
+            { a: 2 },
+            { a: 1 }
+        ]);
+    });
+});
+

@@ -18,6 +18,12 @@ exports.mutateCollection = function (collection, mutator) {
         .map(Object.entries)
         .map(mutator)
         .map(exports.fromEntriesToObject));
-}
-;
+};
+
+exports.sorted = function (collection, comparator) {
+    let result = collection.slice(0);
+    result.sort(comparator);
+
+    return result;
+};
 

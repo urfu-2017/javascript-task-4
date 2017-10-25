@@ -1,5 +1,5 @@
 'use strict';
-const { containsIn, mutateCollection } = require('./utils');
+const { containsIn, mutateCollection, sorted } = require('./utils');
 
 /**
  * Сделано задание на звездочку
@@ -44,11 +44,14 @@ exports.filterIn = function (property, values) {
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
+    let comparator = order === 'asc'
+        ? (x, y) => x[property] > y[property]
+        : (x, y) => x[property] < y[property];
 
-    return;
+    return collection => sorted(collection, comparator);
 };
 
 /**
@@ -57,6 +60,7 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  * @returns {Function}
  */
+
 exports.format = function (property, formatter) {
     return collection => mutateCollection(collection,
         entries => entries.map(
