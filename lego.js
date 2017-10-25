@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -16,7 +16,9 @@ exports.query = function (collection) {
     let functions = [].slice.call(arguments, 1);
     functions.sort((first, second) => first.priority - second.priority);
 
-    return functions.reduce((prevCollection, nextFunc) => nextFunc(prevCollection), collection);
+    return functions.reduce((prevCollection, nextFunction) =>
+        nextFunction(prevCollection), copyCollection(collection)
+    );
 };
 
 /**
@@ -142,4 +144,13 @@ if (exports.isStar) {
 
         return intersector;
     };
+}
+
+/**
+ * Создание копии коллекции объектов
+ * @param {Array} collection – Оригинальная коллекция объектов
+ * @returns {Array} – Копия коллекции склонированных объектов
+ */
+function copyCollection(collection) {
+    return collection.map(object => Object.assign({}, object));
 }
