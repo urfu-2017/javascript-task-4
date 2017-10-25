@@ -60,13 +60,8 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(copyCollection) {
-        if (property !== undefined && values !== undefined) {
             return copyCollection.filter(a => values.indexOf(a[property]) !== -1);
-        }
-
-        return copyCollection;
-    };
-
+        };
 };
 
 /**
