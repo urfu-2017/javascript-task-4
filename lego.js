@@ -1,89 +1,124 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
 exports.isStar = true;
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
-exports.query = function (collection) {
-    return collection;
+const commands = {
+    select: 'select',
+    filterIn: 'filterIn',
+    sortBy: 'sortBy',
+    format: 'format',
+    limit: 'limit'
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
-exports.select = function () {
-    return;
+const priority = [
+    commands.filterIn,
+    commands.sortBy,
+    commands.select,
+    commands.limit,
+    commands.format
+];
+
+const deepCopy = object => JSON.parse(JSON.stringify(object));
+
+exports.query = function (...collection) {
+    let copy = deepCopy(collection[0]);
+    let actions = collection.slice(1);
+    actions.sort((fi, se) => priority.indexOf(fi.command) - priority.indexOf(se.command));
+    actions.forEach(action => {
+        if (action.hasOwnProperty('apply')) {
+            action.apply(copy);
+        } else {
+            copy = action.getApplied(copy);
+        }
+    });
+
+    return copy;
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
+exports.select = function (...keys) {
+    return {
+        command: commands.select,
+        apply: records => {
+            records.forEach(record => {
+                Object.keys(record).forEach(key => {
+                    if (keys.indexOf(key) === -1) {
+                        delete record[key];
+                    }
+                });
+            });
+        }
+    };
+};
+
 exports.filterIn = function (property, values) {
-    console.info(property, values);
+    const predicate = record => {
+        const propertyExists = record.hasOwnProperty(property);
+        const propertyValueFits = values.some(val => val === record[property]);
 
-    return;
+        return propertyExists && propertyValueFits;
+    };
+
+    return {
+        command: commands.filterIn,
+        predicate: predicate,
+        getApplied: records => records.filter(predicate)
+    };
 };
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
+    return {
+        command: commands.sortBy,
+        apply: records => records.sort((first, second) => {
+            let result;
+            if (first[property] < second[property]) {
+                result = -1;
+            } else if (first[property] > second[property]) {
+                result = 1;
+            } else {
+                result = 0;
+            }
 
-    return;
+            return order === 'asc' ? result : -result;
+        })
+    };
 };
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
+
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
-    return;
+    return {
+        command: commands.format,
+        apply: records => records.forEach(record => {
+            record[property] = formatter(record[property]);
+        })
+    };
 };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
 exports.limit = function (count) {
-    console.info(count);
-
-    return;
+    return {
+        command: commands.limit,
+        getApplied: records => records.slice(0, count)
+    };
 };
 
 if (exports.isStar) {
 
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.or = function () {
-        return;
+    exports.or = function (...filters) {
+        const predicate = record => filters.some(filter => filter.predicate(record));
+
+        return {
+            commands: commands.filterIn,
+            predicate: predicate,
+            getApplied: records => records.filter(predicate)
+        };
     };
 
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.and = function () {
-        return;
+    exports.and = function (...filters) {
+        const predicate = record => filters.every(filter => filter.predicate(record));
+
+        return {
+            commands: commands.filterIn,
+            predicate: predicate,
+            getApplied: records => records.filter(predicate)
+        };
     };
 }
