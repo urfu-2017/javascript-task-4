@@ -68,11 +68,10 @@ exports.format = function (property, formatter) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
+ * @returns {Function}
  */
 exports.limit = function (count) {
-    console.info(count);
-
-    return;
+    return collection => collection.slice(0, count);
 };
 
 if (exports.isStar) {

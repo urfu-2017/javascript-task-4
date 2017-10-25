@@ -2,7 +2,7 @@
 'use strict';
 
 const assert = require('assert');
-const { select, filterIn, format } = require('./lego');
+const { select, filterIn, format, limit } = require('./lego');
 
 
 describe('lego.select', function () {
@@ -50,5 +50,15 @@ describe('lego.format', function () {
             { a: 'FORMATTED', b: 2 },
             { a: 'FORMATTED' }
         ]);
+    });
+});
+
+
+describe('lego.limit', function () {
+    it('должен вернуть только указанное число', function () {
+        let collection = Array(100).fill({});
+
+        let actual = limit(3)(collection);
+        assert.equal(actual.length, 3);
     });
 });
