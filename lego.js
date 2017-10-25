@@ -107,6 +107,7 @@ exports.limit = function (count) {
         if (collection !== undefined) {
             return collection.slice(0, count);
         }
+        
         return [];
     };
 };
