@@ -34,6 +34,7 @@ exports.query = function (collection) {
 };
 
 function deleteUselessProperties(friend, properties) {
+    properties = Array.from(new Set(properties));
     for (let property in friend) {
         if (properties.indexOf(property) === -1) {
             delete friend[property];
@@ -55,7 +56,7 @@ exports.select = function () {
             for (let property of Object.keys(friend)) {
                 count += argv.includes(property);
             }
-            if (count === 0) {
+            if (count < argv.length) {
                 collection.splice(collection.indexOf(friend), 1);
             }
         }
