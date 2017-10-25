@@ -182,7 +182,7 @@ if (exports.isStar) {
         var actions = Array.prototype.slice.call(arguments);
         var orFunction = function (friends) {
             if (actions.length === 0) {
-                return friends;
+                return [];
             }
             var partysToUnite = actions.map((action) => action.func(friends));
 
@@ -206,7 +206,7 @@ if (exports.isStar) {
         var actions = Array.prototype.slice.call(arguments);
         var andFunction = function (friends) {
             if (actions.length === 0) {
-                return friends;
+                return [];
             }
             var partysToUnite = actions.map((action) => action.func(friends));
 
