@@ -40,14 +40,14 @@ exports.select = function () {
     return function select(collection) {
 
         return collection.map(person => {
-            var newParametr = {};
+            var newPerson = {};
             for (var i = 0; i < parametrs.length; i++) {
                 if (parametrs[i] in person) {
-                    newParametr[parametrs[i]] = person[parametrs[i]];
+                    newPerson[parametrs[i]] = person[parametrs[i]];
                 }
             }
 
-            return newParametr;
+            return newPerson;
         });
     };
 };
@@ -107,7 +107,9 @@ exports.format = function (property, formatter) {
     return function format(collection) {
 
         return collection.map(function (person) {
-            person[property] = formatter(person[property]);
+            if (property in person) {
+                person[property] = formatter(person[property]);
+            }
 
             return person;
         });
