@@ -14,6 +14,17 @@ function formArgs(args) {
 
     return out;
 }
+function checkArgs(args) {
+    var out = [];
+    var acceptable = ['name','age','gender','email','phone','favouriteFruit'];
+    for (var p = 0; p < args.length; p++) {
+        if (acceptable.includes(args[p])) {
+            out.push(args[p]);
+        }
+    }
+
+    return out;
+}
 function parseArguments(args) { // eslint-disable-line complexity
     var operands = {};
     operands.select = [];
@@ -24,6 +35,7 @@ function parseArguments(args) { // eslint-disable-line complexity
             case 'SELECT':
                 a1 = args[y][1];
                 a1 = formArgs(a1);
+                a1 = checkArgs(a1);
                 operands.select += a1;
                 break;
             case 'FILTER':
