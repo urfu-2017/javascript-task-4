@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 let functionPriority = ['filterIn', 'sortBy', 'limit', 'select', 'format'];
 
@@ -122,17 +122,31 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Array}
      */
-    exports.or = function () {
-        return;
+    exports.or = function (...qFunctions) {
+        return function or(collection) {
+            return collection.filter(function (record) {
+                return qFunctions.some(function (func) {
+                    return func(collection).includes(record);
+                });
+            });
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Array}
      */
-    exports.and = function () {
-        return;
+    exports.and = function (...qFunctions) {
+        return function and(collection) {
+            return collection.filter(function (record) {
+                return qFunctions.every(function (func) {
+                    return func(collection).includes(record);
+                });
+            });
+        };
     };
 }
