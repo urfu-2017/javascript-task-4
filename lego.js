@@ -28,7 +28,7 @@ exports.query = function (collection) {
 exports.select = function () {
     let properties = [].slice.call(arguments);
 
-    let _func = function _select(collection) {
+    return function _select(collection) {
         return collection.map(friend => {
             let newFriend = {};
 
@@ -41,10 +41,6 @@ exports.select = function () {
             return newFriend;
         });
     };
-
-    _func.params = properties;
-
-    return _func;
 };
 
 /**
@@ -101,13 +97,11 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function _format(collection) {
-        for (let friend of collection) {
-            if (Object.keys(friend).includes(property) && friend[property] !== undefined) {
-                friend[property] = formatter(friend[property]);
-            }
-        }
+        return collection.map(friend => {
+            friend[property] = formatter(friend[property]);
 
-        return collection;
+            return friend;
+        });
     };
 };
 
