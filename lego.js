@@ -100,18 +100,18 @@ exports.select = function () {
     return ['SELECT', arguments];
 };
 
-function helper(data, q, el, key) {
-    if (!key.includes(el)) {
-        delete data[q][el];
+function helper(data, q, key) {
+    for (var el in data[q]) {
+        if (!key.includes(el) && (data[q].hasOwnProperty(el))) {
+            delete data[q][el];
+        }
     }
 
     return data;
 }
 function select1(data, key) {
     for (var q = 0; q < data.length; q++) {
-        for (var el in data[q]) {
-            helper(data, q, el, key)
-        }
+        data = helper(data, q, key);
     }
 
     return data;
@@ -132,7 +132,7 @@ function filter1(data, args) {
     var values = args[1];
     for (var q = 0; q < data.length; q++) {
         if (!values.includes(data[q][property])) {
-           data.splice(q, 1);
+            data.splice(q, 1);
         }
     }
 
@@ -163,8 +163,7 @@ function sort1(data, args) {
 
             return 0;
         });
-    }
-    else {
+    } else {
         data.sort(function compare(b, a) {
             if (a[property] < b[property]) {
                 return -1;
@@ -216,8 +215,7 @@ function limit1(data, count) {
         for (var y = 0; y < count; y++) {
             out.push(data[y]);
         }
-    }
-    else {
+    } else {
         return data;
     }
 
