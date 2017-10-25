@@ -39,7 +39,9 @@ exports.query = function (collection, ...values) {
 
 exports.select = function (...values) {
     return function select(collection) {
-        return collection.map(function (data) {
+        var clone = Object.assign([], collection);
+
+        return clone.map(function (data) {
             Object.keys(data).forEach(function (key) {
                 if (!values.includes(key)) {
                     delete data[key];
@@ -60,7 +62,9 @@ exports.select = function (...values) {
 
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filter(function (data) {
+        var clone = Object.assign([], collection);
+
+        return clone.filter(function (data) {
             return values.includes(data[property]);
         });
     };
@@ -74,7 +78,9 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return function SortBy(collection) {
-        return collection.sort(function (firstValue, secondValue) {
+        var clone = Object.assign([], collection);
+
+        return clone.sort(function (firstValue, secondValue) {
             let typeAsc = Number(firstValue[property] > secondValue[property]);
             let typeDesc = Number(firstValue[property] < secondValue[property]);
 
@@ -135,3 +141,4 @@ if (exports.isStar) {
         return;
     };
 }
+
