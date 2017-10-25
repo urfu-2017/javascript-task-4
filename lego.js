@@ -100,7 +100,7 @@ exports.format = function (property, formatter) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
- * @returns {Functions}
+ * @returns {Function}
  */
 exports.limit = function (count) {
     return function limit(collection) {
