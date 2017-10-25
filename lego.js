@@ -1,9 +1,10 @@
 'use strict';
 const functionWeight = {
-    format: 1,
+    filterIn: 0,
+    sortBy: 1,
     select: 2,
-    filterIn: 3,
-    sortBy: 4
+    limit: 3,
+    format: 4
 };
 
 /**
@@ -20,24 +21,18 @@ exports.isStar = false;
  */
 
 exports.query = function (collection, ...values) {
+    var ar = (Array.from(values));
     var clone = Object.assign([], collection);
-    const methods = Array.from(values)
-        .sort((firstFunction, secondFunction) => {
-            if (functionWeight[firstFunction.name] > functionWeight[secondFunction.name]) {
-                return -1;
-            }
-            if (functionWeight[firstFunction.name] < functionWeight[secondFunction.name]) {
-                return 1;
-            }
+    const methods = ar
+        .sort((a, b) => functionWeight[a.name] - functionWeight[b.name]);
 
-            return 0;
-        });
-    methods.forEach(function (func) {
-        clone = func(clone);
-    });
+    console.info(methods);
 
-    return clone;
+    return methods.reduce((result, func) =>
+        func(result), clone);
+
 };
+
 
 /**
  * Выбор полей
@@ -68,7 +63,7 @@ exports.select = function (...values) {
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter(function (data) {
-            return values.indexOf(data[property]) !== -1;
+            return values.includes(data[property]);
         });
     };
 };
@@ -82,14 +77,10 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function SortBy(collection) {
         return collection.sort(function (firstValue, secondValue) {
-            if (order === 'asc') {
-                let typeAsc = Number(firstValue[property] > secondValue[property]);
-
-                return typeAsc;
-            }
+            let typeAsc = Number(firstValue[property] > secondValue[property]);
             let typeDesc = Number(firstValue[property] < secondValue[property]);
 
-            return typeDesc;
+            return (order === 'asc') ? typeAsc : typeDesc;
         }
         );
     };
@@ -118,10 +109,11 @@ exports.format = function (property, formatter) {
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  */
-exports.limit = function (count) {
-    console.info(count);
 
-    return;
+exports.limit = function (count) {
+    return function limit(collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
@@ -144,3 +136,4 @@ if (exports.isStar) {
         return;
     };
 }
+
