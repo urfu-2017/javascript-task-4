@@ -29,7 +29,9 @@ exports.select = function () {
 
     let selector = collection => collection.map(object =>
         fields.reduce((newObject, field) => {
-            newObject[field] = object[field];
+            if (field in object) {
+                newObject[field] = object[field];
+            }
 
             return newObject;
         }, {})
