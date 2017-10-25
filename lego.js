@@ -65,7 +65,7 @@ exports.select = function (...fields) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filterIn(element => values.includes(element[property]));
+        return collection.filter(element => values.includes(element[property]));
     };
 };
 
