@@ -9,10 +9,12 @@ exports.isStar = true;
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @param {...Function} functions – Функции для запроса
+ * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection, ...functions) {
+exports.query = function (collection) {
+    let functions = [].slice.call(arguments, 1);
+
     if (functions.length === 0) {
         return collection;
     }
@@ -31,7 +33,9 @@ exports.query = function (collection, ...functions) {
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function (...fields) {
+exports.select = function () {
+    let fields = [].slice.call(arguments, 0);
+
     let selector = collection => collection.reduce((acc, object) => {
         let strippedObject = {};
 
@@ -120,10 +124,12 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @param {...Function} filters – Фильтрующие функции
+     * @params {...Function} – Фильтрующие функции
      * @returns {Function} – Функция выдающая объединение результатов переданных функций-фильтров
      */
-    exports.or = function (...filters) {
+    exports.or = function () {
+        let filters = [].slice.call(arguments, 0);
+
         let combiner = collection => collection.filter(object => filters.some(
             filter => filter(collection).includes(object))
         );
@@ -135,10 +141,12 @@ if (exports.isStar) {
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @param {...Function} filters – Фильтрующие функции
+     * @params {...Function} – Фильтрующие функции
      * @returns {Function} – Функция выдающая пересечение результатов переданных функций-фильтров
      */
-    exports.and = function (...filters) {
+    exports.and = function () {
+        let filters = [].slice.call(arguments, 0);
+
         let intersector = collection => collection.filter(object => filters.every(
             filter => filter(collection).includes(object)
         ));
