@@ -78,7 +78,7 @@ exports.sortBy = function (property, order) {
     return function SortBy(collection) {
         return collection.sort(function (firstValue, secondValue) {
             let typeAsc = firstValue[property] > secondValue[property];
-            let typeDesc = firstValue[property] < secondValue[property];
+            let typeDesc = firstValue[property] <= secondValue[property];
 
             return (order === 'asc') ? typeAsc : typeDesc;
         }
@@ -137,6 +137,4 @@ if (exports.isStar) {
         return;
     };
 }
-
-
 
