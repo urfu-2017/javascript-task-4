@@ -9,11 +9,10 @@ exports.isStar = true;
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Function} – Функции для запроса
+ * @param {...Function} functions – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    let functions = [].slice.call(arguments, 1);
+exports.query = function (collection, ...functions) {
     functions.sort((first, second) => first.priority - second.priority);
 
     return functions.reduce((prevCollection, nextFunction) =>
@@ -23,12 +22,10 @@ exports.query = function (collection) {
 
 /**
  * Выбор полей
- * @params {...String}
+ * @param {...String} fields
  * @returns {Function}
  */
-exports.select = function () {
-    let fields = [].slice.call(arguments, 0);
-
+exports.select = function (...fields) {
     let selector = collection => collection.map(object =>
         fields.reduce((newObject, field) => {
             if (field in object) {
@@ -63,7 +60,7 @@ exports.filterIn = function (property, values) {
  * @returns {Function} – Сортирующая функция
  */
 exports.sortBy = function (property, order) {
-    let sorter = collection => collection.slice(0).sort((first, second) => {
+    let sorter = collection => collection.sort((first, second) => {
         if (first[property] > second[property]) {
             return order === 'asc' ? 1 : -1;
         }
@@ -114,12 +111,10 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @param {...Function} filters – Фильтрующие функции
      * @returns {Function} – Функция выдающая объединение результатов переданных функций-фильтров
      */
-    exports.or = function () {
-        let filters = [].slice.call(arguments, 0);
-
+    exports.or = function (...filters) {
         let combiner = collection => collection.filter(object => filters.some(
             filter => filter(collection).includes(object))
         );
@@ -131,12 +126,10 @@ if (exports.isStar) {
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @param {...Function} filters – Фильтрующие функции
      * @returns {Function} – Функция выдающая пересечение результатов переданных функций-фильтров
      */
-    exports.and = function () {
-        let filters = [].slice.call(arguments, 0);
-
+    exports.and = function (...filters) {
         let intersector = collection => collection.filter(object => filters.every(
             filter => filter(collection).includes(object)
         ));
