@@ -23,7 +23,7 @@ const PRIORYTY_ARGUMENTS = {
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var orderedArguments = Object.values(arguments).slice(1)
+    var orderedArguments = Array.from(arguments).slice(1)
         .sort((a, b) => PRIORYTY_ARGUMENTS[a.name] - PRIORYTY_ARGUMENTS[b.name]);
 
     return orderedArguments.reduce((result, argument) => argument(result), collection);
@@ -35,7 +35,7 @@ exports.query = function (collection) {
  * @returns {Array}
  */
 exports.select = function () {
-    var parametrs = Object.values(arguments);
+    var parametrs = Array.from(arguments);
 
     return function select(collection) {
 
@@ -138,7 +138,7 @@ if (exports.isStar) {
      * @returns {Array}
      */
     exports.or = function () {
-        var subQuery = Object.values(arguments);
+        var subQuery = Array.from(arguments);
 
         return function or(collection) {
             var properElement = subQuery.reduce((result, currentFilter) =>
@@ -155,7 +155,7 @@ if (exports.isStar) {
      * @returns {Array}
      */
     exports.and = function () {
-        var subQuery = Object.values(arguments);
+        var subQuery = Array.from(arguments);
 
         return function and(collection) {
 
