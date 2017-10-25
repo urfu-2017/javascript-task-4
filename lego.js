@@ -142,8 +142,7 @@ if (exports.isStar) {
      */
     exports.and = function (...functions) {
         return function and(collection) {
-                return colection.filter(el => functions.every(func => func([el]).length > 0));
-            };
+            return colection.filter(el => functions.every(func => func([el]).length > 0));
         };
     };
-}
+};
