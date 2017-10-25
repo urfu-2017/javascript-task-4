@@ -77,7 +77,7 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return copyCollection.sort((a, b) => {
+        return collection.sort((a, b) => {
             return (order === 'asc') ? a[property] > b[property] : b[property] > a[property];
         });
     };
@@ -133,4 +133,4 @@ if (exports.isStar) {
             return collection.filter(el => functions.every(func => func([el]).length > 0));
         };
     };
-};
+}
