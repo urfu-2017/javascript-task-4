@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 const PRIORYTY_ARGUMENTS = {
     and: 0,
@@ -23,10 +23,11 @@ const PRIORYTY_ARGUMENTS = {
  * @returns {Array}
  */
 exports.query = function (collection) {
+    var copyCollection = [].concat(collection);
     var orderedArguments = Array.from(arguments).slice(1)
         .sort((a, b) => PRIORYTY_ARGUMENTS[a.name] - PRIORYTY_ARGUMENTS[b.name]);
 
-    return orderedArguments.reduce((result, argument) => argument(result), collection);
+    return orderedArguments.reduce((result, argument) => argument(result), copyCollection);
 };
 
 /**
