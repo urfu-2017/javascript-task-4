@@ -13,9 +13,19 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...actions) {
-    var result = collection;
+    var result = JSON.parse(JSON.stringify(collection));
     actions.forEach(function (action) {
-        if (action.type !== 'limit' && action.type !== 'format' && action.type !== 'select') {
+        if (action.type === 'filter') {
+            result = action.func(result);
+        }
+    });
+    actions.forEach(function (action) {
+        if (action.type === 'sort') {
+            result = action.func(result);
+        }
+    });
+    actions.forEach(function (action) {
+        if (action.type === 'limit') {
             result = action.func(result);
         }
     });
@@ -25,7 +35,7 @@ exports.query = function (collection, ...actions) {
         }
     });
     actions.forEach(function (action) {
-        if (action.type === 'limit' || action.type === 'format') {
+        if (action.type === 'format') {
             result = action.func(result);
         }
     });
