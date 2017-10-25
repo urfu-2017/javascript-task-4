@@ -135,12 +135,14 @@ if (exports.isStar) {
      * @returns {Function}
      */
     exports.and = (...filters) => function and(collection) {
-        return filters
+        const filtered = filters
             .map(f => new Set(f(collection)))
             .reduce((acc, current) => {
                 return acc &&
                     new Set([...current].filter(i => acc.has(i))) ||
                     new Set(current);
             }, undefined);
+
+        return [...filtered];
     };
 }
