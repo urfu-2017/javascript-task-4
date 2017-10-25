@@ -142,8 +142,14 @@ exports.limit = function (count) {
 
 function friendInParty(friend, party) {
     function friendCompare(firstFriend, secondFriend) {
-        for (var property in firstFriend) {
+        var property;
+        for (property in firstFriend) {
             if (secondFriend[property] !== firstFriend[property]) {
+                return false;
+            }
+        }
+        for (property in secondFriend) {
+            if (firstFriend[property] !== secondFriend[property]) {
                 return false;
             }
         }
@@ -181,7 +187,7 @@ if (exports.isStar) {
 
         var actions = Array.prototype.slice.call(arguments);
         var orFunction = function (friends) {
-            var partysToUnite = actions.map((action) => action.func(friends));
+            var partysToUnite = actions.map(action => action.func(friends));
 
             return partysToUnite.reduce(unitePartys);
         };
@@ -202,7 +208,7 @@ if (exports.isStar) {
 
         var actions = Array.prototype.slice.call(arguments);
         var andFunction = function (friends) {
-            var partysToUnite = actions.map((action) => action.func(friends));
+            var partysToUnite = actions.map(action => action.func(friends));
 
             return partysToUnite.reduce(intersectPartys);
         };
