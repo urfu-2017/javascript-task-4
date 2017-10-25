@@ -34,9 +34,9 @@ exports.select = function (...args) {
  * @param {Array} values – Доступные значения
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
 
-    return;
+    return collection => Array.from(collection
+        .filter(x => containsIn(values)([x[property]])));
 };
 
 /**
