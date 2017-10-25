@@ -57,12 +57,12 @@ function applyOperands(data, operands) { // eslint-disable-line complexity
     if (operands.sort !== undefined) {
         data = sort1(data, operands.sort);
     }
-    if (operands.filter !== undefined) {
+    if (operands.filter.length > 0) {
         for (var o = 0; o < operands.filter.length; o++) {
             data = filter1(data, operands.filter[o]);
         }
     }
-    if (operands.select !== undefined) {
+    if (operands.select.length > 0) {
         data = select1(data, operands.select);
     }
     if (operands.limit !== undefined) {
