@@ -27,18 +27,13 @@ exports.query = function (collection) {
 exports.select = function () {
     let fields = [].slice.call(arguments, 0);
 
-    let selector = collection => collection.reduce((acc, object) => {
-        let strippedObject = {};
+    let selector = collection => collection.map(object =>
+        fields.reduce((newObject, field) => {
+            newObject[field] = object[field];
 
-        for (let field of fields) {
-            if (field in object) {
-                strippedObject[field] = object[field];
-            }
-        }
-        acc.push(strippedObject);
-
-        return acc;
-    }, []);
+            return newObject;
+        }, {})
+    );
     selector.priority = 2;
 
     return selector;
