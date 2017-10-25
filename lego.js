@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -118,7 +118,7 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @params {...Function} filters – Фильтрующие функции
+     * @param {...Function} filters – Фильтрующие функции
      * @returns {Function} – Функция выдающая объединение результатов переданных функций-фильтров
      */
     exports.or = function (...filters) {
@@ -133,7 +133,7 @@ if (exports.isStar) {
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @params {...Function} filters – Фильтрующие функции
+     * @param {...Function} filters – Фильтрующие функции
      * @returns {Function} – Функция выдающая пересечение результатов переданных функций-фильтров
      */
     exports.and = function (...filters) {
