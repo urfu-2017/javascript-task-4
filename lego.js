@@ -75,7 +75,7 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
-        collection.sort(function (a, b) {
+        var sortedCollection = collection.sort(function (a, b) {
             if (a[property] > b[property]) {
 
                 return 1;
@@ -89,10 +89,10 @@ exports.sortBy = function (property, order) {
         });
         if (order === 'desc') {
 
-            return collection.reverse();
+            return sortedCollection.reverse();
         }
 
-        return collection;
+        return sortedCollection;
     };
 };
 
