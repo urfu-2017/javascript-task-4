@@ -4,7 +4,8 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
+var FUNCTION_ORDER = ['filterIn', 'sortBy', 'select', 'limit', 'format'];
 
 /**
  * Запрос к коллекции
@@ -13,58 +14,123 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection) {
-    return collection;
+    var newCollection = [];
+    var properties = Object.keys(collection[0]);
+    collection.forEach(function (friend) {
+        var copy = {};
+        properties.forEach(function (prop) {
+            copy[prop] = friend[prop];
+        });
+        newCollection.push(copy);
+    });
+
+    ([].slice.call(arguments, 1))
+        .sort(function (func1, func2) {
+            return FUNCTION_ORDER.indexOf(func1.name) - FUNCTION_ORDER.indexOf(func2.name);
+        })
+        .forEach(function (func) {
+            newCollection = func(newCollection);
+        });
+
+    return newCollection;
 };
 
 /**
  * Выбор полей
  * @params {...String}
+ * @returns {Array}
  */
 exports.select = function () {
-    return;
+    var givenProperties = [].slice.call(arguments);
+
+    return function select(collection) {
+        var friendProperties = Object.keys(collection[0]);
+        var intersectedProperties = getPropertiesIntersection(friendProperties, givenProperties);
+        var newCollection = [];
+        for (var i = 0; i < collection.length; i++) {
+            var currentFriend = collection[i];
+            var selectedFriend = {};
+            for (var j = 0; j < intersectedProperties.length; j++) {
+                selectedFriend[intersectedProperties[j]] = currentFriend[intersectedProperties[j]];
+            }
+            newCollection.push(selectedFriend);
+        }
+
+        return newCollection;
+    };
 };
+
+/**
+ * Выделение общих свойств у друзей и полученных от селекта
+ * @param {Array} friendsProperties – Свойства друзей на конкретном шаге(если несколько селектов)
+ * @param {Array} givenProperties – Данные нам свойства от селекта
+ * @returns {Array}
+ */
+function getPropertiesIntersection(friendsProperties, givenProperties) {
+    return givenProperties.filter(function (givenProperty) {
+        return friendsProperties.some(function (friendProperty) {
+            return friendProperty === givenProperty;
+        });
+    });
+}
 
 /**
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
+ * @returns {Array}
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
+    return function filterIn(collection) {
+        return collection.reduce(function (friend, nextFriend) {
+            var hasProperty = values.some(function (prop) {
+                return prop === nextFriend[property];
+            });
+            if (hasProperty) {
+                return friend.concat([nextFriend]);
+            }
 
-    return;
+            return friend;
+        }, []);
+    };
 };
 
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Array}
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
+    return function sortBy(collection) {
+        order = (order === 'asc') ? 1 : -1;
 
-    return;
+        return collection.sort(function (a, b) {
+            return (a[property] > b[property] ? 1 : -1) * order;
+        });
+    };
 };
 
 /**
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
+ * @returns {Array}
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
+    return function format(collection) {
+        return collection.map(function (friend) {
+            friend[property] = formatter(friend[property]);
 
-    return;
+            return friend;
+        });
+    };
 };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
 exports.limit = function (count) {
-    console.info(count);
-
-    return;
+    return function limit(collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
