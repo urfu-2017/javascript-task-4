@@ -4,7 +4,8 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -12,16 +13,45 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    return collection;
+
+const OPERATORS = ['sorting', 'filterPersons', 'needFields', 'toFormat', 'limit'];
+
+function duplicateObj(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
+exports.query = function (collection, ...operators) {
+    let newCollection = duplicateObj(collection);
+    operators.sort((a, b) => {
+
+        return OPERATORS.indexOf(a.name) > OPERATORS.indexOf(b.name) ? 1 : -1;
+    });
+
+    return operators.reduce((result, operator) => {
+        return operator(result);
+    }, newCollection);
 };
 
 /**
  * Выбор полей
  * @params {...String}
  */
-exports.select = function () {
-    return;
+
+exports.select = function (...args) {
+    return function needFields(collection) {
+        let newCollection = collection.map((person) => {
+
+            return args.reduce((res, arg) => {
+                if (person.hasOwnProperty(arg)) {
+                    res[arg] = person[arg];
+                }
+
+                return res;
+            }, {});
+        });
+
+        return newCollection;
+    };
 };
 
 /**
@@ -29,10 +59,15 @@ exports.select = function () {
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
  */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
 
-    return;
+exports.filterIn = function (property, values) {
+    return function filterPersons(collection) {
+        let filtered = collection.filter((person) => {
+            return values.indexOf(person[property]) !== -1;
+        });
+
+        return filtered;
+    };
 };
 
 /**
@@ -40,10 +75,15 @@ exports.filterIn = function (property, values) {
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
 
-    return;
+exports.sortBy = function (property, order) {
+    return function sorting(collection) {
+        collection.sort((a, b) => {
+            return order === 'asc' ? a[property] > b[property] : a[property] < b[property];
+        });
+
+        return collection;
+    };
 };
 
 /**
@@ -51,20 +91,30 @@ exports.sortBy = function (property, order) {
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
  */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
 
-    return;
+exports.format = function (property, formatter) {
+    return function toFormat(collection) {
+        let newCollection = collection.map((person) => {
+            if (person[property]) {
+                person[property] = formatter(person[property]);
+            }
+
+            return person;
+        });
+
+        return newCollection;
+    };
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  */
-exports.limit = function (count) {
-    console.info(count);
 
-    return;
+exports.limit = function (count) {
+    return function limit(collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
@@ -74,6 +124,7 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
+
     exports.or = function () {
         return;
     };
@@ -83,6 +134,7 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
+
     exports.and = function () {
         return;
     };
