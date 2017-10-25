@@ -1,10 +1,10 @@
 'use strict';
 const functionWeight = {
     filterIn: 0,
-    sortBy: 1,
+    SortBy: 1,
     select: 2,
-    limit: 3,
-    format: 4
+    limit: 4,
+    format: 5
 };
 
 /**
@@ -22,6 +22,7 @@ exports.isStar = false;
 
 exports.query = function (collection, ...values) {
     var ar = (Array.from(values));
+    console.info(ar);
     var clone = Object.assign([], collection);
     const methods = ar
         .sort((a, b) => functionWeight[a.name] - functionWeight[b.name]);
