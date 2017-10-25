@@ -24,7 +24,7 @@ exports.query = function (collection, ...args) {
 exports.select = function (...args) {
     return collection => Array.from(collection
         .map(Object.entries)
-        .map(x => x.filter(containsIn(args)))
+        .map(entries => entries.filter(containsIn(args)))
         .map(fromEntriesToObject));
 };
 
@@ -56,9 +56,14 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
 
-    return;
+    return collection => Array.from(collection
+        .map(Object.entries)
+        .map(entries => entries.map(([key, value]) => key === property
+            ? [key, formatter(value)]
+            : [key, value]))
+
+        .map(fromEntriesToObject));
 };
 
 /**

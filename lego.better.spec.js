@@ -2,7 +2,7 @@
 'use strict';
 
 const assert = require('assert');
-const { select, filterIn } = require('./lego');
+const { select, filterIn, format } = require('./lego');
 
 
 describe('lego.select', function () {
@@ -32,6 +32,23 @@ describe('lego.filterIn', function () {
         assert.deepStrictEqual(actual, [
             { a: 'YES', c: 1 },
             { a: 'YEP', b: 2 }
+        ]);
+    });
+});
+
+
+describe('lego.format', function () {
+    it('должен вернуть только указанные записи', function () {
+        let collection = [
+            { a: 'NON-FORMATTED', c: 1 },
+            { a: 'NON-FORMATTED', b: 2 },
+            { a: 'NON-FORMATTED' }];
+
+        let actual = format('a', () => 'FORMATTED')(collection);
+        assert.deepStrictEqual(actual, [
+            { a: 'FORMATTED', c: 1 },
+            { a: 'FORMATTED', b: 2 },
+            { a: 'FORMATTED' }
         ]);
     });
 });
