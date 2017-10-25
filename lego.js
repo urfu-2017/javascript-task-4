@@ -15,12 +15,17 @@ exports.isStar = true;
 exports.query = function (collection, ...actions) {
     var result = collection;
     actions.forEach(function (action) {
-        if (action.type !== 'format' && action.type !== 'limit') {
+        if (action.type !== 'limit' && action.type !== 'format' && action.type !== 'select') {
             result = action.func(result);
         }
     });
     actions.forEach(function (action) {
-        if (action.type === 'format' || action.type === 'limit') {
+        if (action.type === 'select') {
+            result = action.func(result);
+        }
+    });
+    actions.forEach(function (action) {
+        if (action.type === 'limit' || action.type === 'format') {
             result = action.func(result);
         }
     });
