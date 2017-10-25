@@ -108,7 +108,7 @@ exports.format = function (property, formatter) {
     return function format(collection) {
 
         return collection.map(function (person) {
-            if (property in person) {
+            if (person[property] !== undefined) {
                 person[property] = formatter(person[property]);
             }
 
