@@ -25,9 +25,8 @@ const PRIORYTY_ARGUMENTS = {
 exports.query = function (collection) {
     var orderedArguments = Object.values(arguments).slice(1)
         .sort((a, b) => PRIORYTY_ARGUMENTS[a.name] - PRIORYTY_ARGUMENTS[b.name]);
-    var newCollection = collection;
 
-    return orderedArguments.reduce((result, argument) => argument(result), newCollection);
+    return orderedArguments.reduce((result, argument) => argument(result), collection);
 };
 
 /**
@@ -43,7 +42,7 @@ exports.select = function () {
         return collection.map(person => {
             var newParametr = {};
             for (var i = 0; i < parametrs.length; i++) {
-                if (person[parametrs[i]]) {
+                if (parametrs[i] in person) {
                     newParametr[parametrs[i]] = person[parametrs[i]];
                 }
             }
