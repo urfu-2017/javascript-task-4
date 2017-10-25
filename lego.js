@@ -119,7 +119,9 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function _format(collection) {
         for (let friend of collection) {
-            friend[property] = formatter(friend[property]);
+            if (Object.keys(friend).includes(property)) {
+                friend[property] = formatter(friend[property]);
+            }
         }
 
         return collection;
