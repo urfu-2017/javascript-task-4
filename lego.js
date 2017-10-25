@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
@@ -13,37 +14,37 @@ function formArgs(args) {
 
     return out;
 }
-function parseArguments(args) {
+function parseArguments(args) { // eslint-disable-line complexity
     var operands = {};
-    operands['select'] = [];
-    operands['filter'] = [];
+    operands.select = [];
+    operands.filter = [];
     var a1;
     for (var y = 1; y < args.length; y++) {
         switch (args[y][0]) {
             case 'SELECT':
                 a1 = args[y][1];
                 a1 = formArgs(a1);
-                operands['select'] += a1;
+                operands.select += a1;
                 break;
             case 'FILTER':
                 a1 = args[y][1];
                 a1 = formArgs(a1);
-                operands['filter'].push(a1);
+                operands.filter.push(a1);
                 break;
             case 'SORT':
                 a1 = args[y][1];
                 a1 = formArgs(a1);
-                operands['sort'] = a1;
+                operands.sort = a1;
                 break;
             case 'FORMAT':
                 a1 = args[y][1];
                 a1 = formArgs(a1);
-                operands['format'] = a1;
+                operands.format = a1;
                 break;
             case 'LIMIT':
                 a1 = args[y][1];
                 a1 = formArgs(a1);
-                operands['limit'] = a1;
+                operands.limit = a1;
                 break;
             default:
                 break;
@@ -52,6 +53,28 @@ function parseArguments(args) {
 
     return operands;
 }
+function applyOperands(data, operands) {
+    if (operands.sort !== undefined) {
+        data = sort1(data, operands['sort']);
+    }
+    if (operands.filter !== undefined) {
+        for (var o = 0; o < operands['filter'].length; o++) {
+            data = filter1(data, operands['filter'][o]);
+        }
+    }
+    if (operands.select !== undefined) {
+        data = select1(data, operands['select']);
+    }
+    if (operands.limit !== undefined) {
+        data = limit1(data, operands['limit']);
+    }
+    if (operands.format !== undefined) {
+        data = format1(data, operands['format']);
+    }
+
+    return data;
+}
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -62,24 +85,7 @@ exports.query = function (collection) {
     var operands = parseArguments(arguments);
     var data = [];
     data = Object.assign(data, collection);
-    if (operands['sort'] !== undefined) {
-        data = sort1(data, operands['sort'] );
-    }
-    if (operands['filter'] !== undefined) {
-        for (var o = 0; o < operands['filter'].length; o++) {
-            data = filter1(data, operands['filter'][o]);
-        }
-    }
-    if (operands['select'] !== undefined) {
-        data = select1(data, operands['select']);
-    }
-    if (operands['limit'] !== undefined) {
-        data = limit1(data, operands['limit']);
-    }
-    if (operands['format'] !== undefined) {
-        data = format1(data, operands['format']);
-    }
-    console.log(data);
+    data = applyOperands(data, operands);
 
     return data;
 };
@@ -87,6 +93,7 @@ exports.query = function (collection) {
 /**
  * Выбор полей
  * @params {...String}
+ * @returns {Array}
  */
 exports.select = function () {
 
@@ -109,10 +116,10 @@ function select1(data, key) {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
+ * @returns {Array}
  */
 exports.filterIn = function (property, values) {
-
-    return ['FILTER', arguments];
+    return ['FILTER', [property, values]];
 };
 
 function filter1(data, args) {
@@ -130,11 +137,10 @@ function filter1(data, args) {
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Array}
  */
 exports.sortBy = function (property, order) {
-    //console.info(property, order);
-
-    return ['SORT', arguments];
+    return ['SORT', [property, order]];
 };
 
 function sort1(data, args) {
@@ -172,9 +178,10 @@ function sort1(data, args) {
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
+ * @returns {Array}
  */
 exports.format = function (property, formatter) {
-    return ['FORMAT', arguments];
+    return ['FORMAT', [property, formatter]];
 };
 
 function format1(data, args) {
@@ -189,11 +196,10 @@ function format1(data, args) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
+ * @returns {Array}
  */
 exports.limit = function (count) {
-    //console.info(count);
-
-    return ['LIMIT', arguments];
+    return ['LIMIT', [count]];
 };
 
 function limit1 (data, count) {
