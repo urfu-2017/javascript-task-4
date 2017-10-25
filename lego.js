@@ -54,7 +54,7 @@ exports.select = (...properties) => function select(collection) {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
-  * @returns {Function}
+ * @returns {Function}
  */
 exports.filterIn = (property, values) => function filterIn(collection) {
     return collection.filter(
@@ -125,7 +125,7 @@ if (exports.isStar) {
                 .forEach(item => filtered.add(item))
         );
 
-        return [...filtered];
+        return collection.filter(x => filtered.has(x));
     };
 
     /**
