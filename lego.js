@@ -92,7 +92,11 @@ exports.format = function (property, formatter) {
 
     return function format(copyCollection) {
         return copyCollection.map(copyCollectionItem => {
-            copyCollectionItem[property] = formatter(copyCollectionItem[property]);
+            if (property in copyCollectionItem) {
+                copyCollectionItem[property] = formatter(copyCollectionItem[property]);
+
+                return copyCollectionItem;
+            }
 
             return copyCollectionItem;
         });
