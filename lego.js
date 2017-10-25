@@ -90,7 +90,7 @@ exports.sortBy = function (property, order) {
             }
         }
 
-        return copyCollection.sort((a, b) => a[property] > b[property]);
+        return copyCollection.sort((a, b) => a[property] < b[property]);
     };
 };
 
