@@ -73,11 +73,23 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     if (order === 'asc') {
         return function sortBy(copyCollection) {
+            for (let item of copyCollection) {
+                if (!(property in item)) {
+                    return copyCollection;
+                }
+            }
+
             return copyCollection.sort((a, b) => a[property] > b[property]);
         };
     }
 
     return function sortBy(copyCollection) {
+        for (let item of copyCollection) {
+            if (!(property in item)) {
+                return copyCollection;
+            }
+        }
+
         return copyCollection.sort((a, b) => a[property] > b[property]);
     };
 };
