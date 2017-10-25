@@ -179,8 +179,11 @@ if (exports.isStar) {
             return result;
         }
 
-        var actions = arguments;
+        var actions = Array.prototype.slice.call(arguments);
         var orFunction = function (friends) {
+            if (actions.length === 0) {
+                return friends;
+            }
             var partysToUnite = actions.map((action) => action.func(friends));
 
             return partysToUnite.reduce(unitePartys, []);
@@ -200,8 +203,11 @@ if (exports.isStar) {
             return firstParty.filter(friend => friendInParty(friend, secondParty));
         }
 
-        var actions = arguments;
+        var actions = Array.prototype.slice.call(arguments);
         var andFunction = function (friends) {
+            if (actions.length === 0) {
+                return friends;
+            }
             var partysToUnite = actions.map((action) => action.func(friends));
 
             return partysToUnite.reduce(intersectPartys, partysToUnite[0]);
