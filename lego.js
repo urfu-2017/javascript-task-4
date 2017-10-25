@@ -14,33 +14,11 @@ exports.isStar = false;
  */
 exports.query = function (collection) {
     let functions = [].slice.call(arguments).slice(1);
-    functions = handlingOfFunctions(functions);
-    let resultCollection = collection.map(friend => Object.assign({}, friend));
-    let properties = [];
-    for (let _function of functions) {
-        if (_function.name !== '_select') {
-            resultCollection = _function(resultCollection);
-        } else {
-            let result = _function(resultCollection);
-            resultCollection = result[0];
-            properties = properties.concat(result[1]);
-        }
-    }
-    for (let friend of resultCollection) {
-        deleteUselessProperties(friend, properties);
-    }
 
-    return resultCollection;
+    return handlingOfFunctions(functions)
+        .reduce((_collection, _function) => _function(_collection),
+            collection.map(friend => Object.assign({}, friend)));
 };
-
-function deleteUselessProperties(friend, properties) {
-    properties = Array.from(new Set(properties));
-    for (let property in friend) {
-        if (properties.indexOf(property) === -1) {
-            delete friend[property];
-        }
-    }
-}
 
 /**
  * Выбор полей
@@ -48,20 +26,20 @@ function deleteUselessProperties(friend, properties) {
  * @returns {Function}
  */
 exports.select = function () {
-    let argv = [].slice.call(arguments);
+    let properties = [].slice.call(arguments);
 
     return function _select(collection) {
-        for (let friend of collection) {
-            let count = 0;
-            for (let property of Object.keys(friend)) {
-                count += argv.includes(property);
-            }
-            if (count < argv.length) {
-                collection.splice(collection.indexOf(friend), 1);
-            }
-        }
+        return collection.map(friend => {
+            let newFriend = {};
 
-        return [collection, argv];
+            for (let property of Object.keys(friend)) {
+                if (properties.includes(property)) {
+                    newFriend[property] = friend[property];
+                }
+            }
+
+            return newFriend;
+        });
     };
 };
 
@@ -136,9 +114,7 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     return function _limit(collection) {
-        collection = collection.slice(0, count);
-
-        return collection;
+        return collection.slice(0, count);
     };
 };
 
