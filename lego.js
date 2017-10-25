@@ -14,7 +14,7 @@ const PRIORITY_LIST = {
     limit: 2,
     or: 0,
     and: 0
-}; 
+};
 
 /**
  * Запрос к коллекции
@@ -64,8 +64,9 @@ exports.select = function (...fields) {
  * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    return function filterIn(collection){
-        return collection.filterIn(element => values.includes(element[property]))};
+    return function filterIn(collection) {
+        return collection.filterIn(element => values.includes(element[property]));
+    };
 };
 
 /**
@@ -76,22 +77,9 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let copyCollection = getCopy(collection);
         return copyCollection.sort((a, b) => {
-            if (a[property] > b[property]) {
-                return 1;
-            }
-            if (a[property] < b[property]) {
-                return -1;
-            }
-
-            return 0;
+            return (order === 'asc') ? a[property] > b[property] : b[property] > a[property];
         });
-        if (order === 'asc') {
-            return copyCollection;
-        }
-
-        return copyCollection.reverse();
     };
 };
 
@@ -130,7 +118,7 @@ if (exports.isStar) {
      */
     exports.or = function (...functions) {
         return function or(collection) {
-            return colection.filter(el => functions.some(func => func([el]).length > 0));
+            return collection.filter(el => functions.some(func => func([el]).length > 0));
         };
     };
 
@@ -142,7 +130,7 @@ if (exports.isStar) {
      */
     exports.and = function (...functions) {
         return function and(collection) {
-            return colection.filter(el => functions.every(func => func([el]).length > 0));
+            return collection.filter(el => functions.every(func => func([el]).length > 0));
         };
     };
 };
