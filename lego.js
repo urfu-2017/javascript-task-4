@@ -60,8 +60,8 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(copyCollection) {
-            return copyCollection.filter(a => values.indexOf(a[property]) !== -1);
-        };
+        return copyCollection.filter(a => values.indexOf(a[property]) !== -1);
+    };
 };
 
 /**
@@ -71,20 +71,26 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
+    if (order === 'asc') {
+        return function sortBy(copyCollection) {
+            for (let item of copyCollection) {
+                if (!(property in item)) {
+                    return copyCollection;
+                }
+            }
+
+            return copyCollection.sort((a, b) => a[property] > b[property]);
+        };
+    }
 
     return function sortBy(copyCollection) {
-        let collection = copyCollection.slice();
-
-        return collection.sort((a, b) => {
-            if (a[property] > b[property]) {
-                return (order === 'asc') ? 1 : -1;
+        for (let item of copyCollection) {
+            if (!(property in item)) {
+                return copyCollection;
             }
-            if (a[property] < b[property]) {
-                return (order === 'asc') ? -1 : 1;
-            }
+        }
 
-            return 0;
-        });
+        return copyCollection.sort((a, b) => a[property] < b[property]);
     };
 };
 
@@ -96,14 +102,16 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(copyCollection) {
-        if (!(copyCollection.every(friend => property in friend))) {
-            return copyCollection;
+        for (let item of copyCollection) {
+            if (!(property in item)) {
+                return copyCollection;
+            }
         }
 
-        return copyCollection.map(friend => {
-            friend[property] = formatter(friend[property]);
+        return copyCollection.map(copyCollectionItem => {
+            copyCollectionItem[property] = formatter(copyCollectionItem[property]);
 
-            return friend;
+            return copyCollectionItem;
         });
     };
 };
