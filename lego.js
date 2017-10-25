@@ -6,6 +6,16 @@
  */
 exports.isStar = true;
 
+const PRIORYTY_ARGUMENTS = {
+    and: 0,
+    or: 0,
+    filterIn: 0,
+    sortBy: 1,
+    select: 2,
+    limit: 3,
+    format: 4
+};
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -13,58 +23,108 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection) {
-    return collection;
+    var orderedArguments = Object.values(arguments).slice(1)
+        .sort((a, b) => PRIORYTY_ARGUMENTS[a.name] - PRIORYTY_ARGUMENTS[b.name]);
+
+    return orderedArguments.reduce((result, argument) => argument(result), collection);
 };
 
 /**
  * Выбор полей
  * @params {...String}
+ * @returns {Array}
  */
 exports.select = function () {
-    return;
+    var parametrs = Object.values(arguments);
+
+    return function select(collection) {
+
+        return collection.map(person => {
+            var newParametr = {};
+            for (var i = 0; i < parametrs.length; i++) {
+                if (person[parametrs[i]]) {
+                    newParametr[parametrs[i]] = person[parametrs[i]];
+                }
+            }
+
+            return newParametr;
+        });
+    };
 };
 
 /**
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
+ * @returns {Array}
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
 
-    return;
+    return function filterIn(collection) {
+
+        return collection.filter(person => values.includes(person[property]));
+    };
 };
 
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Array}
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
 
-    return;
+    return function sortBy(collection) {
+        collection.sort(function (a, b) {
+            if (a[property] > b[property]) {
+
+                return 1;
+            }
+            if (a[property] < b[property]) {
+
+                return -1;
+            }
+
+            return 0;
+        });
+        if (order === 'desc') {
+
+            return collection.reverse();
+        }
+
+        return collection;
+    };
 };
 
 /**
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
+ * @returns {Array}
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
 
-    return;
+    return function format(collection) {
+
+        return collection.map(function (person) {
+            person[property] = formatter(person[property]);
+
+            return person;
+        });
+    };
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
+ * @returns {Array}
  */
 exports.limit = function (count) {
-    console.info(count);
 
-    return;
+    return function limit(collection) {
+
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
@@ -73,17 +133,31 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Array}
      */
     exports.or = function () {
-        return;
+        var subQuery = Object.values(arguments);
+
+        return function or(collection) {
+            var properElement = subQuery.reduce((result, currentFilter) =>
+                result.concat(currentFilter(collection)), []);
+
+            return collection.filter(person => properElement.includes(person));
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Array}
      */
     exports.and = function () {
-        return;
+        var subQuery = Object.values(arguments);
+
+        return function and(collection) {
+
+            return subQuery.reduce((result, currentFilter) => currentFilter(result), collection);
+        };
     };
 }
