@@ -101,16 +101,14 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(copyCollection) {
-        for (let item of copyCollection) {
-            if (!(property in item)) {
-                return copyCollection;
-            }
+        if (!(copyCollection.every(friend => property in friend))) {
+            return copyCollection;
         }
 
-        return copyCollection.map(copyCollectionItem => {
-            copyCollectionItem[property] = formatter(copyCollectionItem[property]);
+        return copyCollection.map(friend => {
+            friend[property] = formatter(friend[property]);
 
-            return copyCollectionItem;
+            return friend;
         });
     };
 };
