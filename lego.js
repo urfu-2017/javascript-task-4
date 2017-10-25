@@ -4,7 +4,32 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
+
+function friendInParty(friend, party) {
+    function friendCompare(firstFriend, secondFriend) {
+        var property;
+        for (property in firstFriend) {
+            if (secondFriend[property] !== firstFriend[property]) {
+                return false;
+            }
+        }
+        for (property in secondFriend) {
+            if (firstFriend[property] !== secondFriend[property]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    for (var partyMember of party) {
+        if (friendCompare(friend, partyMember)) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 /**
  * Запрос к коллекции
@@ -140,31 +165,6 @@ exports.limit = function (count) {
     return { type: 'limit', func: limitFunction };
 };
 
-function friendInParty(friend, party) {
-    function friendCompare(firstFriend, secondFriend) {
-        var property;
-        for (property in firstFriend) {
-            if (secondFriend[property] !== firstFriend[property]) {
-                return false;
-            }
-        }
-        for (property in secondFriend) {
-            if (firstFriend[property] !== secondFriend[property]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    for (var partyMember of party) {
-        if (friendCompare(friend, partyMember)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 if (exports.isStar) {
 
     /**
@@ -204,9 +204,7 @@ if (exports.isStar) {
     exports.and = function () {
         var actions = Array.from(arguments);
         var andFunction = function (friends) {
-            var result = JSON.parse(JSON.stringify(friends));
-
-            return actions.reduce((acc, action) => action.func(acc), result);
+            return actions.reduce((acc, action) => action.func(acc), friends);
         };
 
         return { type: 'filter', func: andFunction };
