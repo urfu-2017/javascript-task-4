@@ -96,11 +96,12 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(function (data) {
-            if (property in data) {
-                data[property] = formatter(data[property]);
+            var clonePerson = Object.assign({}, data);
+            if (data[property] !== undefined) {
+                clonePerson[property] = formatter(clonePerson[property]);
             }
 
-            return data;
+            return clonePerson;
         }
         );
     };
@@ -137,4 +138,3 @@ if (exports.isStar) {
         return;
     };
 }
-
