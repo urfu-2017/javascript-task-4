@@ -95,13 +95,17 @@ exports.sortBy = function (property, order) {
  * @returns {Function} – Функция применяющая форматирование к полям объектов коллекции
  */
 exports.format = function (property, propertyFormatter) {
-    let formatter = collection => collection.map(object => {
-        if (property in object) {
-            object[property] = propertyFormatter(object[property]);
+    let formatter = collection => {
+        if (!(collection.every(object => property in object))) {
+            return collection;
         }
 
-        return object;
-    });
+        return collection.map(object => {
+            object[property] = propertyFormatter(object[property]);
+
+            return object;
+        });
+    };
     formatter.priority = 4;
 
     return formatter;
