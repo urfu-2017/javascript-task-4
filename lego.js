@@ -1,10 +1,10 @@
 'use strict';
 const functionWeight = {
-    filterIn: 0,
+    filterIn: 1,
     SortBy: 1,
     select: 2,
-    limit: 4,
-    format: 5
+    limit: 3,
+    format: 3
 };
 
 /**
@@ -62,9 +62,7 @@ exports.select = function (...values) {
 
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        var clone = Object.assign([], collection);
-
-        return clone.filter(function (data) {
+        return collection.filter(function (data) {
             return values.includes(data[property]);
         });
     };
@@ -78,11 +76,9 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return function SortBy(collection) {
-        var clone = Object.assign([], collection);
-
-        return clone.sort(function (firstValue, secondValue) {
-            let typeAsc = Number(firstValue[property] > secondValue[property]);
-            let typeDesc = Number(firstValue[property] < secondValue[property]);
+        return collection.sort(function (firstValue, secondValue) {
+            let typeAsc = firstValue[property] > secondValue[property];
+            let typeDesc = firstValue[property] < secondValue[property];
 
             return (order === 'asc') ? typeAsc : typeDesc;
         }
@@ -141,4 +137,5 @@ if (exports.isStar) {
         return;
     };
 }
+
 
