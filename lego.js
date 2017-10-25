@@ -185,7 +185,7 @@ if (exports.isStar) {
             return result;
         }
 
-        var actions = Array.prototype.slice.call(arguments);
+        var actions = Array.from(arguments);
         var orFunction = function (friends) {
             var partysToUnite = actions.map(action => action.func(friends));
 
@@ -202,15 +202,11 @@ if (exports.isStar) {
      * @returns {Array}
      */
     exports.and = function () {
-        function intersectPartys(firstParty, secondParty) {
-            return firstParty.filter(friend => friendInParty(friend, secondParty));
-        }
-
-        var actions = Array.prototype.slice.call(arguments);
+        var actions = Array.from(arguments);
         var andFunction = function (friends) {
-            var partysToUnite = actions.map(action => action.func(friends));
+            var result = JSON.parse(JSON.stringify(friends));
 
-            return partysToUnite.reduce(intersectPartys);
+            return actions.reduce((acc, action) => action.func(acc), result);
         };
 
         return { type: 'filter', func: andFunction };
