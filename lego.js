@@ -10,7 +10,7 @@ let priority = {
     'filterIn': 0,
     'format': 3,
     'sortBy': 1,
-    'limit': 4
+    'limit': 3
 };
 
 /**
@@ -60,8 +60,13 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(copyCollection) {
-        return copyCollection.filter(a => values.indexOf(a[property]) !== -1);
+        if (property !== undefined && values !== undefined) {
+            return copyCollection.filter(a => values.indexOf(a[property]) !== -1);
+        }
+
+        return copyCollection;
     };
+
 };
 
 /**
