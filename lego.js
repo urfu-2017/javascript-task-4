@@ -141,15 +141,16 @@ exports.filterIn = function (property, values) {
 };
 
 function filter1(data, args) {
+    var out = [];
     var property = args[0];
     var values = args[1];
     for (var q = 0; q < data.length; q++) {
-        if (!values.includes(data[q][property])) {
-            data.splice(q, 1);
+        if (values.includes(data[q][property])) {
+            out.push(data[q]);
         }
     }
 
-    return data;
+    return out;
 }
 
 /**
