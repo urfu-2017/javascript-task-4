@@ -1,9 +1,6 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
+
 exports.isStar = true;
 
 const PRIORITY = {
