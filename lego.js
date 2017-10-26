@@ -18,10 +18,6 @@ exports.query = (array, ...queries) => queries.sort((first, second) => {
     const orderOne = PRECEDENCE[first.name];
     const orderTwo = PRECEDENCE[second.name];
 
-    if (!orderOne || !orderTwo) {
-        throw new TypeError('Syntax error');
-    }
-
     return orderOne - orderTwo;
 }).reduce((result, selector) => selector(result), array);
 
