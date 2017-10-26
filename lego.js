@@ -138,10 +138,8 @@ exports.format = function (property, formatter) {
         var formatedCollection = [];
         var newItem = {};
         collection.forEach (function (item) {
-            console.info(item);
             newItem = {};
             Object.keys(item).forEach(function (key) {
-                console.info(key, property);
                 let value = item[key];
                 if (key === property) {
                     value = formatter(value);
