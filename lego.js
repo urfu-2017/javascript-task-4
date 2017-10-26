@@ -52,7 +52,8 @@ exports.select = function () {
                 if (key in person) {
                     acc[key] = person[key];
                 }
-                    return acc;
+
+                return acc;
             }, resultPerson);
         });
     };
