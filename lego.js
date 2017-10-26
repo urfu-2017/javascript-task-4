@@ -14,9 +14,16 @@ exports.isStar = false;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = (array, ...queries) => queries
-    .sort((first, second) => PRECEDENCE[first.name] - PRECEDENCE[second.name])
-    .reduce((result, selector) => selector(result), array);
+exports.query = (array, ...queries) => queries.sort((first, second) => {
+    const orderOne = PRECEDENCE[first.name];
+    const orderTwo = PRECEDENCE[second.name];
+
+    if (!orderOne || !orderTwo) {
+        throw new TypeError('Syntax error');
+    }
+
+    return orderOne - orderTwo;
+}).reduce((result, selector) => selector(result), array);
 
 /**
  * Выбор полей
@@ -24,13 +31,17 @@ exports.query = (array, ...queries) => queries
  * @returns {Function}
  */
 exports.select = (...properties) => function select(array) {
-    return array.map(value => properties.reduce((result, property) => {
-        if (value[property] !== undefined) {
-            result[property] = value[property];
-        }
+    return array.map(value => {
+        const newvalue = {};
 
-        return result;
-    }, {}));
+        properties.forEach(property => {
+            if (property in value) {
+                newvalue[property] = value[property];
+            }
+        });
+
+        return newvalue;
+    });
 };
 
 /**
@@ -53,11 +64,7 @@ exports.sortBy = (property, order) => function sortBy(array) {
     const direct = order === 'asc' ? 1 : -1;
 
     return array.slice().sort((value1, value2) => {
-        if (value1[property] === value2[property]) {
-            return 0;
-        }
-
-        return value1[property] > value2[property] ? direct : -direct;
+        return (value1[property] > value2[property] ? 1 : -1) * direct;
     });
 };
 
