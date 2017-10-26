@@ -20,9 +20,8 @@ const priority = [
 
 const deepCopy = object => JSON.parse(JSON.stringify(object));
 
-exports.query = function (...collection) {
-    let copy = deepCopy(collection[0]);
-    let actions = collection.slice(1);
+exports.query = function (records, ...actions) {
+    let copy = deepCopy(records);
     actions.sort((fi, se) => priority.indexOf(fi.command) - priority.indexOf(se.command));
     actions.forEach(action => {
         if (action.hasOwnProperty('apply')) {
@@ -41,7 +40,7 @@ exports.select = function (...keys) {
         apply: records => {
             records.forEach(record => {
                 Object.keys(record).forEach(key => {
-                    if (keys.indexOf(key) === -1) {
+                    if (!keys.includes(key)) {
                         delete record[key];
                     }
                 });
@@ -60,7 +59,7 @@ exports.filterIn = function (property, values) {
 
     return {
         command: commands.filterIn,
-        predicate: predicate,
+        predicate,
         getApplied: records => records.filter(predicate)
     };
 };
@@ -107,7 +106,7 @@ if (exports.isStar) {
 
         return {
             commands: commands.filterIn,
-            predicate: predicate,
+            predicate,
             getApplied: records => records.filter(predicate)
         };
     };
@@ -117,7 +116,7 @@ if (exports.isStar) {
 
         return {
             commands: commands.filterIn,
-            predicate: predicate,
+            predicate,
             getApplied: records => records.filter(predicate)
         };
     };
