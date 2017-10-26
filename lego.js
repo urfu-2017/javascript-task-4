@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -12,77 +12,116 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
+const priority = ['filterIn', 'sortBy', 'select', 'format', 'limit'];
 exports.query = function (collection) {
-    return collection;
+    var clone = [];
+    collection.forEach(function (col) {
+        var obj = {};
+        Object.keys(col).forEach(function (keys) {
+            obj[keys] = col[keys];
+        });
+        clone.push(obj);
+    });
+
+
+    var functions = [].slice.call(arguments, 1);
+
+    functions.sort(function (a, b) {
+        return priority.indexOf(a.name) - priority.indexOf(b.name);
+    });
+    functions.forEach(function (current) {
+        clone = current(clone);
+    });
+
+    return clone;
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
+
 exports.select = function () {
-    return;
+    var args = [].slice.call(arguments);
+
+    return function select(collection) {
+        return collection.map(function (current) {
+
+            current = selector(args, current);
+
+            return current;
+        });
+
+    };
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
+function selector(args, current) {
+    var ob = {};
+    var keys = Object.keys(current);
+
+    args.map(function (argument) {
+        return keys.forEach(function (elem) {
+            if (elem === argument) {
+                ob[argument] = current[elem];
+            }
+        });
+
+    });
+
+
+    return ob;
+}
+
 exports.filterIn = function (property, values) {
-    console.info(property, values);
+    return function (collection) {
+        return collection.filter(function (current) {
+            return values.some(function (val) {
+                return val === current[property];
 
-    return;
+            });
+
+        });
+    };
 };
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
 
-    return;
+    return function sortBy(collection) {
+        return collection.sort(function (a, b) {
+            if (order === 'asc') {
+                return a[property] - b[property];
+            }
+
+            return b[property] - a[property];
+        });
+    };
 };
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
+
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
 
-    return;
+    return function format(collection) {
+        return collection.map(function (current) {
+            current[property] = formatter(current[property]);
+
+            return current;
+        });
+    };
 };
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
-exports.limit = function (count) {
-    console.info(count);
 
-    return;
+exports.limit = function (count) {
+
+
+    return function limit(collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
 
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
+
     exports.or = function () {
         return;
     };
 
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
+
     exports.and = function () {
         return;
     };
