@@ -24,7 +24,9 @@ const PRIORITY_LIST = {
  */
 exports.query = function (collection, ...functions) {
     let copyCollection = getCopy(collection);
-    functions = functions.sort((a, b) => PRIORITY_LIST[a.name] - PRIORITY_LIST[b.name]);
+    functions = functions.sort((a, b) => {
+        return PRIORITY_LIST[a.name] - PRIORITY_LIST[b.name];
+    });
     for (const element of functions) {
         copyCollection = element(copyCollection);
     }
