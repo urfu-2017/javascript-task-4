@@ -105,16 +105,18 @@ if (lego.isStar) {
         lego.select('name'),
 
         // Выбираем всех парней, которые любят картофель, и всех девушек, которые любят яблоки
-        lego.or(
-            // Должно сработать хотябы одно условие
-            lego.and(
-                // Должны сработать оба условия
-                lego.filterIn('gender', ['Мужской']),
-                lego.filterIn('favoriteFruit', ['Картофель'])
-            ),
-            lego.and(
-                lego.filterIn('gender', ['Женский']),
-                lego.filterIn('favoriteFruit', ['Яблоко'])
+        lego.and(
+            lego.or(
+                // Должно сработать хотябы одно условие
+                lego.and(
+                    // Должны сработать оба условия
+                    lego.filterIn('gender', ['Мужской']),
+                    lego.filterIn('favoriteFruit', ['Картофель'])
+                ),
+                lego.and(
+                    lego.filterIn('gender', ['Женский']),
+                    lego.filterIn('favoriteFruit', ['Яблоко'])
+                )
             )
         )
     );
