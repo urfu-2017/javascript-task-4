@@ -68,7 +68,7 @@ describe('lego.query', function () {
         var result = lego.query(
             friends,
             lego.select('name', 'gender', 'email'),
-            lego.filterIn('favoriteFruit', ['Банан']),
+            lego.filterIn('favoriteFruit', ['Яблоко', 'Картофель']),
             lego.sortBy('age', 'asc'),
             lego.format('gender', function (value) {
                 return value[0];
