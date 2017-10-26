@@ -47,14 +47,22 @@ exports.select = function () {
     return function select(collection) {
         return collection.map(person => {
             let resultPerson = {};
+            argumentsArr.forEach(function (key) {
+                if (key in person) {
+                    resultPerson[key] = person[key];
+                }
+            });
 
-            return argumentsArr.reduce(function (acc, key) {
+            return resultPerson;
+
+            /*return argumentsArr.reduce(function (acc, key) {
                 if (key in person) {
                     acc[key] = person[key];
                 }
 
                 return acc;
-            }, resultPerson);
+            }, resultPerson);*/
+
         });
     };
 };
