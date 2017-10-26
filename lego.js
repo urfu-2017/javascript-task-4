@@ -55,13 +55,15 @@ exports.select = function () {
 
             return resultPerson;
 
-            /*return argumentsArr.reduce(function (acc, key) {
+            /*
+            return argumentsArr.reduce(function (acc, key) {
                 if (key in person) {
                     acc[key] = person[key];
                 }
 
                 return acc;
-            }, resultPerson);*/
+            }, resultPerson);
+            */
 
         });
     };
