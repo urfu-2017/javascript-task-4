@@ -12,20 +12,23 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
+exports.query = function (collection, ...functions) {
     const functionPriority = {
-        'sortByProperty': 0, 'filterInByProperty': 1,
-        'selectByFields': 2, 'limitCount': 3, 'formatProperty': 4,
-        'orFilters': 0, 'andFilters': 0
+        'sortByProperty': 0,
+        'filterInByProperty': 1,
+        'selectByFields': 2,
+        'limitCount': 3,
+        'formatProperty': 4,
+        'orFilters': 0,
+        'andFilters': 0
     };
     const collectionCopy = JSON.parse(JSON.stringify(collection));
     if (arguments.length === 1) {
         return collectionCopy;
     }
-    const functionQueue = Array.from(arguments).slice(1);
-    functionQueue.sort((a, b) => functionPriority[a.name] - functionPriority[b.name]);
+    functions.sort((a, b) => functionPriority[a.name] - functionPriority[b.name]);
 
-    return functionQueue.reduce((result, func) => func(result), collectionCopy);
+    return functions.reduce((result, func) => func(result), collectionCopy);
 };
 
 /**
@@ -73,20 +76,17 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortByProperty(collection) {
+        const sign = (order !== 'desc') ? 1 : -1;
         collection.sort((a, b) => {
             if (a[property] > b[property]) {
-                return 1;
+                return sign;
             }
             if (a[property] < b[property]) {
-                return -1;
+                return -sign;
             }
 
             return 0;
         });
-        if (order === 'desc') {
-
-            return collection.reverse();
-        }
 
         return collection;
     };
@@ -100,12 +100,11 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function formatProperty(collection) {
-        return collection.reduce((result, friend) => {
+        return collection.map(function (friend) {
             friend[property] = formatter(friend[property]);
-            result.push(friend);
 
-            return result;
-        }, []);
+            return friend;
+        });
     };
 };
 
