@@ -110,7 +110,7 @@ exports.format = function (property, formatter) {
 exports.limit = function (count) {
     return function limit(collection) {
         let resultCollection = [];
-        count = count < 0 ? collection.length + count : count;
+        count = Math.min(collection.length, count);
         for (let i = 0; i < count; i++) {
             resultCollection.push(collection[i]);
         }
