@@ -97,7 +97,7 @@ function applyOperands(data, operands) { // eslint-disable-line complexity
 exports.query = function (collection) {
     var operands = parseArguments(arguments);
     var data = [];
-    data = Object.assign(data, collection);
+    data = JSON.parse(JSON.stringify(collection));
     data = applyOperands(data, operands);
 
     return data;
