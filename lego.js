@@ -47,15 +47,7 @@ exports.select = function () {
     return function select(collection) {
         return collection.map(person => {
             let resultPerson = {};
-            argumentsArr.forEach(function (key) {
-                if (key in person) {
-                    resultPerson[key] = person[key];
-                }
-            });
 
-            return resultPerson;
-
-            /*
             return argumentsArr.reduce(function (acc, key) {
                 if (key in person) {
                     acc[key] = person[key];
@@ -63,8 +55,6 @@ exports.select = function () {
 
                 return acc;
             }, resultPerson);
-            */
-
         });
     };
 };
@@ -120,13 +110,7 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     return function limit(collection) {
-        let resultCollection = [];
-        count = Math.min(collection.length, count);
-        for (let i = 0; i < count; i++) {
-            resultCollection.push(collection[i]);
-        }
-
-        return resultCollection;
+        return collection.slice(0, count);
     };
 };
 
