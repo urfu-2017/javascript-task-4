@@ -49,9 +49,10 @@ exports.select = function () {
             let resultPerson = {};
 
             return argumentsArr.reduce(function (acc, key) {
-                acc[key] = person[key];
-
-                return acc;
+                if (key in person) {
+                    acc[key] = person[key];
+                }
+                    return acc;
             }, resultPerson);
         });
     };
