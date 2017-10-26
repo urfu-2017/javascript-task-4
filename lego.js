@@ -9,7 +9,7 @@ exports.isStar = true;
 const PRIORITY_LIST = {
     select: 1,
     filterIn: 0,
-    sortBy: 1,
+    sortBy: 0,
     format: 2,
     limit: 2,
     or: 0,
@@ -28,6 +28,7 @@ exports.query = function (collection, ...functions) {
         return PRIORITY_LIST[a.name] - PRIORITY_LIST[b.name];
     });
     for (const element of functions) {
+        console.info(element);
         copyCollection = element(copyCollection);
     }
 
@@ -93,8 +94,11 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        collection.forEach((element) => {
-            element[property] = formatter(element[property]);
+        return collection.map((element) => {
+            var elementq = Object.assign({}, element);
+            elementq[property] = formatter(element[property]);
+
+            return elementq;
         });
     };
 };
