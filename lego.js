@@ -79,8 +79,9 @@ exports.filterIn = function (property, values) {
  * @returns {function}
  */
 exports.sortBy = function (property, order) {
-    if (order === undefined)
-        order = "asc";
+    if (order === undefined) {
+        order = 'asc';
+    }
 
     return function sortBy(collection) {
         return collection.sort((a, b) => {
