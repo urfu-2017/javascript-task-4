@@ -75,7 +75,7 @@ exports.sortBy = (property, order) => function sortBy(array) {
  * @returns {Function}
  */
 exports.format = (property, formatter) => function format(array) {
-    return array.map(value => Object.assign(value, { [property]: formatter(value[property]) }));
+    return array.map(value => Object.assign({}, value, { [property]: formatter(value[property]) }));
 };
 
 /**
