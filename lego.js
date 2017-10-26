@@ -28,7 +28,7 @@ exports.query = function (collection, ...functions) {
 /**
  * Выбор полей
  * @params {...String}
- * @returns {Array}
+ * @returns {Function}
  */
 exports.select = function (...fields) {
     return function select(collection) {
@@ -49,7 +49,7 @@ exports.select = function (...fields) {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
- * @returns {Array}
+ * @returns {Function}
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
@@ -63,11 +63,11 @@ exports.filterIn = function (property, values) {
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- * @returns {Array}
+ * @returns {Function}
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort((a, b) => {
+        return collection.slice().sort((a, b) => {
             let method = (order === 'asc') ? 1 : -1;
             if (isNaN(a[property])) {
                 return method * a[property].localeCompare(b[property]);
@@ -82,14 +82,15 @@ exports.sortBy = function (property, order) {
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
- * @returns {Array}
+ * @returns {Function}
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(contact => {
-            contact[property] = formatter(contact[property]);
+            let changedContact = Object.assign({}, contact);
+            changedContact[property] = formatter(contact[property]);
 
-            return contact;
+            return changedContact;
         });
     };
 };
@@ -97,7 +98,7 @@ exports.format = function (property, formatter) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
- * @returns {Array}
+ * @returns {Function}
  */
 exports.limit = function (count) {
     return function limit(collection) {
@@ -115,7 +116,7 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {Array}
+     * @returns {Function}
      */
     exports.or = function (...functions) {
         return function or(collection) {
@@ -135,7 +136,7 @@ if (exports.isStar) {
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {Array}
+     * @returns {Function}
      */
     exports.and = function (...functions) {
         return function and(collection) {
@@ -152,13 +153,13 @@ function isUniqueContact(contact, index, collection) {
 
 function compareFunctions(a, b) {
     const PRIORITY = {
-        and: 1,
+        and: 0,
         or: 1,
-        filterIn: 1,
-        sortBy: 1,
-        select: 2,
-        limit: 3,
-        format: 3
+        filterIn: 2,
+        sortBy: 2,
+        select: 3,
+        limit: 4,
+        format: 4
     };
 
     return PRIORITY[a.name] - PRIORITY[b.name];
