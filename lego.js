@@ -39,6 +39,7 @@ exports.select = function (...selectedProperties) {
     return function select(collection) {
         return collection.map(item => {
             return selectedProperties
+                .filter(property => item.hasOwnProperty(property))
                 .reduce((result, property) => {
                     result[property] = item[property];
 
