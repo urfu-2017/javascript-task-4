@@ -38,7 +38,7 @@ describe('lego.filterIn', function () {
 
 
 describe('lego.format', function () {
-    it('должен вернуть только указанные записи', function () {
+    it('должен вернуть отформатированные записи', function () {
         let collection = [
             { a: 'NON-FORMATTED', c: 1 },
             { a: 'NON-FORMATTED', b: 2 },
