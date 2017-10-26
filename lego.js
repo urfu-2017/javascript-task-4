@@ -40,7 +40,9 @@ exports.select = function () {
         return collection.map(function (constructElem) {
             var selectGraph = {};
             for (var key of keys) {
-                selectGraph[key] = constructElem[key];
+                if (key in constructElem) {
+                    selectGraph[key] = constructElem[key];
+                }
             }
             // console.info(selectGraph);
 
