@@ -27,17 +27,13 @@ exports.query = (array, ...queries) => queries.sort((first, second) => {
  * @returns {Function}
  */
 exports.select = (...properties) => function select(array) {
-    return array.map(value => {
-        const newvalue = {};
+    return array.map(value => properties.reduce((newValue, property) => {
+        if (value.hasOwnProperty(property)) {
+            newValue[property] = value[property];
+        }
 
-        properties.forEach(property => {
-            if (property in value) {
-                newvalue[property] = value[property];
-            }
-        });
-
-        return newvalue;
-    });
+        return newValue;
+    }, {}));
 };
 
 /**
