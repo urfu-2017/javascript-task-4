@@ -83,7 +83,7 @@ exports.sortBy = function (property, order) {
         let colCopy = copyCollection(collection);
 
         return colCopy.sort((firstPerson, secondPerson) =>
-            reverse * (firstPerson[property] > secondPerson[property]) ? 1 : -1);
+            reverse * ((firstPerson[property] > secondPerson[property]) ? 1 : -1));
     };
 };
 
