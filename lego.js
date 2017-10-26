@@ -14,12 +14,9 @@ exports.isStar = false;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = (array, ...queries) => queries.sort((first, second) => {
-    const orderOne = PRECEDENCE[first.name];
-    const orderTwo = PRECEDENCE[second.name];
-
-    return orderOne - orderTwo;
-}).reduce((result, selector) => selector(result), array);
+exports.query = (array, ...queries) => queries
+    .sort((first, second) => PRECEDENCE[first.name] - PRECEDENCE[second.name])
+    .reduce((result, selector) => selector(result), array);
 
 /**
  * Выбор полей
@@ -82,24 +79,3 @@ exports.format = (property, formatter) => function format(array) {
 exports.limit = (count) => function limit(array) {
     return array.slice(0, count);
 };
-
-if (exports.isStar) {
-
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.or = function () {
-        return;
-    };
-
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.and = function () {
-        return;
-    };
-}
