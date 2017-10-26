@@ -20,9 +20,9 @@ exports.query = function (collection, ...q) {
     q = q.sort(function (a, b) {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
-    for (let i = 0; i < q.length; i++) {
-        potatoCollection = q[i](potatoCollection);
-    }
+    q.forEach(f => {
+        potatoCollection = f(potatoCollection);
+    });
 
     return potatoCollection;
 };
@@ -84,10 +84,7 @@ exports.sortBy = function (property, order) {
                 return collator.compare(a[property], b[property]);
             });
         } else if (order === 'desc') {
-            collection.reverse().sort(function (a, b) {
-
-                return collator.compare(a[property], b[property]);
-            });
+            return collection.reverse();
         }
 
         return potatoCollection;
