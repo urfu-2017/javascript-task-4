@@ -1,7 +1,9 @@
 'use strict';
 const functionWeight = {
+    and: 0,
+    or: 0,
     filterIn: 1,
-    SortBy: 1,
+    sortBy: 1,
     select: 2,
     limit: 3,
     format: 3
@@ -11,7 +13,7 @@ const functionWeight = {
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -21,10 +23,10 @@ exports.isStar = false;
  */
 
 exports.query = function (collection, ...values) {
-    var ar = (Array.from(values));
     var clone = JSON.parse(JSON.stringify(collection));
-    const methods = ar
+    var methods = values
         .sort((a, b) => functionWeight[a.name] - functionWeight[b.name]);
+    console.info(methods);
 
     return methods.reduce((result, func) =>
         func(result), clone);
@@ -75,10 +77,10 @@ exports.filterIn = function (property, values) {
  */
 
 exports.sortBy = function (property, order) {
-    return function SortBy(collection) {
+    return function sortBy(collection) {
         return collection.sort(function (firstValue, secondValue) {
-            let typeAsc = firstValue[property] > secondValue[property];
-            let typeDesc = firstValue[property] <= secondValue[property];
+            var typeAsc = firstValue[property] > secondValue[property];
+            var typeDesc = firstValue[property] <= secondValue[property];
 
             return (order === 'asc') ? typeAsc : typeDesc;
         }
@@ -124,8 +126,14 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.or = function () {
-        return;
+
+    exports.or = function (...values) {
+        return function or(collection) {
+            var answersArray = values.reduce((result, func) =>
+                result.concat(func(collection)), []);
+
+            return collection.filter(person => answersArray.includes(person));
+        };
     };
 
     /**
@@ -133,8 +141,15 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.and = function () {
-        return;
+
+
+    exports.and = function (...values) {
+
+        return function and(collection) {
+
+            return values.reduce((result, func) => func(result),
+                collection);
+        };
     };
 }
 
