@@ -85,6 +85,21 @@ var bestFriends = lego.query(
     lego.limit(4)
 );
 
+/*
+console.log(lego.limit(4)(friends));
+console.log('-------------------');
+console.log(lego.format('gender', function (value) {return value[0];})(friends));
+
+console.log('-------------------');
+console.log(lego.sortBy('name', 'asc')(friends));
+
+console.log('-------------------');
+console.log(lego.filterIn('name', ['Сэм', 'Эмили'])(friends));
+
+console.log('-------------------');
+console.log(lego.select('name', 'gender', 'email')(friends));
+*/
+
 console.info(bestFriends);
 
 /* Выведет:
@@ -121,13 +136,15 @@ if (lego.isStar) {
 
     console.info(bestFriends);
 
-    /* Выведет
-     [
-         { name: 'Сэм' },
-         { name: 'Эмили' },
-         { name: 'Мэт' },
-         { name: 'Шерри' },
-         { name: 'Стелла' }
-     ]
-     */
+
 }
+
+/* Выведет
+ [
+ { name: 'Сэм' },
+ { name: 'Эмили' },
+ { name: 'Мэт' },
+ { name: 'Шерри' },
+ { name: 'Стелла' }
+ ]
+ */
