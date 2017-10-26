@@ -144,6 +144,9 @@ function filter1(data, args) {
     var out = [];
     var property = args[0];
     var values = args[1];
+    if (values.length === 0) {
+        return data;
+    }
     for (var q = 0; q < data.length; q++) {
         if (values.includes(data[q][property])) {
             out.push(data[q]);
