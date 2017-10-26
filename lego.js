@@ -24,12 +24,12 @@ exports.query = (array, ...queries) => queries
  * @returns {Function}
  */
 exports.select = (...properties) => function select(array) {
-    return array.map(value => properties.reduce((newValue, property) => {
-        if (value.hasOwnProperty(property)) {
-            newValue[property] = value[property];
+    return array.map(value => properties.reduce((result, property) => {
+        if (value[property] !== undefined) {
+            result[property] = value[property];
         }
 
-        return newValue;
+        return result;
     }, {}));
 };
 
