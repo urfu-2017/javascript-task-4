@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -120,28 +120,42 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.or = function () {
-        return;
+        let conditions = [].slice.call(arguments);
+
+        return function _or(collection) {
+            return collection.filter(friend => conditions
+                .some(condition => condition(collection).includes(friend)));
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.and = function () {
-        return;
+        let conditions = [].slice.call(arguments);
+
+        return function _and(collection) {
+            return conditions.reduce((_collection, condition) =>
+                condition(_collection), collection);
+        };
     };
 }
 
 function handlingOfFunctions(functions) {
     let prioritiesOfFunctions = {
-        '_filterIn': 1,
-        '_sortBy': 2,
-        '_select': 3,
-        '_format': 4,
-        '_limit': 5
+        '_and': 1,
+        '_or': 2,
+        '_filterIn': 3,
+        '_sortBy': 4,
+        '_select': 5,
+        '_format': 6,
+        '_limit': 7
     };
     functions.sort(function (a, b) {
         return prioritiesOfFunctions[a.name] - prioritiesOfFunctions[b.name];
