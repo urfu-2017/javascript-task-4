@@ -60,7 +60,7 @@ exports.sortBy = (property, order) => function sortBy(array) {
             return 0;
         }
 
-        return (value1[property] > value2[property] ? 1 : -1) * direct;
+        return value1[property] > value2[property] ? direct : -direct;
     });
 };
 
