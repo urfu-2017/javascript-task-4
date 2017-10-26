@@ -104,20 +104,28 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @param {...Function} filters – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function () {
-        return collection => collection;
+    exports.or = function (...filters) {
+        return function or(collection) {
+            return collection.filter(item =>
+                filters.some(filter => filter([item]).length > 0)
+            );
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @param {...Function} filters – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function () {
-        return collection => collection;
+    exports.and = function (...filters) {
+        return function or(collection) {
+            return collection.filter(item =>
+                filters.every(filter => filter([item]).length > 0)
+            );
+        };
     };
 }
