@@ -18,28 +18,27 @@ exports.isStar = true;
 
 /**
  * Запрос к коллекции
- * @param {Array} collection
+ * @param {Object[]} collection
  * @params {...Function} – Функции для запроса
- * @returns {Array}
+ * @returns {Object[]}
  */
 exports.query = function (collection, ...functions) {
     const collectionCopy = collection.map(item => Object.assign({}, item));
 
     return functions
-        .sort((one, other) => FUNCTIONS_PRIORITIES[one.name] - FUNCTIONS_PRIORITIES[other.name])
+        .sort((a, b) => FUNCTIONS_PRIORITIES[a.name] - FUNCTIONS_PRIORITIES[b.name])
         .reduce((result, func) => func(result), collectionCopy);
 };
 
 /**
  * Выбор полей
  * @params {...String}
- * @returns {[Object]}
+ * @returns {function(Object[])}
  */
 exports.select = function (...selectedProperties) {
     return function select(collection) {
         return collection.map(item => {
             return selectedProperties
-                .filter(property => item.hasOwnProperty(property))
                 .reduce((result, property) => {
                     result[property] = item[property];
 
@@ -53,7 +52,7 @@ exports.select = function (...selectedProperties) {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
- * @returns {[Object]}
+ * @returns {function(Object[])}
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
@@ -65,18 +64,18 @@ exports.filterIn = function (property, values) {
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- * @returns {[Object]}
+ * @returns {function(Object[])}
  */
 exports.sortBy = function (property, order) {
-    order = order === 'asc' ? 1 : -1;
+    const anOrder = order === 'asc' ? 1 : -1;
 
     return function sortBy(collection) {
-        return collection.sort((one, other) => {
-            if (one[property] === other[property]) {
+        return collection.sort((a, b) => {
+            if (a[property] === b[property]) {
                 return 0;
             }
 
-            return one[property] > other[property] ? order : -order;
+            return a[property] > b[property] ? anOrder : -anOrder;
         });
     };
 };
@@ -85,7 +84,7 @@ exports.sortBy = function (property, order) {
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
- * @returns {[Object]}
+ * @returns {function(Object[])}
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
@@ -102,7 +101,7 @@ exports.format = function (property, formatter) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
- * @returns {[Object]}
+ * @returns {function(Object[])}
  */
 exports.limit = function (count) {
     return function limit(collection) {
@@ -116,13 +115,13 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {[Object]} - asd
+     * @returns {function(Object[])}
      */
     exports.or = function (...filterFunctions) {
         return function or(collection) {
             return collection
                 .filter(item => filterFunctions
-                    .some(filterFunction => filterFunction([item]).length > 0)
+                    .some(filterFunction => filterFunction([item]).length)
                 );
         };
     };
@@ -131,13 +130,13 @@ if (exports.isStar) {
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
-     * @returns {[Object]} - collection
+     * @returns {function(Object[])}
      */
     exports.and = function (...filterFunctions) {
         return function and(collection) {
             return collection
                 .filter(item => filterFunctions
-                    .every(filterFunction => filterFunction([item]).length > 0)
+                    .every(filterFunction => filterFunction([item]).length)
                 );
         };
     };
