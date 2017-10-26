@@ -87,10 +87,11 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(contact => {
-            let changedContact = Object.assign({}, contact);
-            changedContact[property] = formatter(contact[property]);
+            if (contact.hasOwnProperty(property)) {
+                contact[property] = formatter(contact[property]);
+            }
 
-            return changedContact;
+            return contact;
         });
     };
 };
