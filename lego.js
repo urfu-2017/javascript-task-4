@@ -118,12 +118,9 @@ exports.limit = function (count) {
     console.info(count);
 
     return function (collection) {
-        let potatoCollection = [];
-        for (let i = 0; i < count; i++) {
-            potatoCollection.push(collection[i]);
-        }
+        let potatoCollection = collection;
 
-        return potatoCollection;
+        return potatoCollection.slice(0, count);
     };
 };
 
@@ -147,5 +144,3 @@ if (exports.isStar) {
         return;
     };
 }
-
-
