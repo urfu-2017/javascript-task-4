@@ -44,13 +44,14 @@ exports.select = function (...values) {
         var clone = Object.assign([], collection);
 
         return clone.map(function (data) {
-            Object.keys(data).forEach(function (key) {
-                if (!values.includes(key)) {
-                    delete data[key];
+            var result = {};
+            values.forEach(function (key) {
+                if (Object.keys(data).includes(key)) {
+                    result[key] = data[key];
                 }
             });
 
-            return data;
+            return result;
         });
     };
 
@@ -152,4 +153,5 @@ if (exports.isStar) {
         };
     };
 }
+
 
