@@ -1,6 +1,6 @@
 'use strict';
 
-exports.isStar = true;
+exports.isStar = false;
 
 let result = [];
 exports.query = function (collection, ...methods) {
