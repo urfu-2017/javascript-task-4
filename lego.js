@@ -80,8 +80,9 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         const reverse = (order === 'asc') ? 1 : -1;
+        let collectionCopy = copyCollection(collection);
 
-        return collection.sort((firstPerson, secondPerson) =>
+        return collectionCopy.sort((firstPerson, secondPerson) =>
             reverse * (firstPerson[property] > secondPerson[property]) ? 1 : -1);
     };
 };
