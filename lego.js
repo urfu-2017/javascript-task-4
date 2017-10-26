@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -110,6 +110,7 @@ exports.format = function (property, formatter) {
 exports.limit = function (count) {
     return function limit(collection) {
         let resultCollection = [];
+        count = count < 0 ? collection.length + count : count;
         for (let i = 0; i < count; i++) {
             resultCollection.push(collection[i]);
         }
