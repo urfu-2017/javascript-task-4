@@ -208,7 +208,11 @@ function format1(data, args) {
     var property = args[0];
     var func = args[1];
     for (var u = 0; u < data.length; u++) {
-        data[u][property] = func(data[u][property]);
+        if (data[u][property]) {
+            data[u][property] = func(data[u][property]);
+        } else {
+            continue;
+        }
     }
 
     return data;
