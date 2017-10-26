@@ -82,7 +82,7 @@ exports.sortBy = function (property, order) {
         const reverse = (order === 'asc') ? 1 : -1;
 
         return collection.sort((firstPerson, secondPerson) =>
-            reverse * (firstPerson[property] - secondPerson[property]));
+            reverse * (firstPerson[property] > secondPerson[property]) ? 1 : -1);
     };
 };
 
