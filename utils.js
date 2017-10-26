@@ -10,7 +10,9 @@ exports.fromEntriesToObject = function (entries) {
 };
 
 exports.containsIn = function (args) {
-    return ([key]) => Array.from(args).indexOf(key) >= 0;
+    return function ([key]) {
+        return Array.from(args).indexOf(key) >= 0;
+    };
 };
 
 exports.mutateCollection = function (collection, mutator) {
@@ -19,6 +21,7 @@ exports.mutateCollection = function (collection, mutator) {
         .map(mutator)
         .map(exports.fromEntriesToObject));
 };
+
 
 exports.sorted = function (collection, comparator) {
     let result = collection.slice(0);

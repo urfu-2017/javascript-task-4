@@ -7,15 +7,26 @@ const { containsIn, mutateCollection, sorted } = require('./utils');
  */
 exports.isStar = true;
 
+function getPriority(func) {
+    const ACTIONS_PRIORITY = [
+        'sortBy', 'filterIn', 'select', 'format', 'limit'
+    ];
+
+    return ACTIONS_PRIORITY.indexOf(func.name);
+}
+
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @param {...Function} args – Функции для запроса
+ * @param {...Function} actions – Функции для запроса
  * @returns {Array}
  */
-// eslint-disable-next-line no-unused-vars
-exports.query = function (collection, ...args) {
-    return collection;
+
+exports.query = function (collection, ...actions) {
+
+    return sorted(actions, (x, b) => getPriority(x) > getPriority(b))
+        .reduce((value, func) => func(value), collection.slice());
 };
 
 /**
@@ -24,8 +35,10 @@ exports.query = function (collection, ...args) {
  * @returns {Function}
  */
 exports.select = function (...args) {
-    return collection => mutateCollection(collection,
-        entries => entries.filter(containsIn(args)));
+    return function select(collection) {
+        return mutateCollection(collection,
+            entries => entries.filter(containsIn(args)));
+    };
 };
 
 /**
@@ -36,8 +49,10 @@ exports.select = function (...args) {
  */
 exports.filterIn = function (property, values) {
 
-    return collection => Array.from(collection
-        .filter(x => containsIn(values)([x[property]])));
+    return function filterIn(collection) {
+        return Array.from(collection
+            .filter(x => containsIn(values)([x[property]])));
+    };
 };
 
 /**
@@ -51,7 +66,9 @@ exports.sortBy = function (property, order) {
         ? (x, y) => x[property] > y[property]
         : (x, y) => x[property] < y[property];
 
-    return collection => sorted(collection, comparator);
+    return function sortBy(collection) {
+        return sorted(collection, comparator);
+    };
 };
 
 /**
@@ -62,11 +79,13 @@ exports.sortBy = function (property, order) {
  */
 
 exports.format = function (property, formatter) {
-    return collection => mutateCollection(collection,
-        entries => entries.map(
-            ([key, value]) => key === property
-                ? [key, formatter(value)]
-                : [key, value]));
+    return function format(collection) {
+        return mutateCollection(collection,
+            entries => entries.map(
+                ([key, value]) => key === property
+                    ? [key, formatter(value)]
+                    : [key, value]));
+    };
 };
 
 /**
@@ -75,7 +94,9 @@ exports.format = function (property, formatter) {
  * @returns {Function}
  */
 exports.limit = function (count) {
-    return collection => collection.slice(0, count);
+    return function limit(collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
@@ -84,17 +105,19 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.or = function () {
-        return;
+        return collection => collection;
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.and = function () {
-        return;
+        return collection => collection;
     };
 }
