@@ -120,8 +120,12 @@ if (exports.isStar) {
     exports.or = function (...functions) {
         return function or(collection) {
             return functions
-                .reduce((currentFunction, nextFunction) => {
-                    return currentFunction(collection).concat(nextFunction(collection));
+                .reduce((current, nextFunction) => {
+                    if (typeof current === 'function') {
+                        return current(collection).concat(nextFunction(collection));
+                    }
+
+                    return current.concat(nextFunction(collection));
                 })
                 .filter(isUniqueContact);
         };
