@@ -67,7 +67,7 @@ exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter(
             elem => {
-                return values.indexOf(elem[property]) !== -1;
+                return values.includes(elem[property]);
             });
     };
 };
@@ -79,6 +79,9 @@ exports.filterIn = function (property, values) {
  * @returns {function}
  */
 exports.sortBy = function (property, order) {
+    if (order === undefined)
+        order = "asc";
+
     return function sortBy(collection) {
         return collection.sort((a, b) => {
             return (a[property] > b[property]) && (order === 'asc') ||
@@ -130,7 +133,7 @@ if (exports.isStar) {
             return collection.filter(
                 elem => functions.some(
                     f => {
-                        return f(collection).indexOf(elem) !== -1;
+                        return f(collection).includes(elem);
                     }));
         };
     };
@@ -148,7 +151,7 @@ if (exports.isStar) {
             return collection.filter(
                 elem => functions.every(
                     f => {
-                        return f(collection).indexOf(elem) !== -1;
+                        return f(collection).includes(elem);
                     }));
         };
     };
