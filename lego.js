@@ -29,11 +29,8 @@ exports.query = function (collection) {
     collectionFunction.sort(function (f1, f2) {
         return queryFunction.indexOf(f1.name) - queryFunction.indexOf(f2.name);
     });
-    console.info(collectionFunction);
     collectionFunction.forEach (function (func) {
-        console.info(func);
         collection = func(collection);
-        console.info(func, collection);
     });
 
     return collection;
