@@ -69,7 +69,7 @@ function selector(args, current) {
 }
 
 exports.filterIn = function (property, values) {
-    return function (collection) {
+    return function filterIn(collection) {
         return collection.filter(function (current) {
             return values.some(function (val) {
                 return val === current[property];
@@ -85,10 +85,10 @@ exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort(function (a, b) {
             if (order === 'asc') {
-                return a[property] - b[property];
+                return a[property] > b[property];
             }
 
-            return b[property] - a[property];
+            return b[property] > a[property];
         });
     };
 };
