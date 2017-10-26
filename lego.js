@@ -64,6 +64,10 @@ exports.sortBy = (property, order) => function sortBy(array) {
     const direct = order === 'asc' ? 1 : -1;
 
     return array.slice().sort((value1, value2) => {
+        if (value1[property] === value2[property]) {
+            return 0;
+        }
+
         return (value1[property] > value2[property] ? 1 : -1) * direct;
     });
 };
