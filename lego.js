@@ -18,8 +18,6 @@ function createProperties(properties, friend) {
     for (let property of properties) {
         if (Object.keys(friend).indexOf(property) !== -1) {
             result[property] = friend[property];
-        } else {
-            return {};
         }
     }
 
