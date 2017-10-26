@@ -10,6 +10,10 @@ const PRIORITIES = {
     limit: 5
 };
 
+function copyCollection(collection) {
+    return collection.map(element => Object.assign({}, element));
+}
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -17,13 +21,9 @@ const PRIORITIES = {
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let copiedCollection = collection.map(element => {
-
-        return Object.assign({}, element);
-    });
-    functions = functions.sort((firstFunc, secondFunc) => {
-        return PRIORITIES[firstFunc.name] - PRIORITIES[secondFunc.name];
-    });
+    let copiedCollection = copyCollection(collection);
+    functions = functions.sort((firstFunc, secondFunc) =>
+        PRIORITIES[firstFunc.name] - PRIORITIES[secondFunc.name]);
     functions.forEach(func => {
         copiedCollection = func(copiedCollection);
     });
@@ -38,15 +38,14 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...properties) {
     return function select(collection) {
-        return collection.map(element => {
-            return properties
-                .filter(property => Object.keys(element).includes(property))
+        return collection.map(element =>
+            properties
                 .reduce((result, property) => {
                     result[property] = element[property];
 
                     return result;
-                }, {});
-        });
+                }, {})
+        );
     };
 };
 
@@ -71,15 +70,11 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let copiedCollection = collection.map(element => {
+        let copiedCollection = copyCollection(collection);
 
-            return Object.assign({}, element);
-        });
-
-        return copiedCollection.sort((first, second) => {
-            return (order === 'asc') ? first[property] > second[property]
-                : first[property] < second[property];
-        });
+        return copiedCollection.sort((first, second) =>
+            (order === 'asc') ? first[property] > second[property]
+                : first[property] < second[property]);
     };
 };
 
