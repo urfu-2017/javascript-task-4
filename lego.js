@@ -1,70 +1,90 @@
 'use strict';
 
+const PRECEDENCE = { filterIn: 1, sortBy: 2, select: 3, limit: 4, format: 5 };
+
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
- * @param {Array} collection
+ * @param {Array} array
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    return collection;
-};
+exports.query = (array, ...queries) => queries.sort((first, second) => {
+    const orderOne = PRECEDENCE[first.name];
+    const orderTwo = PRECEDENCE[second.name];
+
+    if (!orderOne || !orderTwo) {
+        throw new TypeError('Syntax error');
+    }
+
+    return orderOne - orderTwo;
+}).reduce((result, selector) => selector(result), array);
 
 /**
  * Выбор полей
  * @params {...String}
+ * @returns {Function}
  */
-exports.select = function () {
-    return;
+exports.select = (...properties) => function select(array) {
+    return array.map(value => {
+        const newvalue = {};
+
+        properties.forEach(property => {
+            if (property in value) {
+                newvalue[property] = value[property];
+            }
+        });
+
+        return newvalue;
+    });
 };
 
 /**
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
+ * @returns {Function}
  */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
-
-    return;
+exports.filterIn = (property, values) => function filterIn(array) {
+    return array.filter(value => values.includes(value[property]));
 };
 
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Function}
  */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
+exports.sortBy = (property, order) => function sortBy(array) {
+    const direct = order === 'asc' ? 1 : -1;
 
-    return;
+    return array.slice().sort((value1, value2) => {
+        return (value1[property] > value2[property] ? 1 : -1) * direct;
+    });
 };
 
 /**
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
+ * @returns {Function}
  */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
-    return;
+exports.format = (property, formatter) => function format(array) {
+    return array.map(value => Object.assign(value, { [property]: formatter(value[property]) }));
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
+ * @returns {Function}
  */
-exports.limit = function (count) {
-    console.info(count);
-
-    return;
+exports.limit = (count) => function limit(array) {
+    return array.slice(0, count);
 };
 
 if (exports.isStar) {
