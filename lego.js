@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -16,15 +16,10 @@ exports.query = function (collection, ...actions) {
     let newCollection = [...collection];
     let formattingActions = actions.filter(action => action.isFormat);
     let limitingActions = actions.filter(action => action.isLimit);
-    actions = actions.filter(action => !action.isFormat && ! action.isLimit);
+    actions = actions.filter(action => !action.isFormat && ! action.isLimit)
+        .concat(formattingActions, limitingActions);
     for (let action of actions) {
         newCollection = action(newCollection);
-    }
-    for (let formattingAction of formattingActions) {
-        newCollection = formattingAction(newCollection);
-    }
-    for (let limitingAction of limitingActions) {
-        newCollection = limitingAction(newCollection);
     }
 
     return newCollection;
@@ -148,13 +143,7 @@ if (exports.isStar) {
      */
     exports.or = function (...actions) {
         return function (collection) {
-            let newCollection = [].concat(...actions.map(action => action(collection)));
-            let compareList = newCollection.map(person => JSON.stringify(person));
-            newCollection = newCollection.filter((person, pos) => {
-                return compareList.indexOf(JSON.stringify(person)) === pos;
-            });
-
-            return newCollection;
+            return collection.filter(person => actions.some(action => action([person]).length));
         };
     };
 
