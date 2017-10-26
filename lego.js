@@ -37,7 +37,7 @@ exports.select = function (...q) {
         return collection.map(el =>{
             let newObjOfFriends = {};
             q.forEach((field) => {
-                if (el[field]) {
+                if (el[field] !== undefined) {
                     newObjOfFriends[field] = el[field];
                 }
             });
@@ -77,27 +77,16 @@ exports.sortBy = function (property, order) {
 
     return function (collection) {
         let potatoCollection = collection;
+        let collator = new Intl.Collator();
         if (order === 'asc') {
             collection.sort(function (a, b) {
-                if (a[property] < b[property]) {
-                    return -1;
-                }
-                if (a[property] > b[property]) {
-                    return 1;
-                }
 
-                return 0;
+                return collator.compare(a[property], b[property]);
             });
         } else if (order === 'desc') {
             collection.reverse().sort(function (a, b) {
-                if (a.property < b.property) {
-                    return -1;
-                }
-                if (a.property > b.property) {
-                    return 1;
-                }
 
-                return 0;
+                return collator.compare(a[property], b[property]);
             });
         }
 
