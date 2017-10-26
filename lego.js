@@ -14,6 +14,10 @@ let FUNC_PRIORITIES = {
     filterIn: 0
 };
 
+function copyCollerction(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -22,7 +26,7 @@ let FUNC_PRIORITIES = {
  */
 exports.query = function (collection, ...functions) {
     return functions.sort((a, b) => FUNC_PRIORITIES[a.name] - FUNC_PRIORITIES[b.name])
-        .reduce((value, func) => func(value), collection);
+        .reduce((value, func) => func(value), copyCollerction(collection));
 };
 
 /**
