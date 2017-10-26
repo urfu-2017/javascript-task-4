@@ -1,4 +1,5 @@
 'use strict';
+// Пошевелим хрюнделя в первый раз
 const { containsIn, mutateCollection, sorted } = require('./utils');
 
 /**
