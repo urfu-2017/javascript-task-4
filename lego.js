@@ -16,8 +16,8 @@ let EXPR_ORDER = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
  * @returns {Array}
  */
 exports.query = function (collection, ...q) {
-    let potatoCollection = collection;
-    q = q.sort(function (a, b) {
+    let potatoCollection = collection.slice();
+    q.sort(function (a, b) {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
     q.forEach(f => {
@@ -55,7 +55,7 @@ exports.select = function (...q) {
 exports.filterIn = function (property, values) {
     console.info(property, values);
 
-    return function (collection) {
+    return function filterIn(collection) {
         let potatoColection = [];
         for (let i = 0; i < collection.length; i++) {
             if (values.indexOf(collection[i][property]) !== -1) {
@@ -75,7 +75,7 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     console.info(property, order);
 
-    return function (collection) {
+    return function sortBy(collection) {
         let potatoCollection = collection;
         let funcSort = (property === 'age')
             ? (a, b) => {
@@ -117,7 +117,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     console.info(property, formatter);
 
-    return function (collection) {
+    return function format(collection) {
         let potatoCollection = [];
         for (let i = 0; i < collection.length; i++) {
             potatoCollection.push(collection[i]);
@@ -132,15 +132,10 @@ exports.format = function (property, formatter) {
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  */
-exports.limit = function (count) {
-    console.info(count);
-
-    return function (collection) {
-        let potatoCollection = collection;
-
-        return potatoCollection.slice(0, count);
+exports.limit = (count) =>
+    function limit(collection) {
+        return collection.slice(0, count);
     };
-};
 
 if (exports.isStar) {
 
