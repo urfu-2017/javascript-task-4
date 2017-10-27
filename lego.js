@@ -45,7 +45,7 @@ exports.query = function (collection, ...funcs) {
 exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
         if (commonFields === undefined) {
-            return coll;
+            return [];
         }
 
         return coll.map(function (item) {
