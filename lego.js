@@ -44,7 +44,6 @@ exports.query = function (collection, ...functions) {
         .sort(function (func1, func2) {
             return priority.indexOf(func1.name) - priority.indexOf(func2.name);
         });
-    let a = 0;
 
     for (let func in sortedFuncs) {
         if (sortedFuncs.hasOwnProperty(func)) {
