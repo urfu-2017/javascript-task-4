@@ -71,10 +71,6 @@ exports.select = function select(...fields) {
  */
 exports.filterIn = function (property, values) {
     let fltr = (coll) => {
-        if (values === undefined) {
-            return coll;
-        }
-
         return coll.filter((friend) => {
             return values.some((prop) => {
                 if (friend.hasOwnProperty(property)) {
@@ -123,7 +119,7 @@ exports.format = function (property, formatter) {
     let frm = (coll) => {
         return coll.map((friend) => {
             if (friend.hasOwnProperty(property)) {
-                let value = friend[property];
+                let value = JSON.parse(JSON.stringify(friend[property]));
                 friend[property] = formatter(value);
             }
 
