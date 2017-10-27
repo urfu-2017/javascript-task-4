@@ -94,7 +94,7 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     let srt = (coll) => {
         let sorted = coll.sort((fr1, fr2) => {
-            return fr1[property] - fr2[property];
+            return fr1[property] > fr2[property];
         });
         if (order === 'asc') {
             return sorted;
