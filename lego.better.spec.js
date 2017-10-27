@@ -101,5 +101,21 @@ describe('lego.sortBy', function () {
             { a: 1 }
         ]);
     });
+
+
+    it('должен вернуть отсортированный по возрастанию список строк', function () {
+        let stringsCollection = [
+            { a: 'abc' },
+            { a: 'xyz' },
+            { a: 'def' }
+        ];
+
+        let actual = sortBy('a', 'asc')(stringsCollection);
+        assert.deepStrictEqual(actual, [
+            { a: 'abc' },
+            { a: 'def' },
+            { a: 'xyz' }
+        ]);
+    });
 });
 
