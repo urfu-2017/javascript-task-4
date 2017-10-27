@@ -21,7 +21,7 @@ exports.query = function (collection, ...functions) {
             return typeof item === 'object';
         })
         .reduce(function (acc, cur) {
-            return acc.concat(cur.args);
+            return acc.concat(cur.args || []);
         }, []);
 
     for (let funcName of functions) {
@@ -35,6 +35,7 @@ exports.query = function (collection, ...functions) {
                         .select(...attrsFromSelect)
                         .func
                 );
+            break;
         }
     }
 
@@ -121,7 +122,9 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(function (friend) {
-            friend[property] = formatter(friend[property]);
+            if (friend.hasOwnProperty(property)) {
+                friend[property] = formatter(friend[property]);
+            }
 
             return friend;
         });
