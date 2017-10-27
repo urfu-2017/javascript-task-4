@@ -5,27 +5,24 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 let EXPR_ORDER = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @param q
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
 exports.query = function (collection, ...q) {
-    let potatoCollection = collection.map(friend => {
-        return Object.assign({}, friend);
-    });
-    q.sort((a, b) => {
+    let potatoCollection = collection.map(friend => Object.assign({}, friend));
+    q.sort(function (a, b) {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
-    for (let f of q) {
+    q.forEach(f => {
         potatoCollection = f(potatoCollection);
-    }
+    });
 
     return potatoCollection;
 };
@@ -37,13 +34,13 @@ exports.query = function (collection, ...q) {
  */
 exports.select = function (...q) {
     return function select(collection) {
-        return collection.map(el => {
+        return collection.map(el =>{
             let newObjOfFriends = {};
-            for (let field of q) {
+            q.forEach((field) => {
                 if (el[field] !== undefined) {
                     newObjOfFriends[field] = el[field];
                 }
-            }
+            });
 
             return newObjOfFriends;
         });
@@ -58,7 +55,7 @@ exports.select = function (...q) {
 exports.filterIn = function (property, values) {
     console.info(property, values);
 
-    return collection => {
+    return function filterIn(collection) {
         let potatoColection = [];
         for (let i = 0; i < collection.length; i++) {
             if (values.indexOf(collection[i][property]) !== -1) {
@@ -78,7 +75,7 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     console.info(property, order);
 
-    return collection => {
+    return function sortBy(collection) {
         let potatoCollection = collection;
         let funcSort = (property === 'age')
             ? (a, b) => {
@@ -92,12 +89,12 @@ exports.sortBy = function (property, order) {
                 return 0;
             }
             : (a, b) => a.localeCompare(b);
-        potatoCollection.sort((a, b) => {
-            return funcSort(a[property], b[property]);
-        });
+        potatoCollection.sort((a, b) => funcSort(a[property], b[property]));
+        if (order === 'desc') {
+            return potatoCollection.reverse();
+        }
 
-        return order === 'desc' ? potatoCollection.reverse() : potatoCollection;
-
+        return potatoCollection;
     };
 
 };
@@ -110,7 +107,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     console.info(property, formatter);
 
-    return collection => {
+    return function format(collection) {
         let potatoCollection = [];
         for (let i = 0; i < collection.length; i++) {
             potatoCollection.push(collection[i]);
@@ -126,7 +123,7 @@ exports.format = function (property, formatter) {
  * @param {Number} count – Максимальное количество элементов
  */
 exports.limit = (count) =>
-    collection => {
+    function limit(collection) {
         return collection.slice(0, count);
     };
 
@@ -138,11 +135,9 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      */
     exports.or = (...q) =>
-        collection => {
+        function or(collection) {
             return collection.filter(item =>
-                q.some(func => {
-                    return func([item]).length > 0;
-                }));
+                q.some(func => func([item]).length > 0));
         };
 
 
@@ -152,12 +147,8 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      */
     exports.and = (...q) =>
-        collection => {
-            return collection.filter(item => {
-                return q.every(func => {
-                    return func([item]).length > 0;
-                });
-            });
+        function and(collection) {
+            return collection.filter(item =>
+                q.every(func => func([item]).length > 0));
         };
-
 }
