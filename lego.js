@@ -43,7 +43,7 @@ exports.query = function (collection, ...functions) {
         return typeof item === 'function';
     })
         .sort(function (func1, func2) {
-            return priority.indexOf(func1.name) - priority.indexOf(func2.name);
+            return priority.indexOf(func1.name) > priority.indexOf(func2.name);
         });
 
     for (let func in sortedFuncs) {
