@@ -79,10 +79,10 @@ var bestFriends = lego.query(
     // А пол выведем только первой буквой для удобства
     lego.format('gender', function (value) {
         return value[0];
-    }),
+    })
 
     // Настоящих друзей не может быть много
-    lego.limit(4)
+
 );
 
 console.info(bestFriends);
