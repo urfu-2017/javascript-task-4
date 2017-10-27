@@ -12,17 +12,20 @@ let EXPR_ORDER = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'
 /**
  * Запрос к коллекции
  * @param {Array} collection
+ * @param q
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
 exports.query = function (collection, ...q) {
-    let potatoCollection = collection.map(friend => Object.assign({}, friend));
-    q.sort(function (a, b) {
+    let potatoCollection = collection.map(friend => {
+        return Object.assign({}, friend);
+    });
+    q.sort((a, b) => {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
-    q.forEach(f => {
+    for (const f of q) {
         potatoCollection = f(potatoCollection);
-    });
+    }
 
     return potatoCollection;
 };
@@ -34,13 +37,13 @@ exports.query = function (collection, ...q) {
  */
 exports.select = function (...q) {
     return function select(collection) {
-        return collection.map(el =>{
+        return collection.map(el => {
             let newObjOfFriends = {};
-            q.forEach((field) => {
+            for (const field of q) {
                 if (el[field] !== undefined) {
                     newObjOfFriends[field] = el[field];
                 }
-            });
+            }
 
             return newObjOfFriends;
         });
@@ -55,7 +58,7 @@ exports.select = function (...q) {
 exports.filterIn = function (property, values) {
     console.info(property, values);
 
-    return function filterIn(collection) {
+    return collection => {
         let potatoColection = [];
         for (let i = 0; i < collection.length; i++) {
             if (values.indexOf(collection[i][property]) !== -1) {
@@ -75,7 +78,7 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     console.info(property, order);
 
-    return function sortBy(collection) {
+    return collection => {
         let potatoCollection = collection;
         let funcSort = (property === 'age')
             ? (a, b) => {
@@ -89,12 +92,12 @@ exports.sortBy = function (property, order) {
                 return 0;
             }
             : (a, b) => a.localeCompare(b);
-        potatoCollection.sort((a, b) => funcSort(a[property], b[property]));
-        if (order === 'desc') {
-            return potatoCollection.reverse();
-        }
+        potatoCollection.sort((a, b) => {
+            return funcSort(a[property], b[property]);
+        });
 
-        return potatoCollection;
+        return order === 'desc' ? potatoCollection.reverse() : potatoCollection;
+
     };
 
 };
@@ -107,7 +110,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     console.info(property, formatter);
 
-    return function format(collection) {
+    return collection => {
         let potatoCollection = [];
         for (let i = 0; i < collection.length; i++) {
             potatoCollection.push(collection[i]);
@@ -123,7 +126,7 @@ exports.format = function (property, formatter) {
  * @param {Number} count – Максимальное количество элементов
  */
 exports.limit = (count) =>
-    function limit(collection) {
+    collection => {
         return collection.slice(0, count);
     };
 
@@ -135,9 +138,11 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      */
     exports.or = (...q) =>
-        function or(collection) {
+        collection => {
             return collection.filter(item =>
-                q.some(func => func([item]).length > 0));
+                q.some(func => {
+                    return func([item]).length > 0;
+                }));
         };
 
 
@@ -147,8 +152,12 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      */
     exports.and = (...q) =>
-        function and(collection) {
-            return collection.filter(item =>
-                q.every(func => func([item]).length > 0));
+        collection => {
+            return collection.filter(item => {
+                return q.every(func => {
+                    return func([item]).length > 0;
+                });
+            });
         };
+
 }
