@@ -40,7 +40,9 @@ exports.select = function (...attrs) {
         return collection.map(function (friend) {
             let newObj = {};
             attrs.forEach(function (attr) {
-                newObj[attr] = friend[attr];
+                if (friend.hasOwnProperty(attr)) {
+                    newObj[attr] = friend[attr];
+                }
             });
 
             return newObj;
