@@ -7,7 +7,7 @@
  */
 exports.isStar = false;
 
-let EXPR_ORDER = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
+let EXPR_ORDER = ['format', 'limit', 'select', 'filterIn', 'sortBy'];
 
 /**
  * Запрос к коллекции
@@ -16,7 +16,7 @@ let EXPR_ORDER = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
  * @returns {Array}
  */
 exports.query = function (collection, ...q) {
-    let potatoCollection = collection.slice();
+    let potatoCollection = collection.map(friend => Object.assign({}, friend));
     q.sort(function (a, b) {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
@@ -96,17 +96,7 @@ exports.sortBy = function (property, order) {
 
         return potatoCollection;
     };
-    //     let collator = new Intl.Collator();
-    //     if (order === 'asc') {
-    //         collection.sort(function (a, b) {
-    //             return collator.compare(a[property], b[property]);
-    //         });
-    //     } else if (order === 'desc') {
-    //         return collection.reverse();
-    //     }
-    //
-    //     return potatoCollection;
-    // };
+
 };
 
 /**
@@ -144,16 +134,21 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.or = function () {
-        return;
-    };
+    exports.or = (...q) =>
+        function or(collection) {
+            return collection.filter(item =>
+                q.some(func => func([item]).length > 0));
+        };
+
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.and = function () {
-        return;
-    };
+    exports.and = (...q) =>
+        function and(collection) {
+            return collection.filter(item =>
+                q.every(func => func([item]).length > 0));
+        };
 }
