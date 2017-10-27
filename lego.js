@@ -16,27 +16,34 @@ let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
  */
 exports.query = function (collection, ...functions) {
     let copiedCollection = JSON.parse(JSON.stringify(collection));
-
     let sortedFuncs = functions.sort(function (func1, func2) {
         return priority.indexOf(func1.name) - priority.indexOf(func2.name);
     });
+    let attrsFromSelect = sortedFuncs.reduce(function (acc, cur) {
+        if (typeof(cur) === 'object' && cur.func.name === 'select') {
+            return acc.concat(cur.args);
+        }
+
+        return acc.concat([]);
+    }, []);
 
     for (let func in sortedFuncs) {
-        if (functions.hasOwnProperty(func)) {
+        if (typeof(functions[func]) === 'function' && functions.hasOwnProperty(func)) {
             copiedCollection = functions[func](copiedCollection);
         }
     }
+    let selectObj = exports.select(...attrsFromSelect);
 
-    return copiedCollection;
+    return selectObj.func(copiedCollection);
 };
 
 /**
  * Выбор полей
  * @params {...String}
- * @returns {Function}
+ * @returns {Object}
  */
 exports.select = function (...attrs) {
-    return function select(collection) {
+    function select(collection) {
         return collection.map(function (friend) {
             let newObj = {};
             attrs.forEach(function (attr) {
@@ -47,7 +54,9 @@ exports.select = function (...attrs) {
 
             return newObj;
         });
-    };
+    }
+
+    return { func: select, args: attrs };
 };
 
 /**
