@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
+let priority = ['filterIn', 'sortBy', 'and', 'or', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
@@ -24,7 +24,7 @@ exports.query = function (collection, ...functions) {
             return acc.concat(cur.args);
         }, []);
 
-    functions.push(this.select(...attrsFromSelect).func);
+    functions.push(exports.select(...attrsFromSelect).func);
 
     let sortedFuncs = functions.filter(function (item) {
         return typeof item === 'function';
