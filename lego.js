@@ -1,4 +1,4 @@
-/* eslint-disable valid-jsdoc */
+/* eslint-disable valid-jsdoc,linebreak-style */
 'use strict';
 
 /**
@@ -77,18 +77,36 @@ exports.sortBy = function (property, order) {
 
     return function (collection) {
         let potatoCollection = collection;
-        let collator = new Intl.Collator();
-        if (order === 'asc') {
-            collection.sort(function (a, b) {
+        let funcSort = (property === 'age')
+            ? (a, b) => {
+                if (a > b) {
+                    return 1;
+                }
+                if (a < b) {
+                    return -1;
+                }
 
-                return collator.compare(a[property], b[property]);
-            });
-        } else if (order === 'desc') {
-            return collection.reverse();
+                return 0;
+            }
+            : (a, b) => a.localeCompare(b);
+        potatoCollection.sort((a, b) => funcSort(a[property], b[property]));
+        if (order === 'desc') {
+            return potatoCollection.reverse();
         }
 
         return potatoCollection;
     };
+    //     let collator = new Intl.Collator();
+    //     if (order === 'asc') {
+    //         collection.sort(function (a, b) {
+    //             return collator.compare(a[property], b[property]);
+    //         });
+    //     } else if (order === 'desc') {
+    //         return collection.reverse();
+    //     }
+    //
+    //     return potatoCollection;
+    // };
 };
 
 /**
