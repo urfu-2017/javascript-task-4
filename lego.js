@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
+let priority = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
