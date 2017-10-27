@@ -14,13 +14,13 @@ exports.isStar = true;
  */
 
 const FUNC_PRIORITIES = {
-    select: 1,
-    format: 2,
-    filterIn: 0,
-    sortBy: 0,
-    or: 0,
-    and: 0,
-    limit: 2
+    select: 5,
+    format: 6,
+    filterIn: 4,
+    sortBy: 3,
+    or: 2,
+    and: 1,
+    limit: 7
 };
 
 function copyCollection(collection) {
@@ -42,13 +42,13 @@ exports.query = function (collection) {
  * @returns {function}
  */
 exports.select = function () {
-    const argumentsArr = [].slice.call(arguments);
+    const properties = [].slice.call(arguments);
 
     return function select(collection) {
         return collection.map(person => {
             let resultPerson = {};
 
-            return argumentsArr.reduce(function (acc, key) {
+            return properties.reduce(function (acc, key) {
                 if (key in person) {
                     acc[key] = person[key];
                 }
