@@ -28,8 +28,8 @@ function copyCollection(collection) {
 }
 
 exports.query = function (collection) {
-    let functions = [].slice.call(arguments, 1);
-    let collectionCopy = copyCollection(collection);
+    const functions = [].slice.call(arguments, 1);
+    const collectionCopy = copyCollection(collection);
 
     return functions.sort((first, second) =>
         FUNC_PRIORITIES[first.name] - FUNC_PRIORITIES[second.name])
@@ -46,7 +46,7 @@ exports.select = function () {
 
     return function select(collection) {
         return collection.map(person => {
-            let resultPerson = {};
+            const resultPerson = {};
 
             return properties.reduce(function (acc, key) {
                 if (key in person) {
@@ -131,6 +131,8 @@ if (exports.isStar) {
                 functions.forEach(func => {
                     if (func([person]).length > 0) {
                         isGoodPerson = true;
+
+                        return;
                     }
                 });
 
@@ -154,6 +156,8 @@ if (exports.isStar) {
                 functions.forEach(func => {
                     if (func([person]).length <= 0) {
                         isGoodPerson = false;
+
+                        return;
                     }
                 });
 
