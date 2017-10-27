@@ -28,7 +28,7 @@ exports.query = function (collection, ...functions) {
         if (typeof funcName === 'function') {
             continue;
         }
-        if (funcName.func.name === 'select') {
+        if (funcName.func.name === 'select' && funcName.args.length !== 0) {
             functions
                 .push(
                     exports
