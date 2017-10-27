@@ -39,8 +39,6 @@ exports.query = function (collection, ...functions) {
         }
     }
 
-    let a = 0;
-
     return copiedCollection;
 };
 
