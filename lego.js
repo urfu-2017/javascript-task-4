@@ -24,22 +24,20 @@ function getActionPriority(func) {
  * @returns {Array}
  */
 
-exports.query = function (collection, ...actions) {
-    return getSortedCopy(actions, (x, y) => getActionPriority(x) - getActionPriority(y))
+exports.query = (collection, ...actions) =>
+    getSortedCopy(actions, (x, y) => getActionPriority(x) - getActionPriority(y))
         .reduce((value, func) => func(value), collection.slice());
-};
 
 /**
  * Выбор полей
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function (...args) {
-    return function select(collection) {
+exports.select = (...args) =>
+    function select(collection) {
         return mutateCollection(collection,
             entries => entries.filter(containsIn(args)));
     };
-};
 
 /**
  * Фильтрация поля по массиву значений
@@ -47,13 +45,11 @@ exports.select = function (...args) {
  * @param {Array} values – Доступные значения
  * @returns {Function}
  */
-exports.filterIn = function (property, values) {
-
-    return function filterIn(collection) {
+exports.filterIn = (property, values) =>
+    function filterIn(collection) {
         return Array.from(collection
             .filter(x => containsIn(values)([x[property]])));
     };
-};
 
 /**
  * Сортировка коллекции по полю
@@ -61,7 +57,7 @@ exports.filterIn = function (property, values) {
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  * @returns {Function}
  */
-exports.sortBy = function (property, order) {
+exports.sortBy = (property, order) => {
     const comparator = (x, y) => {
         if (x[property] > y[property]) {
             return order === 'asc' ? 1 : -1;
@@ -85,26 +81,24 @@ exports.sortBy = function (property, order) {
  * @returns {Function}
  */
 
-exports.format = function (property, formatter) {
-    return function format(collection) {
+exports.format = (property, formatter) =>
+    function format(collection) {
         return mutateCollection(collection,
             entries => entries.map(
                 ([key, value]) => key === property
                     ? [key, formatter(value)]
                     : [key, value]));
     };
-};
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  * @returns {Function}
  */
-exports.limit = function (count) {
-    return function limit(collection) {
+exports.limit = count =>
+    function limit(collection) {
         return collection.slice(0, count);
     };
-};
 
 if (exports.isStar) {
 
@@ -114,13 +108,12 @@ if (exports.isStar) {
      * @param {...Function} filters – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function (...filters) {
-        return function or(collection) {
+    exports.or = (...filters) =>
+        function or(collection) {
             return collection.filter(item =>
                 filters.some(filter => filter([item]).length > 0)
             );
         };
-    };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
@@ -128,11 +121,10 @@ if (exports.isStar) {
      * @param {...Function} filters – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function (...filters) {
-        return function or(collection) {
+    exports.and = (...filters) =>
+        function or(collection) {
             return collection.filter(item =>
                 filters.every(filter => filter([item]).length > 0)
             );
         };
-    };
 }
