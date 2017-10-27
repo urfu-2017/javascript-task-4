@@ -1,6 +1,6 @@
 'use strict';
 // Пошевелим хрюнделя в первый раз
-const { containsIn, mutateCollection, sorted } = require('./utils');
+const { containsIn, mutateCollection, getSortedCopy } = require('./utils');
 
 /**
  * Сделано задание на звездочку
@@ -25,7 +25,7 @@ function getActionPriority(func) {
  */
 
 exports.query = function (collection, ...actions) {
-    return sorted(actions, (x, y) => getActionPriority(x) - getActionPriority(y))
+    return getSortedCopy(actions, (x, y) => getActionPriority(x) - getActionPriority(y))
         .reduce((value, func) => func(value), collection.slice());
 };
 
@@ -63,11 +63,11 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     let comparator = order === 'asc'
-        ? (x, y) => x[property] > y[property]
-        : (x, y) => x[property] < y[property];
+        ? (x, y) => x[property] - y[property]
+        : (x, y) => y[property] - x[property];
 
     return function sortBy(collection) {
-        return sorted(collection, comparator);
+        return getSortedCopy(collection, comparator);
     };
 };
 

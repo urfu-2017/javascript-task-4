@@ -23,7 +23,7 @@ exports.mutateCollection = function (collection, mutator) {
 };
 
 
-exports.sorted = function (collection, comparator) {
+exports.getSortedCopy = function (collection, comparator) {
     return collection
         .slice()
         .sort(comparator);
