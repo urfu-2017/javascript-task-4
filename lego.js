@@ -28,7 +28,7 @@ exports.query = function (collection, ...functions) {
         if (typeof funcName === 'function') {
             continue;
         }
-        if (funcName.func.name === 'select' && funcName.args.length !== 0) {
+        if (funcName.func.name === 'select') {
             functions
                 .push(
                     exports
@@ -61,6 +61,10 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...attrs) {
     function select(collection) {
+        if (attrs.length === 0) {
+            return [];
+        }
+
         return collection.map(function (friend) {
             let newObj = {};
             attrs.forEach(function (attr) {
