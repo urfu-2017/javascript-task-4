@@ -23,7 +23,7 @@ exports.query = function (collection, ...q) {
     q.sort((a, b) => {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
-    for (const f of q) {
+    for (let f of q) {
         potatoCollection = f(potatoCollection);
     }
 
@@ -39,7 +39,7 @@ exports.select = function (...q) {
     return function select(collection) {
         return collection.map(el => {
             let newObjOfFriends = {};
-            for (const field of q) {
+            for (let field of q) {
                 if (el[field] !== undefined) {
                     newObjOfFriends[field] = el[field];
                 }
