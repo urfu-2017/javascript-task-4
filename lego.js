@@ -23,7 +23,7 @@ exports.query = function (collection, ...functions) {
         'andFilters': 0
     };
     const collectionCopy = JSON.parse(JSON.stringify(collection));
-    if (arguments.length === 1) {
+    if (functions.length === 0) {
         return collectionCopy;
     }
     functions.sort((a, b) => functionPriority[a.name] - functionPriority[b.name]);
@@ -38,18 +38,18 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...fields) {
     return function selectByFields(collection) {
-        return collection.reduce((friends, friend) => {
-            const man = Object.keys(friend).reduce((person, field) => {
-                if (fields.includes(field)) {
-                    person[field] = friend[field];
-                }
+        return collection.map(friend => {
+            const suitableFields = fields.filter(function (field) {
+                return Object.keys(friend).includes(field);
+            });
+            const person = {};
+            suitableFields.forEach(function (field) {
+                person[field] = friend[field];
+            });
 
-                return person;
-            }, {});
-            friends.push(man);
+            return person;
 
-            return friends;
-        }, []);
+        });
     };
 };
 
