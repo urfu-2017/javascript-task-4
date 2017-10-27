@@ -5,9 +5,9 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
-let EXPR_ORDER = ['filterIn', 'sortBy', 'select', 'format', 'limit'];
+let EXPR_ORDER = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
