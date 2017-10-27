@@ -62,9 +62,16 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    let comparator = order === 'asc'
-        ? (x, y) => x[property] - y[property]
-        : (x, y) => y[property] - x[property];
+    const comparator = (x, y) => {
+        if (x[property] > y[property]) {
+            return order === 'asc' ? 1 : -1;
+        }
+        if (x[property] < y[property]) {
+            return order === 'asc' ? -1 : 1;
+        }
+
+        return 0;
+    };
 
     return function sortBy(collection) {
         return getSortedCopy(collection, comparator);
