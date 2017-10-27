@@ -76,7 +76,7 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
 
     return function sortBy(collection) {
-        let potatoCollection = collection;
+        let potatoCollection = collection.slice();
         let funcSort = (property === 'age')
             ? (a, b) => {
                 if (a > b) {
