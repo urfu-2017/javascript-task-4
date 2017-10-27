@@ -7,7 +7,7 @@
  */
 exports.isStar = false;
 
-let EXPR_ORDER = ['format', 'limit', 'select', 'filterIn', 'sortBy'];
+let EXPR_ORDER = ['filterIn', 'sortBy', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
@@ -76,7 +76,7 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
 
     return function sortBy(collection) {
-        let potatoCollection = collection.slice();
+        let potatoCollection = collection;
         let funcSort = (property === 'age')
             ? (a, b) => {
                 if (a > b) {
