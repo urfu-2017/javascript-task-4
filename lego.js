@@ -24,7 +24,7 @@ exports.query = function (collection, ...functions) {
             return acc.concat(cur.args);
         }, []);
 
-    functions.push(exports.select(...attrsFromSelect).func);
+    functions.push(this.select(...attrsFromSelect).func);
 
     let sortedFuncs = functions.filter(function (item) {
         return typeof item === 'function';
@@ -38,6 +38,8 @@ exports.query = function (collection, ...functions) {
             copiedCollection = sortedFuncs[func](copiedCollection);
         }
     }
+
+    let a = 0;
 
     return copiedCollection;
 };
