@@ -29,8 +29,9 @@ function copyCollection(collection) {
 exports.query = function (collection, ...params) {
     let collectionCopy = copyCollection(collection);
 
-    return params.sort((a, b) => FUNCTION_ORDER[a.name] - FUNCTION_ORDER[b.name])
-        .reduce((col, func) => func(col), collectionCopy);
+    return params
+        .sort((a, b) => FUNCTION_ORDER[a.name] - FUNCTION_ORDER[b.name])
+        .reduce((acc, func) => func(acc), collectionCopy);
 };
 
 /**
@@ -41,14 +42,13 @@ exports.query = function (collection, ...params) {
 exports.select = (...params) => {
     return function select(collection) {
         return collection.map(person => {
-            let tempPerson = {};
-            params.forEach(prop => {
-                if (prop in person) {
-                    tempPerson[prop] = person[prop];
+            return params.reduce((newPerson, prop) => {
+                if (person.hasOwnProperty(prop)) {
+                    newPerson[prop] = person[prop];
                 }
-            });
 
-            return tempPerson;
+                return newPerson;
+            }, {});
         });
     };
 };
@@ -61,10 +61,8 @@ exports.select = (...params) => {
  */
 exports.filterIn = (property, values) => {
     return function filterIn(collection) {
-
-        return collection.filter(person =>
-            values.some(item => person[property] === item)
-        );
+        return collection
+            .filter(person => values.some(item => person[property] === item));
     };
 };
 
@@ -76,12 +74,13 @@ exports.filterIn = (property, values) => {
  */
 exports.sortBy = (property, order) => {
     return function sortBy(collection) {
+        const sortOrder = order === 'asc' ? 1 : -1;
+
         return collection.sort((a, b) => {
-            let compare = order === 'asc' ? 1 : -1;
             if (a[property] > b[property]) {
-                return compare;
+                return sortOrder;
             } else if (a[property] < b[property]) {
-                return -1 * compare;
+                return -1 * sortOrder;
             }
 
             return 0;
@@ -98,7 +97,7 @@ exports.sortBy = (property, order) => {
 exports.format = (property, formatter) => {
     return function format(collection) {
         return collection.map(person => {
-            if (property in person) {
+            if (person.hasOwnProperty(property)) {
                 person[property] = formatter(person[property]);
             }
 
@@ -112,7 +111,7 @@ exports.format = (property, formatter) => {
  * @param {Number} count – Максимальное количество элементов
  * @returns {Function}
  */
-exports.limit = (count) => {
+exports.limit = count => {
     return function limit(collection) {
         return count > 0 ? collection.slice(0, count) : [];
     };
@@ -126,10 +125,10 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = (...commands) => {
+    exports.or = (...filters) => {
         return function or(collection) {
             return collection.filter(person => {
-                return commands.some(rule => rule(collection).includes(person));
+                return filters.some(rule => Boolean(rule([person]).length));
             });
         };
     };
@@ -140,10 +139,10 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = (...commands) => {
+    exports.and = (...filters) => {
         return function and(collection) {
             return collection.filter(person => {
-                return commands.every(rule => rule(collection).includes(person));
+                return filters.every(rule => Boolean(rule([person]).length));
             });
         };
     };
