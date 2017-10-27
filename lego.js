@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let priority = ['filterIn', 'sortBy', 'and', 'or', 'select', 'format', 'limit'];
+let priority = ['filterIn', 'sortBy', 'and', 'or', 'select', 'limit', 'format'];
 
 /**
  * Запрос к коллекции
@@ -24,7 +24,19 @@ exports.query = function (collection, ...functions) {
             return acc.concat(cur.args);
         }, []);
 
-    functions.push(exports.select(...attrsFromSelect).func);
+    for (let funcName of functions) {
+        if (typeof funcName === 'function') {
+            continue;
+        }
+        if (funcName.func.name === 'select') {
+            functions
+                .push(
+                    exports
+                        .select(...attrsFromSelect)
+                        .func
+                );
+        }
+    }
 
     let sortedFuncs = functions.filter(function (item) {
         return typeof item === 'function';
@@ -32,6 +44,7 @@ exports.query = function (collection, ...functions) {
         .sort(function (func1, func2) {
             return priority.indexOf(func1.name) - priority.indexOf(func2.name);
         });
+    let a = 0;
 
     for (let func in sortedFuncs) {
         if (sortedFuncs.hasOwnProperty(func)) {
