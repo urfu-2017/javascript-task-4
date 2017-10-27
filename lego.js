@@ -8,7 +8,7 @@ const { containsIn, mutateCollection, sorted } = require('./utils');
  */
 exports.isStar = true;
 
-function getPriority(func) {
+function getActionPriority(func) {
     const ACTIONS_PRIORITY = [
         'sortBy', 'filterIn', 'select', 'format', 'limit'
     ];
@@ -25,8 +25,7 @@ function getPriority(func) {
  */
 
 exports.query = function (collection, ...actions) {
-
-    return sorted(actions, (x, b) => getPriority(x) > getPriority(b))
+    return sorted(actions, (x, y) => getActionPriority(x) - getActionPriority(y))
         .reduce((value, func) => func(value), collection.slice());
 };
 

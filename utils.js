@@ -24,9 +24,8 @@ exports.mutateCollection = function (collection, mutator) {
 
 
 exports.sorted = function (collection, comparator) {
-    let result = collection.slice(0);
-    result.sort(comparator);
-
-    return result;
+    return collection
+        .slice()
+        .sort(comparator);
 };
 
