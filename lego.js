@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 let priority = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
