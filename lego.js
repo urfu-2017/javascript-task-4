@@ -16,25 +16,30 @@ let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
  */
 exports.query = function (collection, ...functions) {
     let copiedCollection = JSON.parse(JSON.stringify(collection));
-    let sortedFuncs = functions.sort(function (func1, func2) {
-        return priority.indexOf(func1.name) - priority.indexOf(func2.name);
-    });
-    let attrsFromSelect = sortedFuncs.reduce(function (acc, cur) {
-        if (typeof(cur) === 'object' && cur.func.name === 'select') {
+    let attrsFromSelect = functions
+        .filter(function (item) {
+            return typeof item === 'object';
+        })
+        .reduce(function (acc, cur) {
             return acc.concat(cur.args);
-        }
+        }, []);
 
-        return acc.concat([]);
-    }, []);
+    functions.push(exports.select(...attrsFromSelect).func);
+
+    let sortedFuncs = functions.filter(function (item) {
+        return typeof item === 'function';
+    })
+        .sort(function (func1, func2) {
+            return priority.indexOf(func1.name) - priority.indexOf(func2.name);
+        });
 
     for (let func in sortedFuncs) {
-        if (typeof(functions[func]) === 'function' && functions.hasOwnProperty(func)) {
-            copiedCollection = functions[func](copiedCollection);
+        if (sortedFuncs.hasOwnProperty(func)) {
+            copiedCollection = sortedFuncs[func](copiedCollection);
         }
     }
-    let selectObj = exports.select(...attrsFromSelect);
 
-    return selectObj.func(copiedCollection);
+    return copiedCollection;
 };
 
 /**
