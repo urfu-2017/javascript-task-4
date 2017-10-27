@@ -147,12 +147,12 @@ function filter1(data, args) {
     if (values.length === 0) {
         return data;
     }
-    for (var q = 0; q < data.length; q++) {
-        if (property === 'age') {
-            for (var a = 0; a < values.length; a++) {
-                values[a] = parseInt(values[a]);
-            }
+    if (property === 'age') {
+        for (var a = 0; a < values.length; a++) {
+            values[a] = parseInt(values[a]);
         }
+    }
+    for (var q = 0; q < data.length; q++) {
         if (values.includes(data[q][property])) {
             out.push(data[q]);
         }
