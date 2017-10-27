@@ -43,7 +43,7 @@ exports.select = function () {
     return function select(collection) {
         return collection.map(function (current) {
 
-            current = selector(args, current);
+            current = getRightCollection(args, current);
 
             return current;
         });
@@ -51,21 +51,19 @@ exports.select = function () {
     };
 };
 
-function selector(args, current) {
-    var ob = {};
+function getRightCollection(args, current) {
+    var singleObject = {};
     var keys = Object.keys(current);
 
     args.map(function (argument) {
-        return keys.forEach(function (elem) {
-            if (elem === argument) {
-                ob[argument] = current[elem];
+        return keys.forEach(function (key) {
+            if (key === argument) {
+                singleObject[argument] = current[key];
             }
         });
-
     });
 
-
-    return ob;
+    return singleObject;
 }
 
 exports.filterIn = function (property, values) {
