@@ -87,12 +87,6 @@ exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter (function (friend) {
 
-            /*
-            if (!friend.hasOwnProperty(property)) {
-                return collection;
-            }
-            */
-
             return values.some(function (value) {
                 return value === friend[property];
             });
@@ -109,15 +103,20 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         let sorted = collection
+
+            /*
             .filter(function (friend) {
                 return friend.hasOwnProperty(property);
             })
+            */
             .sort(function (a, b) {
                 return a[property] > b[property];
             });
+
+        /*
         if (sorted.length === 0) {
             return collection;
-        }
+        }*/
 
         return order === 'asc' ? sorted : sorted.reverse();
     };
