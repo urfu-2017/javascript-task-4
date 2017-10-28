@@ -19,23 +19,11 @@ const copy = function copyColl(coll) {
 exports.query = function (collection, ...funcs) {
     let localCollection = copy(collection);
 
-    let commonParams = funcs.filter((func) => func.name === 'select')
-        .reduce(function (acc, item) {
-            return acc.concat(item.params || []);
-        }, []);
-
-    funcs.filter(function (func) {
-        return 'priority' in func;
+    funcs.sort(function (func1, func2) {
+        return func1.priority > func2.priority;
     })
-        .sort(function (func1, func2) {
-            return func1.priority > func2.priority;
-        })
         .forEach(function (func) {
-            if (func.name === 'select') {
-                localCollection = func.func(localCollection, commonParams);
-            } else {
-                localCollection = func.func(localCollection);
-            }
+            localCollection = func.func(localCollection);
         });
 
     return localCollection;
@@ -47,11 +35,11 @@ exports.query = function (collection, ...funcs) {
  * @returns {Object}
  */
 exports.select = function select(...fields) {
-    let slct = (coll, commonFields) => {
+    let slct = (coll) => {
         return coll.map(function (man) {
             let newItem = {};
-            commonFields.forEach(function (field) {
-                if (field in man) {
+            fields.forEach(function (field) {
+                if (man.hasOwnProperty(field)) {
                     newItem[field] = man[field];
                 }
             });
