@@ -44,10 +44,6 @@ exports.query = function (collection, ...funcs) {
  */
 exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
-        if (commonFields === undefined) {
-            return [];
-        }
-
         return coll.map(function (item) {
             let newItem = {};
             commonFields.forEach((field) => {
@@ -55,10 +51,6 @@ exports.select = function select(...fields) {
                     newItem[field] = item[field];
                 }
             });
-
-            if (newItem.isEmpty) {
-                return item;
-            }
 
             return newItem;
         });
@@ -86,7 +78,7 @@ exports.filterIn = function (property, values) {
         });
     };
 
-    return { name: 'filterIn', priority: 1, func: fltr };
+    return { name: 'filterIn', priority: 2, func: fltr };
 };
 
 /**
@@ -97,20 +89,17 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     let srt = (coll) => {
-        let sorted = coll.sort((fr1, fr2) => {
-            return fr1[property] > fr2[property];
-        });
         if (order === 'asc') {
-            return sorted;
+            return coll.sort((fr1, fr2) => fr1[property] > fr2[property]);
         }
         if (order === 'desc') {
-            return sorted.reverse();
+            return coll.sort((fr1, fr2) => fr1[property] < fr2[property]);
         }
 
         return coll;
     };
 
-    return { name: 'sortBy', priority: 2, func: srt };
+    return { name: 'sortBy', priority: 3, func: srt };
 };
 
 /**
@@ -164,7 +153,7 @@ if (exports.isStar) {
             let resColl = [];
             funcs.forEach(function (func) {
                 let copyColl = JSON.parse(JSON.stringify(coll));
-                copyColl = func.func(copyColl);
+                copyColl = func(copyColl);
                 resColl.push(copyColl);
             });
 
@@ -173,7 +162,7 @@ if (exports.isStar) {
             }, []);
         };
 
-        return { priority: 3, func: orFunc };
+        return { name: 'or', priority: 1, func: orFunc };
     };
 
     /**
@@ -183,14 +172,12 @@ if (exports.isStar) {
      * @returns {Object}
      */
     exports.and = function (...funcs) {
-        let andFunc = (coll) => {
+        return (coll) => {
             funcs.forEach(function (func) {
                 coll = func.func(coll);
             });
 
             return coll;
         };
-
-        return { func: andFunc };
     };
 }
