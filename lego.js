@@ -46,8 +46,8 @@ exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
         return coll
             .filter(function (frined) {
-            return fields.every((field) => frined[field] !== undefined);
-        })
+                return fields.every((field) => frined[field] !== undefined);
+            })
             .map(function (item) {
                 let newItem = {};
                 commonFields.forEach((field) => {
