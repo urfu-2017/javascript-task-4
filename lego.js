@@ -32,7 +32,7 @@ exports.query = function (collection, ...funcs) {
             return func1.priority > func2.priority;
         })
         .forEach(function (func) {
-            if (func.name === 'select' && commonParams.length !== 0) {
+            if (func.name === 'select') {
                 localCollection = func.func(localCollection, commonParams);
             } else {
                 localCollection = func.func(localCollection);
@@ -99,11 +99,12 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     let srt = (coll) => {
         let copyColl = copy(coll);
+        copyColl = copyColl.sort((fr1, fr2) => fr1[property] > fr2[property]);
         if (order === 'asc') {
-            return copyColl.sort((fr1, fr2) => fr1[property] > fr2[property]);
+            return copyColl;
         }
 
-        return copyColl.sort((fr1, fr2) => fr1[property] < fr2[property]);
+        return copyColl.reverse();
     };
 
     return { name: 'sortBy', priority: 4, func: srt };
