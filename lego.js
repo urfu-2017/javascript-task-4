@@ -71,7 +71,7 @@ exports.select = function select(...fields) {
  */
 exports.filterIn = function (property, values) {
     let fltr = (coll) => {
-        let resColl = coll.filter((friend) => {
+        return coll.filter((friend) => {
             return values.some((prop) => {
                 if (property in friend) {
                     return prop === friend[property];
@@ -80,12 +80,6 @@ exports.filterIn = function (property, values) {
                 return false;
             });
         });
-
-        if (resColl.length === 0) {
-            resColl = coll;
-        }
-
-        return resColl;
     };
 
     return { name: 'filterIn', priority: 3, func: fltr };
@@ -159,14 +153,13 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         let orFunc = (coll) => {
-            let resColl = [];
-            funcs.forEach(function (func) {
-                resColl.push(func.func(coll));
-            });
-
-            return resColl.reduce(function (acc, item) {
+            funcs = funcs.map(function (func) {
+                return func.func(coll);
+            }).reduce(function (acc, item) {
                 return acc.concat(item || []);
             }, []);
+
+            return funcs.length === 0 ? coll : funcs;
         };
 
         return { name: 'or', priority: 1, func: orFunc };
@@ -180,11 +173,16 @@ if (exports.isStar) {
      */
     exports.and = function (...funcs) {
         let andFunc = (coll) => {
+            let copyColl = JSON.parse(JSON.stringify(coll));
             funcs.forEach(function (func) {
-                coll = func.func(coll);
+                copyColl = func.func(copyColl);
             });
 
-            return coll;
+            if (copyColl.length === 0) {
+                return coll;
+            }
+
+            return copyColl;
         };
 
         return { name: 'and', priority: 2, func: andFunc };
