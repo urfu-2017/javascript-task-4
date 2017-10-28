@@ -62,9 +62,12 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...attrs) {
     function select(collection) {
-        if (attrs.length === 0) {
-            return [];
-        }
+
+        /*
+            if (attrs.length === 0) {
+                return [];
+            }
+        */
 
         return collection.map(function (friend) {
             let newObj = {};
