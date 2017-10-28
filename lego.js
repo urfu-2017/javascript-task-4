@@ -21,7 +21,7 @@ exports.query = function (collection, ...funcs) {
         }, []);
 
     funcs.filter(function (func) {
-        return func.hasOwnProperty('priority');
+        return 'priority' in func;
     })
         .sort(function (func1, func2) {
             return func1.priority - func2.priority;
@@ -51,7 +51,7 @@ exports.select = function select(...fields) {
         return coll.map(function (item) {
             let newItem = {};
             commonFields.forEach((field) => {
-                if (item.hasOwnProperty(field)) {
+                if (field in item) {
                     newItem[field] = item[field];
                 }
             });
@@ -73,7 +73,7 @@ exports.filterIn = function (property, values) {
     let fltr = (coll) => {
         return coll.filter((friend) => {
             return values.some((prop) => {
-                if (friend.hasOwnProperty(property)) {
+                if (property in friend) {
                     return prop === friend[property];
                 }
 
@@ -118,7 +118,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     let frm = (coll) => {
         return coll.map((friend) => {
-            if (friend.hasOwnProperty(property)) {
+            if (property in friend) {
                 let value = JSON.parse(JSON.stringify(friend[property]));
                 friend[property] = formatter(value);
             }
