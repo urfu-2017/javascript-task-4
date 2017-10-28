@@ -23,6 +23,9 @@ function checkArgs(args) {
             out.push(args[p]);
         }
     }
+    if (out.length === 0) {
+        return -1;
+    }
 
     return out;
 }
@@ -78,9 +81,6 @@ function applyOperands(data, operands) { // eslint-disable-line complexity
     if (operands.select.length > 0) {
         data = select1(data, operands.select);
     }
-    if (operands.select.length === 0) {
-        data = [];
-    }
     if (operands.limit !== undefined) {
         data = limit1(data, operands.limit);
     }
@@ -126,6 +126,10 @@ function helper(data, q, key) {
     return data;
 }
 function select1(data, key) {
+    if (parseInt(key) === -1) {
+        data = [];
+        return data;
+    }
     for (var q = 0; q < data.length; q++) {
         data = helper(data, q, key);
     }
