@@ -90,6 +90,10 @@ exports.select = function (...attrs) {
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter (function (friend) {
+            if (!friend.hasOwnProperty(property)) {
+                return collection;
+            }
+
             return values.some(function (value) {
                 return value === friend[property];
             });
