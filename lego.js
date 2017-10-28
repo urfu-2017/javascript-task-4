@@ -78,6 +78,9 @@ function applyOperands(data, operands) { // eslint-disable-line complexity
     if (operands.select.length > 0) {
         data = select1(data, operands.select);
     }
+    if (operands.select.length === 0) {
+        data = [];
+    }
     if (operands.limit !== undefined) {
         data = limit1(data, operands.limit);
     }
