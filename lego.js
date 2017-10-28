@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let priority = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
+let priority = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
 /**
  * Запрос к коллекции
@@ -66,16 +66,20 @@ exports.select = function (...attrs) {
             return [];
         }
 
-        return collection.map(function (friend) {
-            let newObj = {};
-            attrs.forEach(function (attr) {
-                if (friend.hasOwnProperty(attr)) {
-                    newObj[attr] = friend[attr];
-                }
-            });
+        return collection
+            .filter(function (friend) {
+                return attrs.every((attr) => friend[attr] !== undefined);
+            })
+            .map(function (friend) {
+                let newObj = {};
+                attrs.forEach(function (attr) {
+                    if (friend.hasOwnProperty(attr)) {
+                        newObj[attr] = friend[attr];
+                    }
+                });
 
-            return newObj;
-        });
+                return newObj;
+            });
     }
 
     return { func: select, args: attrs };
