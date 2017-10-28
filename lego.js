@@ -56,7 +56,7 @@ exports.select = function select(...fields) {
         });
     };
 
-    return { name: 'select', priority: 4, func: slct, params: fields };
+    return { name: 'select', priority: 5, func: slct, params: fields };
 };
 
 /**
@@ -78,7 +78,7 @@ exports.filterIn = function (property, values) {
         });
     };
 
-    return { name: 'filterIn', priority: 2, func: fltr };
+    return { name: 'filterIn', priority: 3, func: fltr };
 };
 
 /**
@@ -99,7 +99,7 @@ exports.sortBy = function (property, order) {
         return coll;
     };
 
-    return { name: 'sortBy', priority: 3, func: srt };
+    return { name: 'sortBy', priority: 4, func: srt };
 };
 
 /**
@@ -120,7 +120,7 @@ exports.format = function (property, formatter) {
         });
     };
 
-    return { name: 'format', priority: 5, func: frm };
+    return { name: 'format', priority: 6, func: frm };
 };
 
 /**
@@ -137,7 +137,7 @@ exports.limit = function (count) {
         return coll;
     };
 
-    return { name: 'limit', priority: 6, func: cnt };
+    return { name: 'limit', priority: 7, func: cnt };
 };
 
 if (exports.isStar) {
@@ -153,7 +153,7 @@ if (exports.isStar) {
             let resColl = [];
             funcs.forEach(function (func) {
                 let copyColl = JSON.parse(JSON.stringify(coll));
-                copyColl = func(copyColl);
+                copyColl = func.func(copyColl);
                 resColl.push(copyColl);
             });
 
@@ -172,12 +172,14 @@ if (exports.isStar) {
      * @returns {Object}
      */
     exports.and = function (...funcs) {
-        return (coll) => {
+        let andFunc = (coll) => {
             funcs.forEach(function (func) {
                 coll = func.func(coll);
             });
 
             return coll;
         };
+
+        return { name: 'and', priority: 2, func: andFunc };
     };
 }
