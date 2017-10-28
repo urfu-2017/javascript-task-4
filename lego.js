@@ -22,7 +22,7 @@ const PRIORITIES = {
  */
 exports.query = function (collection) {
     let collectionCopy = JSON.parse(JSON.stringify(collection));
-    let functions = Array.prototype.slice.call(arguments, 1);
+    let functions = Array.from(arguments).slice(1);
     functions.sort((a, b) => PRIORITIES[a.name] > PRIORITIES[b.name] ? -1 : 1);
     for (const func of functions) {
         collectionCopy = func(collectionCopy);
@@ -37,7 +37,7 @@ exports.query = function (collection) {
  * @returns {Array}
  */
 exports.select = function () {
-    let args = Array.prototype.slice.call(arguments);
+    let args = Array.from(arguments);
 
     return function select(collection) {
         collection.forEach((elem) => {
@@ -119,7 +119,7 @@ if (exports.isStar) {
      * @returns {Array}
      */
     exports.or = function () {
-        const filterFunсtions = Array.prototype.slice.call(arguments);
+        const filterFunсtions = Array.from(arguments);
 
         return function or(collection) {
             return collection.filter(
@@ -134,7 +134,7 @@ if (exports.isStar) {
      * @returns {Array}
      */
     exports.and = function () {
-        const filterFunсtions = Array.prototype.slice.call(arguments);
+        const filterFunсtions = Array.from(arguments);
 
         return function and(collection) {
             for (const func of filterFunсtions) {
