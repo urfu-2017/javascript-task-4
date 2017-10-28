@@ -120,11 +120,6 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(function (friend) {
-
-            /*
-            if (friend.hasOwnProperty(property)) {
-                friend[property] = formatter(friend[property]);
-            }*/
             friend[property] = formatter(friend[property]);
 
             return friend;
