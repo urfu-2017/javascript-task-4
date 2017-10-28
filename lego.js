@@ -71,7 +71,7 @@ exports.select = function select(...fields) {
  */
 exports.filterIn = function (property, values) {
     let fltr = (coll) => {
-        return coll.filter((friend) => {
+        let resColl = coll.filter((friend) => {
             return values.some((prop) => {
                 if (property in friend) {
                     return prop === friend[property];
@@ -80,6 +80,12 @@ exports.filterIn = function (property, values) {
                 return false;
             });
         });
+
+        if (resColl.length === 0) {
+            resColl = coll;
+        }
+
+        return resColl;
     };
 
     return { name: 'filterIn', priority: 3, func: fltr };
