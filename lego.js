@@ -51,16 +51,23 @@ exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
         let copyColl = copy(coll);
 
-        return copyColl.map(function (item) {
-            let newItem = {};
-            commonFields.forEach((field) => {
-                if (field in item) {
-                    newItem[field] = item[field];
-                }
+        return copyColl.filter(function (item) {
+            return fields.every(function (field) {
+                return field in item;
             });
+        })
+            .map(function (man) {
+                let newItem = {};
+                for (let field of commonFields) {
+                    if (field in man) {
+                        newItem[field] = man[field];
+                    } else {
+                        break;
+                    }
+                }
 
-            return newItem;
-        });
+                return newItem;
+            });
     };
 
     return { name: 'select', priority: 5, func: slct, params: fields };
