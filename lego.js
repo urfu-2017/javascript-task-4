@@ -4,9 +4,9 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
-let priority = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
+let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
 
 /**
  * Запрос к коллекции
@@ -16,39 +16,14 @@ let priority = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
  */
 exports.query = function (collection, ...functions) {
     let copiedCollection = JSON.parse(JSON.stringify(collection));
-    let attrsFromSelect = functions
-        .filter(function (item) {
-            return typeof item === 'object';
-        })
-        .reduce(function (acc, cur) {
-            return acc.concat(cur.args || []);
-        }, []);
 
-    for (let funcName of functions) {
-        if (typeof funcName === 'function') {
-            continue;
-        }
-        if (funcName.func.name === 'select') {
-            functions
-                .push(
-                    exports
-                        .select(...attrsFromSelect)
-                        .func
-                );
-            break;
-        }
-    }
-
-    let sortedFuncs = functions.filter(function (item) {
-        return typeof item === 'function';
-    })
-        .sort(function (func1, func2) {
-            return priority.indexOf(func1.name) > priority.indexOf(func2.name);
-        });
+    let sortedFuncs = functions.sort(function (func1, func2) {
+        return priority.indexOf(func1.name) - priority.indexOf(func2.name);
+    });
 
     for (let func in sortedFuncs) {
-        if (sortedFuncs.hasOwnProperty(func)) {
-            copiedCollection = sortedFuncs[func](copiedCollection);
+        if (functions.hasOwnProperty(func)) {
+            copiedCollection = functions[func](copiedCollection);
         }
     }
 
@@ -58,10 +33,10 @@ exports.query = function (collection, ...functions) {
 /**
  * Выбор полей
  * @params {...String}
- * @returns {Object}
+ * @returns {Function}
  */
 exports.select = function (...attrs) {
-    function select(collection) {
+    return function select(collection) {
         return collection.map(function (friend) {
             let newObj = {};
             attrs.forEach(function (attr) {
@@ -72,9 +47,7 @@ exports.select = function (...attrs) {
 
             return newObj;
         });
-    }
-
-    return { func: select, args: attrs };
+    };
 };
 
 /**
@@ -86,7 +59,6 @@ exports.select = function (...attrs) {
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter (function (friend) {
-
             return values.some(function (value) {
                 return value === friend[property];
             });
@@ -102,10 +74,9 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let sorted = collection
-            .sort(function (a, b) {
-                return a[property] > b[property];
-            });
+        let sorted = collection.sort(function (a, b) {
+            return a[property] > b[property];
+        });
 
         return order === 'asc' ? sorted : sorted.reverse();
     };
