@@ -52,10 +52,6 @@ exports.select = function select(...fields) {
                 }
             });
 
-            if (newItem.isEmpty) {
-                return item;
-            }
-
             return newItem;
         });
     };
@@ -96,11 +92,8 @@ exports.sortBy = function (property, order) {
         if (order === 'asc') {
             return coll.sort((fr1, fr2) => fr1[property] > fr2[property]);
         }
-        if (order === 'desc') {
-            return coll.sort((fr1, fr2) => fr1[property] < fr2[property]);
-        }
 
-        return coll;
+        return coll.sort((fr1, fr2) => fr1[property] < fr2[property]);
     };
 
     return { name: 'sortBy', priority: 4, func: srt };
@@ -133,11 +126,7 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     let cnt = (coll) => {
-        if (coll.length > count) {
-            return coll.splice(0, count);
-        }
-
-        return coll;
+        return coll.splice(0, count);
     };
 
     return { name: 'limit', priority: 7, func: cnt };
@@ -153,10 +142,8 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         let orFunc = (coll) => {
-            funcs = funcs.map(function (func) {
-                return func.func(coll);
-            }).reduce(function (acc, item) {
-                return acc.concat(item || []);
+            funcs = funcs.reduce(function (acc, item) {
+                return acc.concat(item.func(coll) || []);
             }, []);
 
             return funcs.length === 0 ? coll : funcs;
