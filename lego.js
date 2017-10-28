@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -155,9 +155,7 @@ if (exports.isStar) {
         let orFunc = (coll) => {
             let resColl = [];
             funcs.forEach(function (func) {
-                let copyColl = JSON.parse(JSON.stringify(coll));
-                copyColl = func.func(copyColl);
-                resColl.push(copyColl);
+                resColl.push(func.func(coll));
             });
 
             return resColl.reduce(function (acc, item) {
