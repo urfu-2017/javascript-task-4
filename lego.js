@@ -24,7 +24,7 @@ exports.query = function (collection, ...funcs) {
         return 'priority' in func;
     })
         .sort(function (func1, func2) {
-            return func1.priority - func2.priority;
+            return func1.priority > func2.priority;
         })
         .forEach(function (func) {
             if (func.name === 'select' && commonParams.length !== 0) {
