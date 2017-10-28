@@ -73,11 +73,7 @@ exports.filterIn = function (property, values) {
     let fltr = (coll) => {
         return coll.filter((friend) => {
             return values.some((prop) => {
-                if (property in friend) {
-                    return prop === friend[property];
-                }
-
-                return false;
+                return prop === friend[property];
             });
         });
     };
