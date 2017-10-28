@@ -44,16 +44,24 @@ exports.query = function (collection, ...funcs) {
  */
 exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
-        return coll.map(function (item) {
-            let newItem = {};
-            commonFields.forEach((field) => {
-                if (field in item) {
-                    newItem[field] = item[field];
-                }
-            });
+        return coll
+            .filter(function (frined) {
+            return fields.every((field) => frined[field] !== undefined);
+        })
+            .map(function (item) {
+                let newItem = {};
+                commonFields.forEach((field) => {
+                    if (field in item) {
+                        newItem[field] = item[field];
+                    }
+                });
 
-            return newItem;
-        });
+                if (newItem.isEmpty) {
+                    return item;
+                }
+
+                return newItem;
+            });
     };
 
     return { name: 'select', priority: 5, func: slct, params: fields };
