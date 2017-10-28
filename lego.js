@@ -14,7 +14,7 @@ const copy = function copyColl(coll) {
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...Array} – Функции для запроса
+ * @params {Array} – Функции для запроса
  * @returns {Array}
  */
 exports.query = function (collection, ...funcs) {
@@ -58,13 +58,11 @@ exports.select = function select(...fields) {
         })
             .map(function (man) {
                 let newItem = {};
-                for (let field of commonFields) {
+                commonFields.forEach(function (field) {
                     if (field in man) {
                         newItem[field] = man[field];
-                    } else {
-                        break;
                     }
-                }
+                });
 
                 return newItem;
             });
