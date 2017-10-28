@@ -6,6 +6,11 @@
  */
 exports.isStar = true;
 
+
+const copy = function copyColl(coll) {
+    return JSON.parse(JSON.stringify(coll));
+};
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -13,7 +18,7 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...funcs) {
-    let localCollection = JSON.parse(JSON.stringify(collection));
+    let localCollection = copy(collection);
 
     let commonParams = funcs.filter((func) => func.name === 'select')
         .reduce(function (acc, item) {
@@ -44,7 +49,9 @@ exports.query = function (collection, ...funcs) {
  */
 exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
-        return coll.map(function (item) {
+        let copyColl = copy(coll);
+
+        return copyColl.map(function (item) {
             let newItem = {};
             commonFields.forEach((field) => {
                 if (field in item) {
@@ -67,7 +74,9 @@ exports.select = function select(...fields) {
  */
 exports.filterIn = function (property, values) {
     let fltr = (coll) => {
-        return coll.filter((friend) => {
+        let copyColl = copy(coll);
+
+        return copyColl.filter((friend) => {
             return values.some((prop) => {
                 if (property in friend) {
                     return prop === friend[property];
@@ -89,11 +98,12 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     let srt = (coll) => {
+        let copyColl = copy(coll);
         if (order === 'asc') {
-            return coll.sort((fr1, fr2) => fr1[property] > fr2[property]);
+            return copyColl.sort((fr1, fr2) => fr1[property] > fr2[property]);
         }
 
-        return coll.sort((fr1, fr2) => fr1[property] < fr2[property]);
+        return copyColl.sort((fr1, fr2) => fr1[property] < fr2[property]);
     };
 
     return { name: 'sortBy', priority: 4, func: srt };
@@ -107,7 +117,9 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     let frm = (coll) => {
-        return coll.map((friend) => {
+        let copyColl = copy(coll);
+
+        return copyColl.map((friend) => {
             if (property in friend) {
                 friend[property] = formatter(friend[property]);
             }
@@ -126,7 +138,9 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     let cnt = (coll) => {
-        return coll.splice(0, count);
+        let copyColl = copy(coll);
+
+        return copyColl.splice(0, count);
     };
 
     return { name: 'limit', priority: 7, func: cnt };
@@ -142,11 +156,12 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         let orFunc = (coll) => {
+            let copyColl = copy(coll);
             funcs = funcs.reduce(function (acc, item) {
-                return acc.concat(item.func(coll) || []);
+                return acc.concat(item.func(copyColl) || []);
             }, []);
 
-            return funcs.length === 0 ? coll : funcs;
+            return funcs.length === 0 ? copyColl : funcs;
         };
 
         return { name: 'or', priority: 1, func: orFunc };
@@ -160,7 +175,7 @@ if (exports.isStar) {
      */
     exports.and = function (...funcs) {
         let andFunc = (coll) => {
-            let copyColl = JSON.parse(JSON.stringify(coll));
+            let copyColl = copy(coll);
             funcs.forEach(function (func) {
                 copyColl = func.func(copyColl);
             });
@@ -171,3 +186,4 @@ if (exports.isStar) {
         return { name: 'and', priority: 2, func: andFunc };
     };
 }
+
