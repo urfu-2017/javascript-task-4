@@ -56,6 +56,10 @@ exports.select = function select(...fields) {
                 }
             });
 
+            if (newItem.isEmpty) {
+                return item;
+            }
+
             return newItem;
         });
     };
