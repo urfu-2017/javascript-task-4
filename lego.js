@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 let priority = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
 
@@ -105,9 +105,16 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let sorted = collection.sort(function (a, b) {
-            return a[property] > b[property];
-        });
+        let sorted = collection
+            .filter(function (friend) {
+                return friend.hasOwnProperty(property);
+            })
+            .sort(function (a, b) {
+                return a[property] > b[property];
+            });
+        if (sorted.length === 0) {
+            return collection;
+        }
 
         return order === 'asc' ? sorted : sorted.reverse();
     };
