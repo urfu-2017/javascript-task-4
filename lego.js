@@ -6,7 +6,6 @@
  */
 exports.isStar = false;
 
-
 const copy = function copyColl(coll) {
     return JSON.parse(JSON.stringify(coll));
 };
@@ -50,20 +49,14 @@ exports.query = function (collection, ...funcs) {
 exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
         return coll.map(function (man) {
-            let copyMan = copy(man);
-            for (let prop in man) {
-                if (!man.hasOwnProperty(prop)) {
-                    continue;
+            let newItem = {};
+            commonFields.forEach(function (field) {
+                if (field in man) {
+                    newItem[field] = man[field];
                 }
-                if (commonFields.indexOf(prop) === -1) {
-                    delete man[prop];
-                }
-            }
-            if (Object.keys(man).length === 0) {
-                return copyMan;
-            }
+            });
 
-            return man;
+            return newItem;
         });
     };
 
