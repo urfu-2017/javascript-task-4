@@ -62,13 +62,6 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...attrs) {
     function select(collection) {
-
-        /*
-            if (attrs.length === 0) {
-                return [];
-            }
-        */
-
         return collection.map(function (friend) {
             let newObj = {};
             attrs.forEach(function (attr) {
@@ -93,9 +86,12 @@ exports.select = function (...attrs) {
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         return collection.filter (function (friend) {
+
+            /*
             if (!friend.hasOwnProperty(property)) {
                 return collection;
             }
+            */
 
             return values.some(function (value) {
                 return value === friend[property];
