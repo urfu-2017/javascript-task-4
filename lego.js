@@ -103,20 +103,9 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         let sorted = collection
-
-            /*
-            .filter(function (friend) {
-                return friend.hasOwnProperty(property);
-            })
-            */
             .sort(function (a, b) {
                 return a[property] > b[property];
             });
-
-        /*
-        if (sorted.length === 0) {
-            return collection;
-        }*/
 
         return order === 'asc' ? sorted : sorted.reverse();
     };
@@ -131,9 +120,12 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(function (friend) {
+
+            /*
             if (friend.hasOwnProperty(property)) {
                 friend[property] = formatter(friend[property]);
-            }
+            }*/
+            friend[property] = formatter(friend[property]);
 
             return friend;
         });
