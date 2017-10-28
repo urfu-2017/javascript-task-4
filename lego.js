@@ -178,10 +178,6 @@ if (exports.isStar) {
                 copyColl = func.func(copyColl);
             });
 
-            if (copyColl.length === 0) {
-                return coll;
-            }
-
             return copyColl;
         };
 
