@@ -128,6 +128,7 @@ function helper(data, q, key) {
 function select1(data, key) {
     if (parseInt(key) === -1) {
         data = [];
+
         return data;
     }
     for (var q = 0; q < data.length; q++) {
