@@ -59,6 +59,10 @@ exports.select = function select(...fields) {
                 }
             });
 
+            if (Object.keys(newItem).length === 0) {
+                return man;
+            }
+
             return newItem;
         });
     };
