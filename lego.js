@@ -44,24 +44,20 @@ exports.query = function (collection, ...funcs) {
  */
 exports.select = function select(...fields) {
     let slct = (coll, commonFields) => {
-        return coll
-            .filter(function (frined) {
-                return fields.every((field) => frined[field] !== undefined);
-            })
-            .map(function (item) {
-                let newItem = {};
-                commonFields.forEach((field) => {
-                    if (field in item) {
-                        newItem[field] = item[field];
-                    }
-                });
-
-                if (newItem.isEmpty) {
-                    return item;
+        return coll.map(function (item) {
+            let newItem = {};
+            commonFields.forEach((field) => {
+                if (field in item) {
+                    newItem[field] = item[field];
                 }
-
-                return newItem;
             });
+
+            if (newItem.isEmpty) {
+                return item;
+            }
+
+            return newItem;
+        });
     };
 
     return { name: 'select', priority: 5, func: slct, params: fields };
@@ -120,8 +116,7 @@ exports.format = function (property, formatter) {
     let frm = (coll) => {
         return coll.map((friend) => {
             if (property in friend) {
-                let value = JSON.parse(JSON.stringify(friend[property]));
-                friend[property] = formatter(value);
+                friend[property] = formatter(friend[property]);
             }
 
             return friend;
