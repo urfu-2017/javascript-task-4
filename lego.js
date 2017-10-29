@@ -68,15 +68,13 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    if (order === 'asc') {
-        return function sortBy(copyCollection) {
-            if (order === 'asc') {
-                return copyCollection.sort((a, b) => a[property] > b[property]);
-            }
+    return function sortBy(copyCollection) {
+        if (order === 'asc') {
+            return copyCollection.sort((a, b) => a[property] > b[property]);
+        }
 
-            return copyCollection.sort((a, b) => a[property] < b[property]);
-        };
-    }
+        return copyCollection.sort((a, b) => a[property] < b[property]);
+    };
 };
 
 /**
