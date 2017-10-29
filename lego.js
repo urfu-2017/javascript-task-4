@@ -20,15 +20,14 @@ exports.query = function (collection) {
         return Object.assign({}, item);
     });
     var collectionFunctions = [].slice.call(arguments, 1);
-    collectionFunctions
+
+    return collectionFunctions
         .sort(function (f1, f2) {
             return queryFunctions.indexOf(f1.name) - queryFunctions.indexOf(f2.name);
         })
-        .forEach(function (func) {
-            collectionCopy = func(collectionCopy);
-        });
-
-    return collectionCopy;
+        .reduce(function (currentCollection, func) {
+            return func(currentCollection);
+        }, collectionCopy);
 };
 
 /**
