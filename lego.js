@@ -184,12 +184,10 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Array}
      */
-    exports.and = function () {
+    exports.and = function (...actions) {
         function intersectPartys(firstParty, secondParty) {
             return firstParty.filter(friend => friendInParty(friend, secondParty));
         }
-
-        var actions = Array.prototype.slice.call(arguments);
         var andFunction = function (friends) {
             var partysToUnite = actions.map((action) => action.func(friends));
 
