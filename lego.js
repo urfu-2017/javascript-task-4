@@ -7,8 +7,8 @@
 exports.isStar = false;
 
 const PRIORITIES = {
-    'sortBy': 1,
-    'filterIn': 2,
+    'filterIn': 1,
+    'sortBy': 2,
     'select': 3,
     'limit': 4,
     'format': 5
@@ -21,14 +21,14 @@ const PRIORITIES = {
  * @returns {Array}
  */
 exports.query = function (collection, ...operators) {
-    let copyCollection = collection.slice();
+    let copyCollection = collection.map(function (friend) {
+        return Object.assign({}, friend);
+    });
 
-    copyCollection = operators.sort((a, b) => PRIORITIES[a.name] - PRIORITIES[b.name])
+    return operators.sort((a, b) => PRIORITIES[a.name] - PRIORITIES[b.name])
         .reduce(function (stepResult, query) {
             return query(stepResult);
         }, copyCollection);
-
-    return copyCollection;
 };
 
 /**
