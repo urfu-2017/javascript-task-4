@@ -18,31 +18,6 @@ function clone(collection) {
     return JSON.parse(JSON.stringify(collection));
 }
 
-function friendInParty(friend, party) {
-    function friendCompare(firstFriend, secondFriend) {
-        var property;
-        for (property in firstFriend) {
-            if (secondFriend[property] !== firstFriend[property]) {
-                return false;
-            }
-        }
-        for (property in secondFriend) {
-            if (firstFriend[property] !== secondFriend[property]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    for (var partyMember of party) {
-        if (friendCompare(friend, partyMember)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -65,12 +40,13 @@ exports.query = function (collection, ...actions) {
  * @params {...String}
  * @returns {Array}
  */
-exports.select = function (...desiredProperties) {
+exports.select = function () {
+    var desiredValues = arguments;
     var selectFunction = function (friends) {
         return friends.map(function (friend) {
             var result = {};
-            for (var property of desiredProperties) {
-                if (friend.hasOwnProperty(property)) {
+            for (var property of desiredValues) {
+                if (typeof friend[property] !== 'undefined') {
                     result[property] = friend[property];
                 }
             }
@@ -161,6 +137,25 @@ exports.limit = function (count) {
     return { type: 'limit', func: limitFunction };
 };
 
+function friendInParty(friend, party) {
+    function friendCompare(firstFriend, secondFriend) {
+        for (var property in firstFriend) {
+            if (secondFriend[property] !== firstFriend[property]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    for (var partyMember of party) {
+        if (friendCompare(friend, partyMember)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 if (exports.isStar) {
 
     /**
@@ -181,11 +176,11 @@ if (exports.isStar) {
             return result;
         }
 
-        var actions = Array.from(arguments);
+        var actions = Array.prototype.slice.call(arguments);
         var orFunction = function (friends) {
-            var partysToUnite = actions.map(action => action.func(friends));
+            var partysToUnite = actions.map((action) => action.func(friends));
 
-            return partysToUnite.reduce(unitePartys);
+            return partysToUnite.reduce(unitePartys, []);
         };
 
         return { type: 'filter', func: orFunction };
@@ -198,9 +193,15 @@ if (exports.isStar) {
      * @returns {Array}
      */
     exports.and = function () {
-        var actions = Array.from(arguments);
+        function intersectPartys(firstParty, secondParty) {
+            return firstParty.filter(friend => friendInParty(friend, secondParty));
+        }
+
+        var actions = Array.prototype.slice.call(arguments);
         var andFunction = function (friends) {
-            return actions.reduce((acc, action) => action.func(acc), friends);
+            var partysToUnite = actions.map((action) => action.func(friends));
+
+            return partysToUnite.reduce(intersectPartys, partysToUnite[0]);
         };
 
         return { type: 'filter', func: andFunction };
