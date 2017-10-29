@@ -106,7 +106,7 @@ exports.format = function (property, formatter) {
     return function format(collection) {
 
         return collection.map(function (person) {
-            var newPerson = {...person};
+            var newPerson = Object.assign({}, person);
             if (person.hasOwnProperty(property)) {
                 newPerson[property] = formatter(newPerson[property]);
             }
