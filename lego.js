@@ -52,9 +52,9 @@ function friendInParty(friend, party) {
 exports.query = function (collection, ...actions) {
     var result = clone(collection);
     actions.sort((firstAction, secondAction) =>
-        priority[firstAction.name] - priority[secondAction.name]);
+        priority[firstAction.type] - priority[secondAction.type]);
     actions.forEach(function (action) {
-        result = action(result);
+        result = action.func(result);
     });
 
     return result;
@@ -66,7 +66,7 @@ exports.query = function (collection, ...actions) {
  * @returns {Array}
  */
 exports.select = function (...desiredProperties) {
-    var selectFunction = function select(friends) {
+    var selectFunction = function (friends) {
         return friends.map(function (friend) {
             var result = {};
             for (var property of desiredProperties) {
@@ -79,7 +79,7 @@ exports.select = function (...desiredProperties) {
         });
     };
 
-    return selectFunction;
+    return { type: 'select', func: selectFunction };
 };
 
 /**
@@ -89,11 +89,11 @@ exports.select = function (...desiredProperties) {
  * @returns {Array}
  */
 exports.filterIn = function (property, values) {
-    var filterFunction = function filter(friends) {
+    var filterFunction = function (friends) {
         return friends.filter(friend => values.indexOf(friend[property]) >= 0);
     };
 
-    return filterFunction;
+    return { type: 'filter', func: filterFunction };
 };
 
 /**
@@ -114,20 +114,20 @@ exports.sortBy = function (property, order) {
     };
     var sortFunction;
     if (order === 'asc') {
-        sortFunction = function sort(friends) {
+        sortFunction = function (friends) {
             friends.sort(compareBy);
 
             return friends;
         };
     } else {
-        sortFunction = function sort(friends) {
+        sortFunction = function (friends) {
             friends.sort((a, b) => -compareBy(a, b));
 
             return friends;
         };
     }
 
-    return sortFunction;
+    return { type: 'sort', func: sortFunction };
 };
 
 /**
@@ -137,7 +137,7 @@ exports.sortBy = function (property, order) {
  * @returns {Array}
  */
 exports.format = function (property, formatter) {
-    var formatFunction = function format(friends) {
+    var formatFunction = function (friends) {
         return friends.map(function (friend) {
             friend[property] = formatter(friend[property]);
 
@@ -145,7 +145,7 @@ exports.format = function (property, formatter) {
         });
     };
 
-    return formatFunction;
+    return { type: 'format', func: formatFunction };
 };
 
 /**
@@ -153,12 +153,12 @@ exports.format = function (property, formatter) {
  * @param {Number} count – Максимальное количество элементов
  * @returns {Array}
  */
-exports.limit = function limit(count) {
+exports.limit = function (count) {
     var limitFunction = function (friends) {
         return friends.slice(0, count);
     };
 
-    return limitFunction;
+    return { type: 'limit', func: limitFunction };
 };
 
 if (exports.isStar) {
@@ -182,13 +182,13 @@ if (exports.isStar) {
         }
 
         var actions = Array.from(arguments);
-        var orFunction = function filter(friends) {
-            var partysToUnite = actions.map(action => action(friends));
+        var orFunction = function (friends) {
+            var partysToUnite = actions.map(action => action.func(friends));
 
             return partysToUnite.reduce(unitePartys);
         };
 
-        return orFunction;
+        return { type: 'filter', func: orFunction };
     };
 
     /**
@@ -199,10 +199,10 @@ if (exports.isStar) {
      */
     exports.and = function () {
         var actions = Array.from(arguments);
-        var andFunction = function filter(friends) {
-            return actions.reduce((acc, action) => action(acc), friends);
+        var andFunction = function (friends) {
+            return actions.reduce((acc, action) => action.func(acc), friends);
         };
 
-        return andFunction;
+        return { type: 'filter', func: andFunction };
     };
 }
