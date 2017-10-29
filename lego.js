@@ -22,10 +22,9 @@ const PRIORYTY_ARGUMENTS = {
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    var copyCollection = [].concat(collection);
-    var orderedArguments = Array.from(arguments).slice(1)
-        .sort((a, b) => PRIORYTY_ARGUMENTS[a.name] - PRIORYTY_ARGUMENTS[b.name]);
+exports.query = function (collection, ...orderedArguments) {
+    var copyCollection = [...collection];
+    orderedArguments.sort((a, b) => PRIORYTY_ARGUMENTS[a.name] - PRIORYTY_ARGUMENTS[b.name]);
 
     return orderedArguments.reduce((result, argument) => argument(result), copyCollection);
 };
@@ -62,7 +61,6 @@ exports.select = function () {
 exports.filterIn = function (property, values) {
 
     return function filterIn(collection) {
-
         return collection.filter(person => values.includes(person[property]));
     };
 };
@@ -108,8 +106,8 @@ exports.format = function (property, formatter) {
     return function format(collection) {
 
         return collection.map(function (person) {
-            var newPerson = Object.assign({}, person);
-            if (person[property] !== undefined) {
+            var newPerson = {...person};
+            if (person.hasOwnProperty(property)) {
                 newPerson[property] = formatter(newPerson[property]);
             }
 
