@@ -27,9 +27,9 @@ function clone(collection) {
 exports.query = function (collection, ...actions) {
     var result = clone(collection);
     actions.sort((firstAction, secondAction) =>
-        priority[firstAction.type] - priority[secondAction.type]);
+        priority[firstAction.name] - priority[secondAction.name]);
     actions.forEach(function (action) {
-        result = action.func(result);
+        result = action(result);
     });
 
     return result;
@@ -41,7 +41,7 @@ exports.query = function (collection, ...actions) {
  * @returns {Array}
  */
 exports.select = function (...desiredProperties) {
-    var selectFunction = function (friends) {
+    var selectFunction = function select(friends) {
         return friends.map(function (friend) {
             var result = {};
             for (var property of desiredProperties) {
@@ -54,7 +54,7 @@ exports.select = function (...desiredProperties) {
         });
     };
 
-    return { type: 'select', func: selectFunction };
+    return selectFunction;
 };
 
 /**
@@ -64,11 +64,11 @@ exports.select = function (...desiredProperties) {
  * @returns {Array}
  */
 exports.filterIn = function (property, values) {
-    var filterFunction = function (friends) {
+    var filterFunction = function filter(friends) {
         return friends.filter(friend => values.includes(friend[property]));
     };
 
-    return { type: 'filter', func: filterFunction };
+    return filterFunction;
 };
 
 /**
@@ -95,7 +95,7 @@ exports.sortBy = function (property, order) {
         return friends;
     };
 
-    return { type: 'sort', func: sortFunction };
+    return sortFunction;
 };
 
 /**
@@ -105,7 +105,7 @@ exports.sortBy = function (property, order) {
  * @returns {Array}
  */
 exports.format = function (property, formatter) {
-    var formatFunction = function (friends) {
+    var formatFunction = function format(friends) {
         return friends.map(function (friend) {
             friend[property] = formatter(friend[property]);
 
@@ -113,7 +113,7 @@ exports.format = function (property, formatter) {
         });
     };
 
-    return { type: 'format', func: formatFunction };
+    return formatFunction;
 };
 
 /**
@@ -122,11 +122,11 @@ exports.format = function (property, formatter) {
  * @returns {Array}
  */
 exports.limit = function (count) {
-    var limitFunction = function (friends) {
+    var limitFunction = function limit(friends) {
         return friends.slice(0, count);
     };
 
-    return { type: 'limit', func: limitFunction };
+    return limitFunction;
 };
 
 function friendInParty(friend, party) {
@@ -169,13 +169,13 @@ if (exports.isStar) {
         }
 
         var actions = Array.prototype.slice.call(arguments);
-        var orFunction = function (friends) {
-            var partysToUnite = actions.map((action) => action.func(friends));
+        var orFunction = function filter(friends) {
+            var partysToUnite = actions.map((action) => action(friends));
 
             return partysToUnite.reduce(unitePartys, []);
         };
 
-        return { type: 'filter', func: orFunction };
+        return orFunction;
     };
 
     /**
@@ -184,16 +184,16 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Array}
      */
-    exports.and = function (...actions) {
+    exports.and = function filter(...actions) {
         function intersectPartys(firstParty, secondParty) {
             return firstParty.filter(friend => friendInParty(friend, secondParty));
         }
         var andFunction = function (friends) {
-            var partysToUnite = actions.map((action) => action.func(friends));
+            var partysToUnite = actions.map((action) => action(friends));
 
             return partysToUnite.reduce(intersectPartys, partysToUnite[0]);
         };
 
-        return { type: 'filter', func: andFunction };
+        return andFunction;
     };
 }
