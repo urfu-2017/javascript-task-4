@@ -130,9 +130,9 @@ if (exports.isStar) {
     exports.or = function (...values) {
         return function or(collection) {
             var answersArray = values.reduce((result, func) =>
-                result.concat(func(collection).filter(person => !result.includes(person))), []);
+                result.concat(func(collection)), []);
 
-            return answersArray;
+            return collection.filter(person => answersArray.includes(person));
         };
     };
 
@@ -149,3 +149,4 @@ if (exports.isStar) {
         };
     };
 }
+
