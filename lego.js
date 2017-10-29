@@ -40,13 +40,12 @@ exports.query = function (collection, ...actions) {
  * @params {...String}
  * @returns {Array}
  */
-exports.select = function () {
-    var desiredValues = arguments;
+exports.select = function (...desiredProperties) {
     var selectFunction = function (friends) {
         return friends.map(function (friend) {
             var result = {};
-            for (var property of desiredValues) {
-                if (typeof friend[property] !== 'undefined') {
+            for (var property of desiredProperties) {
+                if (friend.hasOwnProperty(property)) {
                     result[property] = friend[property];
                 }
             }
