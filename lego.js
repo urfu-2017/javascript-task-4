@@ -3,10 +3,10 @@ const functionWeight = {
     and: 0,
     or: 0,
     filterIn: 1,
-    sortBy: 1,
-    select: 2,
-    limit: 3,
-    format: 3
+    sortBy: 2,
+    select: 3,
+    limit: 4,
+    format: 5
 };
 
 /**
@@ -23,10 +23,9 @@ exports.isStar = true;
  */
 
 exports.query = function (collection, ...values) {
-    var clone = JSON.parse(JSON.stringify(collection));
+    var clone = [].concat(collection);
     var methods = values
         .sort((a, b) => functionWeight[a.name] - functionWeight[b.name]);
-    console.info(methods);
 
     return methods.reduce((result, func) =>
         func(result), clone);
@@ -39,17 +38,15 @@ exports.query = function (collection, ...values) {
  * @params {...String}
  */
 
-exports.select = function (...values) {
+exports.select = function (...keys) {
     return function select(collection) {
-        var clone = Object.assign([], collection);
-
-        return clone.map(function (data) {
+        return collection.map(person => {
             var result = {};
-            values.forEach(function (key) {
-                if (Object.keys(data).includes(key)) {
-                    result[key] = data[key];
+            for (var i = 0; i < keys.length; i++) {
+                if (keys[i] in person) {
+                    result[keys[i]] = person[keys[i]];
                 }
-            });
+            }
 
             return result;
         });
@@ -79,13 +76,15 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort(function (firstValue, secondValue) {
-            var typeAsc = firstValue[property] > secondValue[property];
-            var typeDesc = firstValue[property] <= secondValue[property];
+        return collection.sort(function (a, b) {
+            if (a[property] === b[property]) {
+                return 0;
+            } else if (a[property] > b[property]) {
+                return order === 'asc' ? 1 : -1;
+            }
 
-            return (order === 'asc') ? typeAsc : typeDesc;
-        }
-        );
+            return order === 'desc' ? 1 : -1;
+        });
     };
 };
 
@@ -131,9 +130,9 @@ if (exports.isStar) {
     exports.or = function (...values) {
         return function or(collection) {
             var answersArray = values.reduce((result, func) =>
-                result.concat(func(collection)), []);
+                result.concat(func(collection).filter(person => !result.includes(person))), []);
 
-            return collection.filter(person => answersArray.includes(person));
+            return answersArray;
         };
     };
 
@@ -143,15 +142,10 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      */
 
-
     exports.and = function (...values) {
-
         return function and(collection) {
-
             return values.reduce((result, func) => func(result),
                 collection);
         };
     };
 }
-
-
