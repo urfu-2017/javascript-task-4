@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 var priority = {
     filter: 0,
@@ -90,7 +90,7 @@ exports.select = function (...desiredProperties) {
  */
 exports.filterIn = function (property, values) {
     var filterFunction = function filter(friends) {
-        return friends.filter(friend => values.includes(friend[property]));
+        return friends.filter(friend => values.includes(friend[property]) >= 0);
     };
 
     return filterFunction;
@@ -103,22 +103,29 @@ exports.filterIn = function (property, values) {
  * @returns {Array}
  */
 exports.sortBy = function (property, order) {
-    var ascComparator = function (a, b) {
+    var compareBy = function (a, b) {
         if (a[property] > b[property]) {
             return 1;
-        } else if (a[property] < b[property]) {
-            return -1;
+        } else if (a[property] === b[property]) {
+            return 0;
         }
 
-        return 0;
+        return -1;
     };
-    var descComparator = (a, b) => -ascComparator(a, b);
-    var comparator = order === 'asc' ? ascComparator : descComparator;
-    var sortFunction = function sort(friends) {
-        friends.sort(comparator);
+    var sortFunction;
+    if (order === 'asc') {
+        sortFunction = function sort(friends) {
+            friends.sort(compareBy);
 
-        return friends;
-    };
+            return friends;
+        };
+    } else {
+        sortFunction = function sort(friends) {
+            friends.sort((a, b) => -compareBy(a, b));
+
+            return friends;
+        };
+    }
 
     return sortFunction;
 };
@@ -190,7 +197,8 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Array}
      */
-    exports.and = function (...actions) {
+    exports.and = function () {
+        var actions = Array.from(arguments);
         var andFunction = function filter(friends) {
             return actions.reduce((acc, action) => action(acc), friends);
         };
