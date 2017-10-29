@@ -1,27 +1,25 @@
 'use strict';
+const _ = require('lodash');
 
 exports.isStar = false;
+var FUNCTIONS = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
 
-function putFunctionsInOrder(functions) {
-    var functionsInOrder = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
+function putFunctionsInOrder(a, b) {
+    if (FUNCTIONS.indexOf(a.name) > FUNCTIONS.indexOf(b.name)) {
 
-    return functions.sort((a, b) => {
+        return 1;
+    }
+    if (FUNCTIONS.indexOf(a.name) < FUNCTIONS.indexOf(b.name)) {
 
-        return functionsInOrder.indexOf(a.name) <
-        functionsInOrder.indexOf(b.name) ? -1 : 1;
-    });
+        return -1;
+    }
+
+    return 0;
 }
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
-
 exports.query = function (collection, ...functions) {
-    var collectionCopy = JSON.parse(JSON.stringify(collection));
-    functions = putFunctionsInOrder(functions);
+    var collectionCopy = _.cloneDeep(collection);
+    functions = functions.sort(putFunctionsInOrder);
     functions.forEach(fun => {
         collectionCopy = fun(collectionCopy);
     });
@@ -29,24 +27,23 @@ exports.query = function (collection, ...functions) {
     return collectionCopy;
 };
 
-
 /**
  * Выбор полей
  * @params {...String}
  */
 
 exports.select = function (...selected) {
-
     return function select(collection) {
-        collection.forEach(partner => {
-            for (var key in partner) {
-                if (selected.indexOf(key) === -1) {
-                    delete partner[key];
+        return collection.map(collectionCopy => {
+            var result = {};
+            for (var key of selected) {
+                if (collectionCopy.hasOwnProperty(key)) {
+                    result[key] = collectionCopy[key];
                 }
             }
-        });
 
-        return collection;
+            return result;
+        });
     };
 };
 
@@ -60,7 +57,13 @@ exports.select = function (...selected) {
 exports.filterIn = function (property, values) {
 
     return function filterIn(collection) {
-        return collection.filter(partner => values.indexOf(partner[property]) !== -1);
+        return collection.filter(collectionCopy => {
+            if (collectionCopy.hasOwnProperty(property)) {
+                return values.includes(collectionCopy[property]);
+            }
+
+            return false;
+        });
     };
 };
 
