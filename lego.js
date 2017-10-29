@@ -19,9 +19,8 @@ let priority = {
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
+exports.query = function (collection, ...functions) {
     let copyCollection = collection.slice();
-    let functions = [].slice.call(arguments, 1);
     functions.sort((a, b) => priority[a.name] > priority[b.name]);
     functions.forEach(func => {
         copyCollection = func(copyCollection);
@@ -35,9 +34,7 @@ exports.query = function (collection) {
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function () {
-    let selectArgs = [].slice.call(arguments);
-
+exports.select = function (...selectArgs) {
     return function select(copyCollection) {
         return copyCollection.map(copyCollectionItem => {
             let answer = {};
@@ -73,25 +70,13 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     if (order === 'asc') {
         return function sortBy(copyCollection) {
-            for (let item of copyCollection) {
-                if (!(property in item)) {
-                    return copyCollection;
-                }
+            if (order === 'asc') {
+                return copyCollection.sort((a, b) => a[property] > b[property]);
             }
 
-            return copyCollection.sort((a, b) => a[property] > b[property]);
+            return copyCollection.sort((a, b) => a[property] < b[property]);
         };
     }
-
-    return function sortBy(copyCollection) {
-        for (let item of copyCollection) {
-            if (!(property in item)) {
-                return copyCollection;
-            }
-        }
-
-        return copyCollection.sort((a, b) => a[property] < b[property]);
-    };
 };
 
 /**
@@ -102,12 +87,6 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(copyCollection) {
-        for (let item of copyCollection) {
-            if (!(property in item)) {
-                return copyCollection;
-            }
-        }
-
         return copyCollection.map(copyCollectionItem => {
             let newСopyCollectionItem = Object.assign({}, copyCollectionItem);
             newСopyCollectionItem[property] = formatter(newСopyCollectionItem[property]);
