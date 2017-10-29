@@ -90,7 +90,7 @@ exports.select = function (...desiredProperties) {
  */
 exports.filterIn = function (property, values) {
     var filterFunction = function filter(friends) {
-        return friends.filter(friend => values.includes(friend[property]) >= 0);
+        return friends.filter(friend => values.indexOf(friend[property]) >= 0);
     };
 
     return filterFunction;
