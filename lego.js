@@ -4,7 +4,19 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
+
+var priority = {
+    filter: 0,
+    sort: 1,
+    select: 2,
+    limit: 3,
+    format: 4
+};
+
+function clone(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
 
 function friendInParty(friend, party) {
     function friendCompare(firstFriend, secondFriend) {
@@ -38,26 +50,11 @@ function friendInParty(friend, party) {
  * @returns {Array}
  */
 exports.query = function (collection, ...actions) {
-    var result = JSON.parse(JSON.stringify(collection));
+    var result = clone(collection);
+    actions.sort((firstAction, secondAction) =>
+        priority[firstAction.name] - priority[secondAction.name]);
     actions.forEach(function (action) {
-        if (action.type === 'filter' || action.type === 'sort') {
-            result = action.func(result);
-        }
-    });
-    actions.forEach(function (action) {
-        if (action.type === 'select') {
-            result = action.func(result);
-        }
-    });
-    actions.forEach(function (action) {
-        if (action.type === 'limit') {
-            result = action.func(result);
-        }
-    });
-    actions.forEach(function (action) {
-        if (action.type === 'format') {
-            result = action.func(result);
-        }
+        result = action(result);
     });
 
     return result;
@@ -68,13 +65,12 @@ exports.query = function (collection, ...actions) {
  * @params {...String}
  * @returns {Array}
  */
-exports.select = function () {
-    var desiredValues = arguments;
-    var selectFunction = function (friends) {
+exports.select = function (...desiredProperties) {
+    var selectFunction = function select(friends) {
         return friends.map(function (friend) {
             var result = {};
-            for (var property of desiredValues) {
-                if (typeof friend[property] !== 'undefined') {
+            for (var property of desiredProperties) {
+                if (friend.hasOwnProperty(property)) {
                     result[property] = friend[property];
                 }
             }
@@ -83,7 +79,7 @@ exports.select = function () {
         });
     };
 
-    return { type: 'select', func: selectFunction };
+    return selectFunction;
 };
 
 /**
@@ -93,11 +89,11 @@ exports.select = function () {
  * @returns {Array}
  */
 exports.filterIn = function (property, values) {
-    var filterFunction = function (friends) {
-        return friends.filter(friend => values.indexOf(friend[property]) >= 0);
+    var filterFunction = function filter(friends) {
+        return friends.filter(friend => values.includes(friend[property]));
     };
 
-    return { type: 'filter', func: filterFunction };
+    return filterFunction;
 };
 
 /**
@@ -107,31 +103,24 @@ exports.filterIn = function (property, values) {
  * @returns {Array}
  */
 exports.sortBy = function (property, order) {
-    var compareBy = function (a, b) {
+    var ascComparator = function (a, b) {
         if (a[property] > b[property]) {
             return 1;
-        } else if (a[property] === b[property]) {
-            return 0;
+        } else if (a[property] < b[property]) {
+            return -1;
         }
 
-        return -1;
+        return 0;
     };
-    var sortFunction;
-    if (order === 'asc') {
-        sortFunction = function (friends) {
-            friends.sort(compareBy);
+    var descComparator = (a, b) => -ascComparator(a, b);
+    var comparator = order === 'asc' ? ascComparator : descComparator;
+    var sortFunction = function sort(friends) {
+        friends.sort(comparator);
 
-            return friends;
-        };
-    } else {
-        sortFunction = function (friends) {
-            friends.sort((a, b) => -compareBy(a, b));
+        return friends;
+    };
 
-            return friends;
-        };
-    }
-
-    return { type: 'sort', func: sortFunction };
+    return sortFunction;
 };
 
 /**
@@ -141,7 +130,7 @@ exports.sortBy = function (property, order) {
  * @returns {Array}
  */
 exports.format = function (property, formatter) {
-    var formatFunction = function (friends) {
+    var formatFunction = function format(friends) {
         return friends.map(function (friend) {
             friend[property] = formatter(friend[property]);
 
@@ -149,7 +138,7 @@ exports.format = function (property, formatter) {
         });
     };
 
-    return { type: 'format', func: formatFunction };
+    return formatFunction;
 };
 
 /**
@@ -157,12 +146,12 @@ exports.format = function (property, formatter) {
  * @param {Number} count – Максимальное количество элементов
  * @returns {Array}
  */
-exports.limit = function (count) {
+exports.limit = function limit(count) {
     var limitFunction = function (friends) {
         return friends.slice(0, count);
     };
 
-    return { type: 'limit', func: limitFunction };
+    return limitFunction;
 };
 
 if (exports.isStar) {
@@ -186,13 +175,13 @@ if (exports.isStar) {
         }
 
         var actions = Array.from(arguments);
-        var orFunction = function (friends) {
-            var partysToUnite = actions.map(action => action.func(friends));
+        var orFunction = function filter(friends) {
+            var partysToUnite = actions.map(action => action(friends));
 
             return partysToUnite.reduce(unitePartys);
         };
 
-        return { type: 'filter', func: orFunction };
+        return orFunction;
     };
 
     /**
@@ -201,12 +190,11 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Array}
      */
-    exports.and = function () {
-        var actions = Array.from(arguments);
-        var andFunction = function (friends) {
-            return actions.reduce((acc, action) => action.func(acc), friends);
+    exports.and = function (...actions) {
+        var andFunction = function filter(friends) {
+            return actions.reduce((acc, action) => action(acc), friends);
         };
 
-        return { type: 'filter', func: andFunction };
+        return andFunction;
     };
 }
