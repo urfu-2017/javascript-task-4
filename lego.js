@@ -65,7 +65,7 @@ exports.select = function (...desiredProperties) {
  */
 exports.filterIn = function (property, values) {
     var filterFunction = function (friends) {
-        return friends.filter(friend => values.indexOf(friend[property]) >= 0);
+        return friends.filter(friend => values.includes(friend[property]));
     };
 
     return { type: 'filter', func: filterFunction };
@@ -78,29 +78,22 @@ exports.filterIn = function (property, values) {
  * @returns {Array}
  */
 exports.sortBy = function (property, order) {
-    var compareBy = function (a, b) {
+    var ascComparator = function (a, b) {
         if (a[property] > b[property]) {
             return 1;
-        } else if (a[property] === b[property]) {
-            return 0;
+        } else if (a[property] < b[property]) {
+            return -1;
         }
 
-        return -1;
+        return 0;
     };
-    var sortFunction;
-    if (order === 'asc') {
-        sortFunction = function (friends) {
-            friends.sort(compareBy);
+    var descComparator = (a, b) => -ascComparator(a, b);
+    var comparator = order === 'asc' ? ascComparator : descComparator;
+    var sortFunction = function sort(friends) {
+        friends.sort(comparator);
 
-            return friends;
-        };
-    } else {
-        sortFunction = function (friends) {
-            friends.sort((a, b) => -compareBy(a, b));
-
-            return friends;
-        };
-    }
+        return friends;
+    };
 
     return { type: 'sort', func: sortFunction };
 };
