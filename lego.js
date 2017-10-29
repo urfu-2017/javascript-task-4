@@ -6,32 +6,22 @@
  */
 exports.isStar = true;
 
-var PRIORITYS = {
-    select: 4.5,
-    format: 5,
-    limit: 6,
-    or: 1,
-    and: 1,
-    filterIn: 2,
-    sortBy: 3 };
+var PRIORITIES = {
+    select: 45,
+    format: 50,
+    limit: 60,
+    or: 10,
+    and: 10,
+    filterIn: 20,
+    sortBy: 30
+};
 
 function doCopyCollection(collection) {
-    return collection.map(function (record) {
-        var copyRecord = {};
-        Object.keys(record).forEach(function (item) {
-            if (record.hasOwnProperty(item)) {
-                copyRecord[item] = record[item];
-            }
-
-            return copyRecord;
-        });
-
-        return copyRecord;
-    });
+    return [...collection];
 }
 
 function sortFunctions(firstFunc, secondFunc) {
-    return Math.sign(PRIORITYS[firstFunc.name] - PRIORITYS[secondFunc.name]);
+    return Math.sign(PRIORITIES[firstFunc.name] - PRIORITIES[secondFunc.name]);
 }
 
 /**
@@ -40,8 +30,7 @@ function sortFunctions(firstFunc, secondFunc) {
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    var functions = [].slice.call(arguments, 1);
+exports.query = function (collection, ...functions) {
     if (functions.length === 0) {
         return collection;
     }
@@ -116,9 +105,7 @@ exports.sortBy = function (property, order) {
  * @returns {function}
  */
 exports.format = function (property, formatter) {
-
     return function format(collection) {
-
         return collection.map(function (record) {
             if (record.hasOwnProperty(property)) {
                 record[property] = formatter(record[property]);
@@ -138,7 +125,6 @@ exports.limit = function (count) {
     count = count > 0 ? count : 0;
 
     return function limit(collection) {
-
         return collection.slice(0, count);
     };
 };
