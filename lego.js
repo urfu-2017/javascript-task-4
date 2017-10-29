@@ -63,9 +63,7 @@ exports.filterIn = function (property, values) {
 
     return function filterIn(collection) {
         return collection.filter(function (item) {
-            return ((item.hasOwnProperty(property)) && (values.some(function (val) {
-                return item[property] === val;
-            })));
+            return (item.hasOwnProperty(property) && values.indexOf(item[property]) !== -1);
         });
     };
 };
