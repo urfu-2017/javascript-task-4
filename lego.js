@@ -4,7 +4,15 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
+
+const PRIORITIES = {
+    'sortBy': 1,
+    'filterIn': 2,
+    'select': 3,
+    'limit': 4,
+    'format': 5
+};
 
 /**
  * Запрос к коллекции
@@ -12,16 +20,36 @@ exports.isStar = true;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    return collection;
+exports.query = function (collection, ...operators) {
+    let copyCollection = collection.slice();
+
+    copyCollection = operators.sort((a, b) => PRIORITIES[a.name] - PRIORITIES[b.name])
+        .reduce(function (stepResult, query) {
+            return query(stepResult);
+        }, copyCollection);
+
+    return copyCollection;
 };
 
 /**
  * Выбор полей
  * @params {...String}
  */
-exports.select = function () {
-    return;
+exports.select = function (...fieldsForSampling) {
+
+    return function select(collection) {
+
+        return collection.map(function (friend) {
+
+            return Object.keys(friend).reduce(function (newCollection, current) {
+                if (fieldsForSampling.includes(current)) {
+                    newCollection[current] = friend[current];
+                }
+
+                return newCollection;
+            }, {});
+        });
+    };
 };
 
 /**
@@ -30,10 +58,16 @@ exports.select = function () {
  * @param {Array} values – Доступные значения
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
 
-    return;
+    return function filterIn(collection) {
+
+        return collection.filter(function (friend) {
+
+            return values.includes(friend[property]);
+        });
+    };
 };
+
 
 /**
  * Сортировка коллекции по полю
@@ -41,10 +75,23 @@ exports.filterIn = function (property, values) {
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
 
-    return;
+    return function sortBy(collection) {
+
+        return order === 'desc' ? descSort(collection, property)
+            : ascSort(collection, property);
+    };
 };
+
+function ascSort(collection, property) {
+
+    return collection.sort((a, b) => a[property] > b[property]);
+}
+
+function descSort(collection, property) {
+
+    return collection.sort((a, b) => a[property] < b[property]);
+}
 
 /**
  * Форматирование поля
@@ -52,9 +99,15 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
 
-    return;
+    return function format(collection) {
+
+        return collection.map(function (friend) {
+            friend[property] = formatter(friend[property]);
+
+            return friend;
+        });
+    };
 };
 
 /**
@@ -62,9 +115,11 @@ exports.format = function (property, formatter) {
  * @param {Number} count – Максимальное количество элементов
  */
 exports.limit = function (count) {
-    console.info(count);
 
-    return;
+    return function limit(collection) {
+
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
