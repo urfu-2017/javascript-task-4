@@ -8,7 +8,7 @@ exports.isStar = true;
 
 var PRIORITY_OF_FUNCTIONS = {
     or: 1,
-    and: 1,
+    and: 2,
     filterIn: 3,
     sortBy: 4,
     select: 5,
@@ -27,13 +27,13 @@ function sortFunctions(firstFunction, secondFunction) {
  * @returns {Function}
  */
 exports.query = function (collection, ...functions) {
-    var sorted = functions.sort(sortFunctions);
-    var newCollection = JSON.parse(JSON.stringify(collection));
-    for (let func of sorted) {
-        newCollection = func(newCollection);
+    let sortedFunctions = functions.sort(sortFunctions);
+    let collectionCopy = JSON.parse(JSON.stringify(collection));
+    for (let func of sortedFunctions) {
+        collectionCopy = func(collectionCopy);
     }
 
-    return newCollection;
+    return collectionCopy;
 };
 
 /**
@@ -41,18 +41,13 @@ exports.query = function (collection, ...functions) {
  * @params {...String},
  * @returns {Object}
  */
-exports.select = function (...margins) {
+exports.select = function (...fields) {
     return function select(collection) {
-        var friendList = JSON.parse(JSON.stringify(collection));
+        let friendList = JSON.parse(JSON.stringify(collection));
         let newFriendList = [];
-        for (let entry of friendList) {
-            let keys = Object.keys(entry);
-            keys = keys.filter(x => (margins.includes(x)));
-            if (Array.isArray(keys)) {
-                newFriendList.push(createObjectWithMargins(entry, keys));
-            } else {
-                newFriendList.push(createObjectWithMargin(entry, keys));
-            }
+        for (let friend of friendList) {
+            let friendFields = Object.keys(friend).filter(x => (fields.includes(x)));
+            newFriendList.push(createObjectWithFields(friend, friendFields));
         }
 
         return newFriendList;
@@ -90,9 +85,9 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
 
     return function sortBy(collection) {
-        var newCollection = JSON.parse(JSON.stringify(collection));
+        let collectionCopy = JSON.parse(JSON.stringify(collection));
 
-        return newCollection.sort((x, y) => {
+        return collectionCopy.sort((x, y) => {
             if (order === 'asc') {
                 return x[property] > y[property];
             }
@@ -112,9 +107,9 @@ exports.format = function (property, formatter) {
     console.info(property, formatter);
 
     return function format(collection) {
-        var newCollection = JSON.parse(JSON.stringify(collection));
+        let collectionCopy = JSON.parse(JSON.stringify(collection));
 
-        return newCollection.map(x => {
+        return collectionCopy.map(x => {
             let keys = Object.keys(x);
             if (!keys.includes(property)) {
                 return x;
@@ -135,13 +130,10 @@ exports.limit = function (count) {
     console.info(count);
 
     return function limit(collection) {
-        var newCollection = [];
-        for (var i = 0; i < count; i++) {
-            var element = collection[i];
-            newCollection.push(element);
-        }
+        let collectionCopy = JSON.parse(JSON.stringify(collection));
+        collectionCopy.length = count;
 
-        return newCollection;
+        return collectionCopy;
     };
 };
 
@@ -156,12 +148,10 @@ if (exports.isStar) {
     exports.or = function (...functions) {
 
         return function or(collection) {
-            var newCollection = JSON.parse(JSON.stringify(collection));
+            let collectionCopy = JSON.parse(JSON.stringify(collection));
 
-            var finalCollection = newCollection.filter(x => functions
-                .some(f => (f([x]).length !== 0)));
-
-            return finalCollection;
+            return collectionCopy.filter(x => functions
+                .some(fieldFiltering => (fieldFiltering([x]).length !== 0)));
         };
     };
 
@@ -174,17 +164,17 @@ if (exports.isStar) {
     exports.and = function (...functions) {
 
         return function and(collection) {
-            var newCollection = JSON.parse(JSON.stringify(collection));
+            let collectionCopy = JSON.parse(JSON.stringify(collection));
             for (let func of functions) {
-                newCollection = func(newCollection);
+                collectionCopy = func(collectionCopy);
             }
 
-            return newCollection;
+            return collectionCopy;
         };
     };
 }
 
-function createObjectWithMargins(entry, keys) {
+function createObjectWithFields(entry, keys) {
     let newObject = {};
     for (let key of keys) {
         newObject[key] = entry[key];
@@ -193,10 +183,4 @@ function createObjectWithMargins(entry, keys) {
     return newObject;
 }
 
-function createObjectWithMargin(entry, key) {
-    let newObject = {};
-    newObject[key] = entry[key];
-
-    return newObject;
-}
 
