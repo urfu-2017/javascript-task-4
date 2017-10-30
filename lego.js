@@ -85,9 +85,8 @@ exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort((firstRecord, secondRecord) => {
             let ascending = Number(firstRecord[property] > secondRecord[property]);
-            let descending = Number(secondRecord[property] > firstRecord[property]);
 
-            return order === 'asc' ? ascending : descending;
+            return order === 'asc' ? ascending : ascending * (-1);
         });
     };
 };
