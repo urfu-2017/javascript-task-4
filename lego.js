@@ -25,13 +25,17 @@ const FUNCTION_PRIORITY = {
  */
 
 exports.query = function (collection, ...operators) {
+    let newCollection = collection.map(record => {
+        return Object.assign({}, record);
+    });
+
     return operators
         .sort((firstFunction, secondFunction) => {
             return FUNCTION_PRIORITY[firstFunction.name] - FUNCTION_PRIORITY[secondFunction.name];
         })
         .reduce((currentCollection, fun) => {
             return fun(currentCollection);
-        }, collection);
+        }, newCollection);
 };
 
 /**
