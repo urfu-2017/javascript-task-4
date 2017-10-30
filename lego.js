@@ -51,10 +51,12 @@ exports.select = function (...commands) {
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
  */
-exports.filterIn = function filterIn(property, values) {
-    return collection => collection.filter(el =>
-        values.some(value =>
-            el[property] === value));
+exports.filterIn = function (property, values) {
+    return function filterIn(collection) {
+        return collection.filter(el =>
+            values.some(value =>
+                el[property] === value));
+    };
 };
 
 /**
@@ -62,8 +64,8 @@ exports.filterIn = function filterIn(property, values) {
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  */
-exports.sortBy = function sortBy(property, order) {
-    return collection => {
+exports.sortBy = function (property, order) {
+    return function sortBy(collection) {
         let funcSort = (property === 'age')
             ? (a, b) => {
                 return a - b;
@@ -84,10 +86,12 @@ exports.sortBy = function sortBy(property, order) {
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
  */
-exports.format = function format(property, formatter) {
-    return collection => collection.map(el =>
-        Object.assign({}, el, { [property]: formatter(el[property]) })
-    );
+exports.format = function (property, formatter) {
+    return function format(collection) {
+        return collection.map(el =>
+            Object.assign({}, el, { [property]: formatter(el[property]) })
+        );
+    };
 };
 
 /**
