@@ -8,12 +8,12 @@ exports.isStar = true;
 
 const PRIORITY_OF_METHODS = {
     and: 0,
-    or: 1,
-    filterIn: 2,
-    sortBy: 3,
-    select: 4,
-    limit: 5,
-    format: 6
+    or: 0,
+    filterIn: 1,
+    sortBy: 2,
+    select: 3,
+    limit: 4,
+    format: 5
 };
 
 /**
@@ -40,46 +40,45 @@ function copy(object) {
 /**
  * Запрос к коллекции
  * @param {Array} collection
- * @params {...methods} – Функции для запроса
+ * @param {Array} methods – Функции для запроса
  * @returns {Array}
  */
 exports.query = function (collection, ...methods) {
     let collectionCopy = copy(collection);
-    for (let foo of methods.sort(sortMethods)) {
-        collectionCopy = foo(collectionCopy);
+    for (let meth of methods.sort(sortMethods)) {
+        collectionCopy = meth(collectionCopy);
     }
 
     return collectionCopy;
 };
 
 /**
- * Содержит ли массив часть
+ * Содержит ли массив элемент
  * @param {Array} arr - массив
- * @param {Array} part - часть (элемент)
- * @returns {Boolean} - содержится ли часть в массиве
+ * @param {Array} item - элемент
+ * @returns {Boolean} - содержится ли элемент в массиве
  */
-function isContain(arr, part) {
+function contains(arr, item) {
 
-    return arr.indexOf(part) !== -1;
+    return arr.indexOf(item) !== -1;
 }
 
 /**
  * Выбор полей
- * @params {...String} - Поля
+ * @param {Array} properties - Поля
  * @returns {Function}
  */
 exports.select = function (...properties) {
 
     return function select(collection) {
-        let collectionCopy = copy(collection);
 
-        return collectionCopy.map(object => {
+        return copy(collection).map(object => {
             let newObject = {};
-            for (let key in object) {
-                if (isContain(properties, key)) {
-                    newObject[key] = object[key];
+            properties.forEach(prop => {
+                if (object.hasOwnProperty(prop)) {
+                    newObject[prop] = object[prop];
                 }
-            }
+            });
 
             return newObject;
         });
@@ -96,10 +95,9 @@ exports.filterIn = function (property, values) {
 
     return function filterIn(collection) {
 
-        return collection.filter(part => {
-            let propertyName = part[property];
+        return copy(collection).filter(item => {
 
-            return isContain(values, propertyName);
+            return contains(values, item[property]);
         });
     };
 };
@@ -113,9 +111,8 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
-        let collectionCopy = copy(collection);
 
-        return collectionCopy.sort((a, b) => {
+        return copy(collection).sort((a, b) => {
 
             return (order === 'asc') ? a[property] > b[property] : b[property] > a[property];
         });
@@ -131,12 +128,11 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
 
     return function format(collection) {
-        let collectionCopy = copy(collection);
 
-        return collectionCopy.map(part => {
-            part[property] = formatter(part[property]);
+        return copy(collection).map(item => {
+            item[property] = formatter(item[property]);
 
-            return part;
+            return item;
         });
     };
 };
@@ -156,13 +152,13 @@ exports.limit = function (count) {
 
 /**
  * Остался ли элемент в коллекции после применения фильтра
- * @param {Object} part - элемент
+ * @param {Object} item - элемент
  * @param {Function} filter - фильтр
  * @returns {Boolean}
  */
-function isPartRemainAfterFilter(part, filter) {
+function isitemRemainAfterFilter(item, filter) {
 
-    return filter([part]).length !== 0;
+    return filter([item]).length !== 0;
 }
 
 if (exports.isStar) {
@@ -170,21 +166,19 @@ if (exports.isStar) {
     /**
      * Фильтрация, объединяющая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
-     * @returns {Function} оставляет элементы, пошедшие хотя бы через один фильтр
+     * @param {Array} filtersIn – Фильтрующие функции
+     * @returns {Function} оставляет элементы, прошедшие хотя бы через один фильтр
      */
     exports.or = function (...filtersIn) {
 
         return function or(collection) {
 
-            return collection.filter(part => {
-                for (let filter of filtersIn) {
-                    if (isPartRemainAfterFilter(part, filter)) { // элемент остался после фильтра
-                        return true;
-                    }
-                }
+            return collection.filter(item => {
 
-                return false;
+                return filtersIn.some(filter => {
+
+                    return isitemRemainAfterFilter(item, filter);
+                });
             });
         };
     };
@@ -192,21 +186,19 @@ if (exports.isStar) {
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
-     * @params {...Function} – Фильтрующие функции
+     * @param {Array} filtersIn – Фильтрующие функции
      * @returns {Function} оставляет элементы, которые остались после всех фильтров
      */
     exports.and = function (...filtersIn) {
 
         return function and(collection) {
 
-            return collection.filter(part => {
-                for (let filter of filtersIn) {
-                    if (!isPartRemainAfterFilter(part, filter)) { // элемент изчез после фильтра
-                        return false;
-                    }
-                }
+            return collection.filter(item => {
 
-                return true;
+                return filtersIn.every(filter => {
+
+                    return isitemRemainAfterFilter(item, filter);
+                });
             });
         };
     };
