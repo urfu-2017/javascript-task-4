@@ -17,7 +17,18 @@ var PRIORITIES = {
 };
 
 function doCopyCollection(collection) {
-    return [...collection];
+    return collection.map(function (record) {
+        var copyRecord = {};
+        Object.keys(record).forEach(function (item) {
+            if (record.hasOwnProperty(item)) {
+                copyRecord[item] = record[item];
+            }
+
+            return copyRecord;
+        });
+
+        return copyRecord;
+    });
 }
 
 function sortFunctions(firstFunc, secondFunc) {
