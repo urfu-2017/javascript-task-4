@@ -10,6 +10,7 @@ const PRIORITY = {
     format: 6
 };
 
+
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
@@ -25,7 +26,7 @@ exports.isStar = false;
 
 
 exports.query = function (collection, ...selectors) {
-    var collectionCopy = collection;
+    let collectionCopy = getCopy(collection);
     selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
     for (let i = 0; i < selectors.length; i++) {
         collectionCopy = selectors[i](collectionCopy);
@@ -34,6 +35,11 @@ exports.query = function (collection, ...selectors) {
     return collectionCopy;
 };
 
+function getCopy(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
+
 /**
  * Выбор полей
  * @params {...String}
@@ -41,13 +47,14 @@ exports.query = function (collection, ...selectors) {
 
 exports.select = function (...params) {
 
-    return function (collection) {
-        let collectionCopy = collection;
+    return function select(collection) {
+        let collectionCopy = getCopy(collection);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = {};
             for (var i = 0; i < params.length; i++) {
-                if (person[i] !== undefined) {
-                    newPerson[i] = person[i];
+                let param = params[i];
+                if (person[param] !== undefined) {
+                    newPerson[param] = person[param];
                 }
             }
 
@@ -65,10 +72,10 @@ exports.select = function (...params) {
  */
 
 exports.filterIn = function (property, values) {
-    console.info(property, values);
+    // console.info(property, values);
 
-    return function (collection) {
-        let collectionCopy = collection.filter((a) => values.indexOf(a[property]) > -1);
+    return function filterIn(collection) {
+        let collectionCopy = getCopy(collection).filter((a) => values.indexOf(a[property]) > -1);
 
         return collectionCopy;
     };
@@ -83,8 +90,8 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     // console.info(property, order);
 
-    return function (collection) {
-        let collectionCopy = collection;
+    return function sortBy(collection) {
+        let collectionCopy = getCopy(collection);
         if (order === 'asc') {
             collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
 
@@ -105,12 +112,12 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     // console.info(property, formatter);
 
-    return function (collection) {
-        let collectionCopy = collection;
+    return function format(collection) {
+        let collectionCopy = getCopy(collection);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
-            console.info(newPerson);
+            // console.info(newPerson);
 
             return newPerson;
         });
@@ -127,8 +134,8 @@ exports.format = function (property, formatter) {
 exports.limit = function (count) {
     // console.info(count);
 
-    return function (collection) {
-        let collectionCopy = collection.slice(0, count);
+    return function limit(collection) {
+        let collectionCopy = getCopy(collection).slice(0, count);
 
         return collectionCopy;
     };
@@ -141,8 +148,15 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.or = function () {
-        return;
+
+    exports.or = function (...selectors) {
+        selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
+
+        return function or(collection) {
+            return collection.filter(person =>
+                selectors.some(func => func(collection).includes(person)));
+            // console.info(collectionCopy);
+        };
     };
 
     /**
@@ -150,7 +164,13 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.and = function () {
-        return;
+
+    exports.and = function (...selectors) {
+        selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
+
+        return function and(collection) {
+            return collection.filter(person =>
+                selectors.every(func => func(collection).includes(person)));
+        };
     };
 }
