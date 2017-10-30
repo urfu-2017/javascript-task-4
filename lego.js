@@ -1,3 +1,4 @@
+/* eslint-disable valid-jsdoc,linebreak-style */
 'use strict';
 
 /**
@@ -6,22 +7,43 @@
  */
 exports.isStar = true;
 
+let EXPR_ORDER = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    return collection;
+exports.query = function (collection, ...commands) {
+    let potatoCollection = collection.map(friend => Object.assign({}, friend));
+    commands.sort(function (a, b) {
+        return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
+    });
+    commands.forEach(f => {
+        potatoCollection = f(potatoCollection);
+    });
+
+    return potatoCollection;
 };
+
 
 /**
  * Выбор полей
  * @params {...String}
  */
-exports.select = function () {
-    return;
+exports.select = function (...commands) {
+    return function select(collection) {
+        return collection.map(el =>
+            commands.reduce((newObjOfFriends, field) => {
+                if (el[field] !== undefined) {
+                    newObjOfFriends[field] = el[field];
+                }
+
+                return newObjOfFriends;
+            }, {})
+        );
+    };
 };
 
 /**
@@ -30,9 +52,11 @@ exports.select = function () {
  * @param {Array} values – Доступные значения
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
-
-    return;
+    return function filterIn(collection) {
+        return collection.filter(el =>
+            values.some(value =>
+                el[property] === value));
+    };
 };
 
 /**
@@ -41,9 +65,20 @@ exports.filterIn = function (property, values) {
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
+    return function sortBy(collection) {
+        let funcSort = (property === 'age')
+            ? (a, b) => {
+                return a - b;
+            }
+            : (a, b) => a.localeCompare(b);
+        collection.sort((a, b) => funcSort(a[property], b[property]));
+        if (order === 'desc') {
+            return collection.reverse();
+        }
 
-    return;
+        return collection;
+    };
+
 };
 
 /**
@@ -52,20 +87,21 @@ exports.sortBy = function (property, order) {
  * @param {Function} formatter – Функция для форматирования
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
-    return;
+    return function format(collection) {
+        return collection.map(el =>
+            Object.assign({}, el, { [property]: formatter(el[property]) })
+        );
+    };
 };
 
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
  */
-exports.limit = function (count) {
-    console.info(count);
-
-    return;
-};
+exports.limit = (count) =>
+    function limit(collection) {
+        return collection.slice(0, count);
+    };
 
 if (exports.isStar) {
 
@@ -74,16 +110,21 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.or = function () {
-        return;
-    };
+    exports.or = (...commands) =>
+        function or(collection) {
+            return collection.filter(item =>
+                commands.some(func => func([item]).length > 0));
+        };
+
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.and = function () {
-        return;
-    };
+    exports.and = (...commands) =>
+        function and(collection) {
+            return collection.filter(item =>
+                commands.every(func => func([item]).length > 0));
+        };
 }
