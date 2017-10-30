@@ -48,7 +48,9 @@ exports.select = function (...fields) {
         return collection.map((record) => {
             let newRecord = {};
             fields.forEach((key) => {
-                newRecord[key] = record[key];
+                if (key in record) {
+                    newRecord[key] = record[key];
+                }
             });
 
             return newRecord;
