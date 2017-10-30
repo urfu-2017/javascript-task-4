@@ -31,6 +31,7 @@ exports.query = function (collection, ...operators) {
 
     return operators
         .sort((firstFunction, secondFunction) => {
+
             return FUNCTION_PRIORITY[firstFunction.name] - FUNCTION_PRIORITY[secondFunction.name];
         })
         .reduce((currentCollection, fun) => {
@@ -45,13 +46,14 @@ exports.query = function (collection, ...operators) {
 
 exports.select = function (...fields) {
     return function select(collection) {
-        return collection.map(record => {
-            let newRecord = {};
-            fields.forEach(key => {
-                newRecord[key] = record[key];
+        return collection.map(function (record) {
+            Object.keys(record).forEach(function (key) {
+                if (!fields.includes(key)) {
+                    delete record[key];
+                }
             });
 
-            return newRecord;
+            return record;
         });
     };
 };
@@ -64,7 +66,6 @@ exports.select = function (...fields) {
  */
 
 exports.filterIn = function (property, values) {
-
     return function filterIn(collection) {
         return collection.filter(record => {
             return values.includes(record[property]);
@@ -97,7 +98,6 @@ exports.sortBy = function (property, order) {
  */
 
 exports.format = function (property, formatter) {
-
     return function format(collection) {
         return collection.map(record=> {
             if (property in record) {
