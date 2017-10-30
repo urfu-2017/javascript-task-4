@@ -15,12 +15,12 @@ let EXPR_ORDER = ['and', 'or', 'filterIn', 'sortBy', 'select', 'format', 'limit'
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection, ...q) {
+exports.query = function (collection, ...commands) {
     let potatoCollection = collection.map(friend => Object.assign({}, friend));
-    q.sort(function (a, b) {
+    commands.sort(function (a, b) {
         return EXPR_ORDER.indexOf(a.name) - EXPR_ORDER.indexOf(b.name);
     });
-    q.forEach(f => {
+    commands.forEach(f => {
         potatoCollection = f(potatoCollection);
     });
 
@@ -32,18 +32,17 @@ exports.query = function (collection, ...q) {
  * Выбор полей
  * @params {...String}
  */
-exports.select = function (...q) {
+exports.select = function (...commands) {
     return function select(collection) {
-        return collection.map(el =>{
-            let newObjOfFriends = {};
-            q.forEach((field) => {
+        return collection.map(el =>
+            commands.reduce((newObjOfFriends, field) => {
                 if (el[field] !== undefined) {
                     newObjOfFriends[field] = el[field];
                 }
-            });
 
-            return newObjOfFriends;
-        });
+                return newObjOfFriends;
+            }, {})
+        );
     };
 };
 
@@ -52,19 +51,10 @@ exports.select = function (...q) {
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
  */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
-
-    return function filterIn(collection) {
-        let potatoColection = [];
-        for (let i = 0; i < collection.length; i++) {
-            if (values.indexOf(collection[i][property]) !== -1) {
-                potatoColection.push(collection[i]);
-            }
-        }
-
-        return potatoColection;
-    };
+exports.filterIn = function filterIn(property, values) {
+    return collection => collection.filter(el =>
+        values.some(value =>
+            el[property] === value));
 };
 
 /**
@@ -72,29 +62,19 @@ exports.filterIn = function (property, values) {
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
  */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
-
-    return function sortBy(collection) {
-        let potatoCollection = collection;
+exports.sortBy = function sortBy(property, order) {
+    return collection => {
         let funcSort = (property === 'age')
             ? (a, b) => {
-                if (a > b) {
-                    return 1;
-                }
-                if (a < b) {
-                    return -1;
-                }
-
-                return 0;
+                return a - b;
             }
             : (a, b) => a.localeCompare(b);
-        potatoCollection.sort((a, b) => funcSort(a[property], b[property]));
+        collection.sort((a, b) => funcSort(a[property], b[property]));
         if (order === 'desc') {
-            return potatoCollection.reverse();
+            return collection.reverse();
         }
 
-        return potatoCollection;
+        return collection;
     };
 
 };
@@ -104,18 +84,10 @@ exports.sortBy = function (property, order) {
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
  */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
-    return function format(collection) {
-        let potatoCollection = [];
-        for (let i = 0; i < collection.length; i++) {
-            potatoCollection.push(collection[i]);
-            potatoCollection[i][property] = formatter(collection[i][property]);
-        }
-
-        return potatoCollection;
-    };
+exports.format = function format(property, formatter) {
+    return collection => collection.map(el =>
+        Object.assign({}, el, { [property]: formatter(el[property]) })
+    );
 };
 
 /**
@@ -134,10 +106,10 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.or = (...q) =>
+    exports.or = (...commands) =>
         function or(collection) {
             return collection.filter(item =>
-                q.some(func => func([item]).length > 0));
+                commands.some(func => func([item]).length > 0));
         };
 
 
@@ -146,9 +118,9 @@ if (exports.isStar) {
      * @star
      * @params {...Function} – Фильтрующие функции
      */
-    exports.and = (...q) =>
+    exports.and = (...commands) =>
         function and(collection) {
             return collection.filter(item =>
-                q.every(func => func([item]).length > 0));
+                commands.every(func => func([item]).length > 0));
         };
 }
