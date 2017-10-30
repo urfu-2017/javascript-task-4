@@ -42,9 +42,9 @@ exports.query = function (collection, ...params) {
 exports.select = (...params) => {
     return function select(collection) {
         return collection.map(person => {
-            return params.reduce((newPerson, prop) => {
-                if (person.hasOwnProperty(prop)) {
-                    newPerson[prop] = person[prop];
+            return params.reduce((newPerson, param) => {
+                if (person.hasOwnProperty(param)) {
+                    newPerson[param] = person[param];
                 }
 
                 return newPerson;
@@ -62,7 +62,7 @@ exports.select = (...params) => {
 exports.filterIn = (property, values) => {
     return function filterIn(collection) {
         return collection
-            .filter(person => values.some(item => person[property] === item));
+            .filter(person => values.some(value => person[property] === value));
     };
 };
 
@@ -79,7 +79,8 @@ exports.sortBy = (property, order) => {
         return collection.sort((a, b) => {
             if (a[property] > b[property]) {
                 return sortOrder;
-            } else if (a[property] < b[property]) {
+            }
+            if (a[property] < b[property]) {
                 return -1 * sortOrder;
             }
 
@@ -128,7 +129,7 @@ if (exports.isStar) {
     exports.or = (...filters) => {
         return function or(collection) {
             return collection.filter(person => {
-                return filters.some(rule => Boolean(rule([person]).length));
+                return filters.some(filter => filter([person]).length !== 0);
             });
         };
     };
@@ -142,7 +143,7 @@ if (exports.isStar) {
     exports.and = (...filters) => {
         return function and(collection) {
             return collection.filter(person => {
-                return filters.every(rule => Boolean(rule([person]).length));
+                return filters.every(filter => filter([person]).length !== 0);
             });
         };
     };
