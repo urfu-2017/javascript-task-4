@@ -46,13 +46,12 @@ exports.query = function (collection, ...operators) {
 exports.select = function (...fields) {
     return function select(collection) {
         return collection.map((record) => {
-            Object.keys(record).forEach((key) => {
-                if (!fields.includes(key)) {
-                    delete record[key];
-                }
+            let newRecord = {};
+            fields.forEach((key) => {
+                newRecord[key] = record[key];
             });
 
-            return record;
+            return newRecord;
         });
     };
 };
