@@ -25,13 +25,12 @@ const FUNCTION_PRIORITY = {
  */
 
 exports.query = function (collection, ...operators) {
-    let newCollection = collection.map(record => {
+    let newCollection = collection.map((record) => {
         return Object.assign({}, record);
     });
 
     return operators
         .sort((firstFunction, secondFunction) => {
-
             return FUNCTION_PRIORITY[firstFunction.name] - FUNCTION_PRIORITY[secondFunction.name];
         })
         .reduce((currentCollection, fun) => {
@@ -46,8 +45,8 @@ exports.query = function (collection, ...operators) {
 
 exports.select = function (...fields) {
     return function select(collection) {
-        return collection.map(function (record) {
-            Object.keys(record).forEach(function (key) {
+        return collection.map((record) => {
+            Object.keys(record).forEach((key) => {
                 if (!fields.includes(key)) {
                     delete record[key];
                 }
@@ -66,8 +65,9 @@ exports.select = function (...fields) {
  */
 
 exports.filterIn = function (property, values) {
+
     return function filterIn(collection) {
-        return collection.filter(record => {
+        return collection.filter((record) => {
             return values.includes(record[property]);
         });
     };
@@ -82,10 +82,11 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort(function (firstRecord, secondRecord) {
+        return collection.sort((firstRecord, secondRecord) => {
             let ascending = Number(firstRecord[property] > secondRecord[property]);
+            let descending = Number(secondRecord[property] > firstRecord[property]);
 
-            return order === 'asc' ? ascending : ascending * (-1);
+            return order === 'asc' ? ascending : descending;
         });
     };
 };
@@ -98,8 +99,9 @@ exports.sortBy = function (property, order) {
  */
 
 exports.format = function (property, formatter) {
+
     return function format(collection) {
-        return collection.map(record=> {
+        return collection.map((record) => {
             if (property in record) {
                 record[property] = formatter(record[property]);
             }
@@ -132,8 +134,8 @@ if (exports.isStar) {
 
     exports.or = function (...functions) {
         return function or(collection) {
-            return collection.filter(record => {
-                return functions.some(fun => {
+            return collection.filter((record) => {
+                return functions.some((fun) => {
                     return fun(collection).includes(record);
                 });
             });
