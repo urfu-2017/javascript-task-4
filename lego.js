@@ -13,15 +13,10 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let collectionCopy = JSON.parse(JSON.stringify(collection));
+    let collectionCopy = Object.assign(collection);
 
-    return functions.sort((a, b) => {
-        return a.priority - b.priority;
-    }).reduce((acc, func) => {
-        acc = func.exec(acc);
-
-        return acc;
-    }, collectionCopy);
+    return functions.sort((a, b) => a.priority - b.priority)
+        .reduce((acc, func) => func.exec(acc), collectionCopy);
 };
 
 /**
@@ -31,23 +26,25 @@ exports.query = function (collection, ...functions) {
 
 exports.select = function (...selectors) {
     return {
-        priority: 3,
-        exec: collection => {
-            return collection.reduce((acc, friend) => {
-                acc.push(selectors.reduce((selection, selector) => {
-                    if (friend.hasOwnProperty(selector)) {
-                        selection[selector] = friend[selector];
-                    }
+        priority: 2,
+        exec: collection => collection.reduce((acc, friend) => {
+            acc.push(buildSelection(friend));
 
-                    return selection;
-                }, {}));
-
-                return acc;
-
-            }, []);
-        }
+            return acc;
+        }, [])
     };
+
+    function buildSelection(friend) {
+        return selectors.reduce((selection, selector) => {
+            if (Reflect.has(friend, selector)) {
+                selection[selector] = friend[selector];
+            }
+
+            return selection;
+        }, {});
+    }
 };
+
 
 /**
  * Фильтрация поля по массиву значений
@@ -57,20 +54,11 @@ exports.select = function (...selectors) {
 
 exports.filterIn = function (property, values) {
     return {
-        priority: 1,
-        exec: collection => {
-            return collection.filter(friend => {
-                for (let value of values) {
-                    if (friend[property] === value) {
-                        return true;
-                    }
-                }
-
-                return false;
-            });
-        }
+        priority: 0,
+        exec: collection => collection.filter(friend => values.includes(friend[property]))
     };
 };
+
 
 /**
  * Сортировка коллекции по полю
@@ -80,24 +68,19 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return {
-        priority: 2,
-        exec: collection => {
-            let sortedCollection = collection.sort((a, b) => {
-                if (a[property] < b[property]) {
-                    return -1;
-                } else if (a[property] > b[property]) {
-                    return 1;
-                }
-
-                return 0;
-            });
-            if (order === 'desc') {
-                return sortedCollection.reverse();
-            }
-
-            return sortedCollection;
-        }
+        priority: 1,
+        exec: collection => collection.sort(comparator)
     };
+
+    function comparator(a, b) {
+        if (a[property] < b[property]) {
+            return order === 'asc' ? -1 : 1;
+        } else if (a[property] > b[property]) {
+            return order === 'asc' ? 1 : -1;
+        }
+
+        return 0;
+    }
 };
 
 /**
@@ -108,18 +91,18 @@ exports.sortBy = function (property, order) {
 
 exports.format = function (property, formatter) {
     return {
-        priority: 4,
-        exec: collection => {
-            return collection.map(friend => {
-                if (friend.hasOwnProperty(property)) {
+        priority: 3,
+        exec: collection =>
+            collection.map(friend => {
+                if (Reflect.has(friend, property)) {
                     friend[property] = formatter(friend[property]);
                 }
 
                 return friend;
-            });
-        }
+            })
     };
 };
+
 
 /**
  * Ограничение количества элементов в коллекции
@@ -128,10 +111,8 @@ exports.format = function (property, formatter) {
 
 exports.limit = function (count) {
     return {
-        priority: 4,
-        exec: collection => {
-            return collection.slice(0, count);
-        }
+        priority: 3,
+        exec: collection => collection.slice(0, count)
     };
 };
 
@@ -146,19 +127,9 @@ if (exports.isStar) {
     exports.or = function (...functions) {
         return {
             priority: 0,
-            exec: collection => {
-                // return functions.reduce((acc, filter) => {
-                //     filter.exec(collection).forEach(friend => {
-                //         if (!acc.includes(friend)) {
-                //             acc.push(friend);
-                //         }
-                //     });
-                //
-                //     return acc;
-                // }, []);
-                return collection.filter(friend =>
-                    functions.some(filter => filter.exec(collection).includes(friend)));
-            }
+            exec: collection =>
+                collection.filter(friend =>
+                    functions.some(filter => filter.exec(collection).includes(friend)))
         };
     };
 
@@ -171,13 +142,7 @@ if (exports.isStar) {
     exports.and = function (...functions) {
         return {
             priority: 0,
-            exec: collection => {
-                return functions.reduce((acc, filter) => {
-                    acc = filter.exec(acc);
-
-                    return acc;
-                }, collection);
-            }
+            exec: collection => functions.reduce((acc, filter) => filter.exec(acc), collection)
         };
     };
 }

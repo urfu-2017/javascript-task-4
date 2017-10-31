@@ -61,7 +61,9 @@ var friends = [
     }
 ];
 
+// Находим настоящих друзей
 var bestFriends = lego.query(
+
     // среди всех друзей.
     friends,
 
@@ -108,13 +110,12 @@ if (lego.isStar) {
             lego.and(
                 // Должны сработать оба условия
                 lego.filterIn('gender', ['Мужской']),
-                lego.filterIn('gender', ['Женский']),
                 lego.filterIn('favoriteFruit', ['Картофель'])
+            ),
+            lego.and(
+                lego.filterIn('gender', ['Женский']),
+                lego.filterIn('favoriteFruit', ['Яблоко'])
             )
-            // lego.and(
-            //     lego.filterIn('gender', ['Женский']),
-            //     lego.filterIn('favoriteFruit', ['Яблоко'])
-            // )
         )
     );
 
