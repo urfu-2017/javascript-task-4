@@ -42,15 +42,13 @@ exports.select = function (...properties) {
         let collectionCopy = copy(collection);
 
         return collectionCopy.map(element => {
-            let newElement = {};
-
-            for (let key in element) {
+            return Object.keys(element).reduce(function (newElement, key) {
                 if (contains(properties, key)) {
                     newElement[key] = element[key];
                 }
-            }
 
-            return newElement;
+                return newElement;
+            }, {});
         });
     };
 };
@@ -78,8 +76,8 @@ exports.sortBy = function (property, order) {
         let collectionCopy = copy(collection);
 
         return collectionCopy.sort((a, b) => {
-            return (order === 'asc') ? a[property] > b[property]
-                : a[property] < b[property];
+            return (order === 'asc') ? a[property] - b[property]
+                : a[property] - b[property];
         });
     };
 };
