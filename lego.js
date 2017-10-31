@@ -132,18 +132,6 @@ exports.limit = function (count) {
     };
 };
 
-var equals = function (item1, item2) {
-    var keys = Object.keys(item1);
-    if (keys.length !== Object.keys(item2).length) {
-
-        return false;
-    }
-
-    return (keys.every(function (key) {
-        return (item1[key] === item2[key]);
-    }));
-};
-
 if (exports.isStar) {
 
     /**
@@ -156,12 +144,12 @@ if (exports.isStar) {
         var _arguments = [].slice.call(arguments);
 
         return function or(collection) {
+            collection = collection.slice();
+
             return _arguments.reduce (function (resultedCollection, func) {
                 let newCollection = func(collection);
                 collection = collection.filter(function (item) {
-                    return !newCollection.some(function (filteredItem) {
-                        return equals(item, filteredItem);
-                    });
+                    return newCollection.indexOf(item) === -1;
                 });
 
                 return resultedCollection.concat(newCollection);
@@ -181,7 +169,7 @@ if (exports.isStar) {
         return function and(collection) {
             return _arguments.reduce (function (filteredCollection, func) {
                 return func(filteredCollection);
-            }, collection);
+            }, collection.slice());
         };
     };
 }
