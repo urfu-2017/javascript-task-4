@@ -147,7 +147,7 @@ if (exports.isStar) {
             return _arguments.reduce (function (resultedCollection, func) {
                 let newCollection = func(collection);
                 collection.filter(function (item) {
-                    return !newCollection.indexOf(item);
+                    return newCollection.indexOf(item) === -1;
                 });
 
                 return resultedCollection.concat(newCollection);
@@ -165,8 +165,8 @@ if (exports.isStar) {
         var _arguments = [].slice.call(arguments);
 
         return function and(collection) {
-            return _arguments.reduce (function (filteredCollection, argument) {
-                return argument(filteredCollection);
+            return _arguments.reduce (function (filteredCollection, func) {
+                return func(filteredCollection);
             }, collection);
         };
     };
