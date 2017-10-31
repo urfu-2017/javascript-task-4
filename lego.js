@@ -1,15 +1,5 @@
 'use strict';
 
-const PRIORITY = {
-    filterIn: 0,
-    and: 1,
-    or: 2,
-    sortBy: 3,
-    select: 4,
-    limit: 5,
-    format: 6
-};
-
 
 /**
  * Сделано задание на звездочку
@@ -26,6 +16,15 @@ exports.isStar = true;
 
 
 exports.query = function (collection, ...selectors) {
+    const PRIORITY = {
+        filterIn: 0,
+        and: 1,
+        or: 2,
+        sortBy: 3,
+        select: 4,
+        limit: 5,
+        format: 6
+    };
     let collectionCopy = collection.slice(0);
     selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
     for (let i = 0; i < selectors.length; i++) {
@@ -84,15 +83,13 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
-        let collectionCopy = collection.slice(0);
-        if (order === 'asc') {
-            collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
+        return collection.sort((a, b) => {
+            if (order === 'asc') {
+                return (a[property] > b[property]);
+            }
 
-            return collectionCopy;
-        }
-        collectionCopy = collectionCopy.sort((a, b) => a[property] < b[property]);
-
-        return collectionCopy;
+            return (a[property] < b[property]);
+        });
     };
 };
 
