@@ -127,7 +127,9 @@ exports.limit = function (count) {
     // console.info(count);
 
     return function limit(collection) {
-        return collection.slice(0, count);
+        let collectionCopy = getCopy(collection).slice(0, count);
+
+        return collectionCopy;
     };
 };
 
