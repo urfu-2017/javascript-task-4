@@ -132,6 +132,18 @@ exports.limit = function (count) {
     };
 };
 
+var equals = function (item1, item2) {
+    var keys = Object.keys(item1);
+    if (keys.length !== Object.keys(item2).length) {
+
+        return false;
+    }
+
+    return (keys.every(function (key) {
+        return (item1[key] === item2[key]);
+    }));
+};
+
 if (exports.isStar) {
 
     /**
@@ -145,13 +157,14 @@ if (exports.isStar) {
 
         return function or(collection) {
             return _arguments.reduce (function (resultedCollection, func) {
-                return func(collection).reduce (function (currentCollection, item1) {
-                    if (resultedCollection.indexOf(item1) === -1) {
-                        currentCollection.push(item1);
-                    }
+                let newCollection = func(collection);
+                collection = collection.filter(function (item) {
+                    return !newCollection.some(function (filteredItem) {
+                        return equals(item, filteredItem);
+                    });
+                });
 
-                    return currentCollection;
-                }, resultedCollection.slice());
+                return resultedCollection.concat(newCollection);
             }, []);
         };
     };
