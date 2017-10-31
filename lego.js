@@ -9,7 +9,7 @@ exports.isStar = true;
 
 const FUNCTION_PRIORITY = {
     limit: 4,
-    format: 4,
+    format: 5,
     select: 3,
     or: 2,
     add: 2,
