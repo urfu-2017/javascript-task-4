@@ -108,16 +108,13 @@ exports.format = function (property, formatter) {
     // console.info(property, formatter);
 
     return function format(collection) {
-        let collectionCopy = getCopy(collection);
-        collectionCopy = collectionCopy.map((person) => {
+        return collection.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
             // console.info(newPerson);
 
             return newPerson;
         });
-
-        return collectionCopy;
     };
 };
 
@@ -130,9 +127,7 @@ exports.limit = function (count) {
     // console.info(count);
 
     return function limit(collection) {
-        let collectionCopy = getCopy(collection).slice(0, count);
-
-        return collectionCopy;
+        return collection.slice(0, count);
     };
 };
 
