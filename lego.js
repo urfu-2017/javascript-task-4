@@ -64,13 +64,13 @@ exports.filterIn = function (property, values) {
     console.info(property, values);
 
     return function filterIn(collection) {
-        return collection.filter(x => {
-            let keys = Object.keys(x);
-            if (!keys.includes(property)) {
+        return collection.filter(friend => {
+            let fields = Object.keys(friend);
+            if (!fields.includes(property)) {
                 return false;
             }
 
-            return values.includes(x[property]);
+            return values.includes(friend[property]);
         });
     };
 };
@@ -107,16 +107,15 @@ exports.format = function (property, formatter) {
     console.info(property, formatter);
 
     return function format(collection) {
-        let collectionCopy = JSON.parse(JSON.stringify(collection));
 
-        return collectionCopy.map(x => {
-            let keys = Object.keys(x);
-            if (!keys.includes(property)) {
-                return x;
+        return collection.map(friend => {
+            let fields = Object.keys(friend);
+            if (!fields.includes(property)) {
+                return friend;
             }
-            x[property] = formatter(x[property]);
+            friend[property] = formatter(friend[property]);
 
-            return x;
+            return friend;
         });
     };
 };
@@ -131,6 +130,9 @@ exports.limit = function (count) {
 
     return function limit(collection) {
         let collectionCopy = JSON.parse(JSON.stringify(collection));
+        if (count < 0) {
+            return [];
+        }
         collectionCopy.length = count;
 
         return collectionCopy;
@@ -148,10 +150,9 @@ if (exports.isStar) {
     exports.or = function (...functions) {
 
         return function or(collection) {
-            let collectionCopy = JSON.parse(JSON.stringify(collection));
 
-            return collectionCopy.filter(x => functions
-                .some(fieldFiltering => (fieldFiltering([x]).length !== 0)));
+            return collection.filter(friend => functions
+                .some(func => (func([friend]).length !== 0)));
         };
     };
 
