@@ -26,7 +26,7 @@ exports.isStar = false;
 
 
 exports.query = function (collection, ...selectors) {
-    let collectionCopy = getCopy(collection);
+    let collectionCopy = collection.slice(0);
     selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
     for (let i = 0; i < selectors.length; i++) {
         collectionCopy = selectors[i](collectionCopy);
@@ -72,9 +72,7 @@ exports.filterIn = function (property, values) {
     // console.info(property, values);
 
     return function filterIn(collection) {
-        let collectionCopy = getCopy(collection).filter((a) => values.indexOf(a[property]) > -1);
-
-        return collectionCopy;
+        return collection.filter((a) => values.indexOf(a[property]) > -1);
     };
 };
 
