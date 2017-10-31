@@ -9,12 +9,12 @@ exports.isStar = true;
 
 const FUNCTION_PRIORITY = {
     limit: 4,
-    format: 5,
+    format: 4,
     select: 3,
-    or: 2,
-    add: 2,
-    sortBy: 1,
-    filterIn: 1
+    sortBy: 2,
+    filterIn: 2,
+    or: 1,
+    add: 1
 };
 
 /**
@@ -78,11 +78,12 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort((firstRecord, secondRecord) => {
-            let ascending = (firstRecord[property] > secondRecord[property]) ? 1 : -1;
+        return collection.slice()
+            .sort((firstRecord, secondRecord) => {
+                let ascending = (firstRecord[property] > secondRecord[property]) ? 1 : -1;
 
-            return order === 'asc' ? ascending : -ascending;
-        });
+                return order === 'asc' ? ascending : -ascending;
+            });
     };
 };
 
@@ -95,12 +96,14 @@ exports.sortBy = function (property, order) {
 
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.map((record) => {
-            let newRecord = Object.assign({}, record);
-            newRecord[property] = formatter(newRecord[property]);
+        return collection.slice()
+            .map((record) => {
+                if (property in record) {
+                    record[property] = formatter(record[property]);
+                }
 
-            return newRecord;
-        });
+                return record;
+            });
     };
 };
 
