@@ -25,13 +25,17 @@ const FUNCTION_PRIORITY = {
  */
 
 exports.query = function (collection, ...operators) {
+    let newCollection = collection.map((record) => {
+        return Object.assign({}, record);
+    });
+
     return operators
         .sort((firstFunction, secondFunction) => {
             return FUNCTION_PRIORITY[firstFunction.name] - FUNCTION_PRIORITY[secondFunction.name];
         })
         .reduce((currentCollection, fun) => {
             return fun(currentCollection);
-        }, collection);
+        }, newCollection);
 };
 
 /**
@@ -81,9 +85,8 @@ exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort((firstRecord, secondRecord) => {
             let ascending = Number(firstRecord[property] > secondRecord[property]);
-            let descending = Number(secondRecord[property] > firstRecord[property]);
 
-            return order === 'asc' ? ascending : descending;
+            return order === 'asc' ? ascending : ascending - 1;
         });
     };
 };
@@ -98,12 +101,11 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map((record) => {
-            let newRecord = Object.assign({}, record);
-            if (property in newRecord) {
-                newRecord[property] = formatter(newRecord[property]);
+            if (property in record) {
+                record[property] = formatter(record[property]);
             }
 
-            return newRecord;
+            return record;
         });
     };
 };
