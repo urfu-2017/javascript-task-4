@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -20,8 +20,8 @@ exports.query = function (collection, ...selectors) {
         and: 1,
         or: 2,
         sortBy: 3,
-        select: 5,
-        limit: 4,
+        select: 4,
+        limit: 5,
         format: 6
     };
     let collectionCopy = collection.slice();
