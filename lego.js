@@ -14,7 +14,7 @@ const FUNCTION_PRIORITY = {
     sortBy: 2,
     filterIn: 2,
     or: 1,
-    add: 1
+    add: 2
 };
 
 /**
@@ -25,13 +25,17 @@ const FUNCTION_PRIORITY = {
  */
 
 exports.query = function (collection, ...operators) {
+    let newCollection = collection.map((record) => {
+        return Object.assign({}, record);
+    });
+
     return operators
         .sort((firstFunction, secondFunction) => {
             return FUNCTION_PRIORITY[firstFunction.name] - FUNCTION_PRIORITY[secondFunction.name];
         })
         .reduce((currentCollection, fun) => {
             return fun(currentCollection);
-        }, collection);
+        }, newCollection);
 };
 
 /**
@@ -78,12 +82,11 @@ exports.filterIn = function (property, values) {
 
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.slice()
-            .sort((firstRecord, secondRecord) => {
-                let ascending = (firstRecord[property] > secondRecord[property]) ? 1 : -1;
+        return collection.sort((firstRecord, secondRecord) => {
+            let ascending = (firstRecord[property] > secondRecord[property]) ? 1 : -1;
 
-                return order === 'asc' ? ascending : -ascending;
-            });
+            return order === 'asc' ? ascending : -ascending;
+        });
     };
 };
 
@@ -96,14 +99,13 @@ exports.sortBy = function (property, order) {
 
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.slice()
-            .map((record) => {
-                if (property in record) {
-                    record[property] = formatter(record[property]);
-                }
+        return collection.map((record) => {
+            if (property in record) {
+                record[property] = formatter(record[property]);
+            }
 
-                return record;
-            });
+            return record;
+        });
     };
 };
 
