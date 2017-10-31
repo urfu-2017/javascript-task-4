@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let FUNC_PRIORITETS = {
+let FUNC_PRIORS = {
     'format': 0,
     'limit': 0,
     'select': 2,
@@ -23,14 +23,15 @@ let FUNC_PRIORITETS = {
  * @returns {Array}
  */
 exports.query = function (collection, ...funcs) {
-    funcs = funcs.sort((a, b) => FUNC_PRIORITETS[b.name] - FUNC_PRIORITETS[a.name]);
+    funcs = funcs.sort(compareFunctionsByPriority);
     let newCollection = createObjectCopy(collection);
-    for (let func of funcs) {
-        newCollection = func(newCollection);
-    }
 
-    return newCollection;
+    return funcs.reduce((prev, func) => func(prev), newCollection);
 };
+
+function compareFunctionsByPriority(function1, function2) {
+    return FUNC_PRIORS[function2.name] - FUNC_PRIORS[function1.name];
+}
 
 function createObjectCopy(object) {
     return JSON.parse(JSON.stringify(object));
@@ -45,9 +46,9 @@ exports.select = function (...fields) {
     return function select(collection) {
         return collection.map(element => {
             let newElement = {};
-            for (let arg of fields) {
-                if (arg in element) {
-                    newElement[arg] = element[arg];
+            for (let field of fields) {
+                if (element.hasOwnProperty(field)) {
+                    newElement[field] = element[field];
                 }
             }
 
@@ -97,8 +98,8 @@ function createComparatorByProperty(property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.map(el => {
-            let newElem = createObjectCopy(el);
+        return collection.map(elem => {
+            let newElem = createObjectCopy(elem);
             newElem[property] = formatter(newElem[property]);
 
             return newElem;
@@ -127,7 +128,11 @@ if (exports.isStar) {
      */
     exports.or = function (...filters) {
         return function or(collection) {
-            return collection.filter(el => filters.some(filter => filter([el]).includes(el)));
+            return collection.filter(
+                elem => filters.some(
+                    filter => filter([elem]).length === 1
+                )
+            );
         };
     };
 
@@ -139,12 +144,7 @@ if (exports.isStar) {
      */
     exports.and = function (...filters) {
         return function and(collection) {
-            let newCollection = collection;
-            for (let filter of filters) {
-                newCollection = filter(newCollection);
-            }
-
-            return newCollection;
+            return filters.reduce((prev, filter) => filter(prev), collection);
         };
     };
 }
