@@ -35,11 +35,6 @@ exports.query = function (collection, ...selectors) {
     return collectionCopy;
 };
 
-function getCopy(collection) {
-    return JSON.parse(JSON.stringify(collection));
-}
-
-
 /**
  * Выбор полей
  * @params {...String}
@@ -69,7 +64,6 @@ exports.select = function (...params) {
  */
 
 exports.filterIn = function (property, values) {
-    // console.info(property, values);
 
     return function filterIn(collection) {
         return collection.filter((a) => values.indexOf(a[property]) > -1);
@@ -83,10 +77,9 @@ exports.filterIn = function (property, values) {
  */
 
 exports.sortBy = function (property, order) {
-    // console.info(property, order);
 
     return function sortBy(collection) {
-        let collectionCopy = getCopy(collection);
+        let collectionCopy = collection.slice(0);
         if (order === 'asc') {
             collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
 
@@ -105,14 +98,12 @@ exports.sortBy = function (property, order) {
  */
 
 exports.format = function (property, formatter) {
-    // console.info(property, formatter);
 
     return function format(collection) {
-        let collectionCopy = getCopy(collection);
+        let collectionCopy = collection.slice(0);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
-            // console.info(newPerson);
 
             return newPerson;
         });
@@ -127,7 +118,6 @@ exports.format = function (property, formatter) {
  */
 
 exports.limit = function (count) {
-    // console.info(count);
 
     return function limit(collection) {
         return collection.slice(0, count);
@@ -143,12 +133,10 @@ if (exports.isStar) {
      */
 
     exports.or = function (...selectors) {
-        selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
 
         return function or(collection) {
             return collection.filter(person =>
                 selectors.some(func => func(collection).includes(person)));
-            // console.info(collectionCopy);
         };
     };
 
@@ -159,7 +147,6 @@ if (exports.isStar) {
      */
 
     exports.and = function (...selectors) {
-        selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
 
         return function and(collection) {
             return collection.filter(person =>
