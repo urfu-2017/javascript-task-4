@@ -25,17 +25,13 @@ const FUNCTION_PRIORITY = {
  */
 
 exports.query = function (collection, ...operators) {
-    let newCollection = collection.map((record) => {
-        return Object.assign({}, record);
-    });
-
     return operators
         .sort((firstFunction, secondFunction) => {
             return FUNCTION_PRIORITY[firstFunction.name] - FUNCTION_PRIORITY[secondFunction.name];
         })
         .reduce((currentCollection, fun) => {
             return fun(currentCollection);
-        }, newCollection);
+        }, collection);
 };
 
 /**
@@ -100,11 +96,10 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map((record) => {
-            if (property in record) {
-                record[property] = formatter(record[property]);
-            }
+            let newRecord = Object.assign({}, record);
+            newRecord[property] = formatter(newRecord[property]);
 
-            return record;
+            return newRecord;
         });
     };
 };
