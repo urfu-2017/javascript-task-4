@@ -146,7 +146,7 @@ if (exports.isStar) {
         return function or(collection) {
             return _arguments.reduce (function (resultedCollection, func) {
                 let newCollection = func(collection);
-                collection.filter(function (item) {
+                collection = collection.filter(function (item) {
                     return newCollection.indexOf(item) === -1;
                 });
 
