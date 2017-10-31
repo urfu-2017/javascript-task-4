@@ -25,9 +25,9 @@ var FUNCTIONS_PRIORITY = {
 exports.query = function (collection, ...functions) {
     let collectionCopy = copy(collection);
 
-    for (let func of functions.sort(sortFunctions)) {
+    functions.sort(sortFunctions).forEach(func => {
         collectionCopy = func(collectionCopy);
-    }
+    });
 
     return collectionCopy;
 };
@@ -43,6 +43,7 @@ exports.select = function (...properties) {
 
         return collectionCopy.map(element => {
             let newElement = {};
+
             for (let key in element) {
                 if (contains(properties, key)) {
                     newElement[key] = element[key];
@@ -62,11 +63,7 @@ exports.select = function (...properties) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filter(element => {
-            let propertyValue = element[property];
-
-            return contains(values, propertyValue);
-        });
+        return collection.filter(element => contains(values, element[property]));
     };
 };
 
@@ -98,8 +95,7 @@ exports.format = function (property, formatter) {
         let collectionCopy = copy(collection);
 
         return collectionCopy.map(element => {
-            let propertyValue = element[property];
-            element[property] = formatter(propertyValue);
+            element[property] = formatter(element[property]);
 
             return element;
         });
@@ -171,7 +167,7 @@ function copy(someObject) {
 }
 
 function contains(arr, elem) {
-    return arr.indexOf(elem) !== -1;
+    return arr.includes(elem);
 }
 
 function sortFunctions(a, b) {
