@@ -144,18 +144,16 @@ if (exports.isStar) {
         var _arguments = [].slice.call(arguments);
 
         return function or(collection) {
-            var collectionCopy = collection.slice();
-            var filteredCollection = _arguments.reduce (function (resultedCollection, func) {
-                let newCollection = func(collection);
-                collection = collection.filter(function (item) {
+            var notOrCollection = _arguments.reduce (function (notSelectedCollection, func) {
+                let newCollection = func(notSelectedCollection);
+
+                return notSelectedCollection.filter(function (item) {
                     return newCollection.indexOf(item) === -1;
                 });
+            }, collection.slice());
 
-                return resultedCollection.concat(newCollection);
-            }, []);
-
-            return collectionCopy.filter(function (item) {
-                return filteredCollection.indexOf(item) !== -1;
+            return collection.filter(function (item) {
+                return notOrCollection.indexOf(item) === -1;
             });
         };
     };
