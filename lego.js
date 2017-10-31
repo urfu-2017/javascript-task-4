@@ -9,11 +9,11 @@ exports.isStar = true;
 let FUNC_PRIORITETS = {
     'format': 0,
     'limit': 0,
-    'select': 1,
-    'sortBy': 2,
-    'filterIn': 2,
-    'or': 2,
-    'and': 2
+    'select': 2,
+    'sortBy': 5,
+    'filterIn': 10,
+    'or': 10,
+    'and': 10
 };
 
 /**
