@@ -66,7 +66,6 @@ exports.select = function (...fields) {
  */
 
 exports.filterIn = function (property, values) {
-
     return function filterIn(collection) {
         return collection.filter((record) => {
             return values.includes(record[property]);
@@ -85,8 +84,9 @@ exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort((firstRecord, secondRecord) => {
             let ascending = Number(firstRecord[property] > secondRecord[property]);
+            let descending = Number(secondRecord[property] > firstRecord[property]);
 
-            return order === 'asc' ? ascending : ascending - 1;
+            return order === 'asc' ? ascending : descending;
         });
     };
 };
