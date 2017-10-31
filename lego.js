@@ -15,7 +15,7 @@ const PRIORITY = {
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -108,13 +108,16 @@ exports.format = function (property, formatter) {
     // console.info(property, formatter);
 
     return function format(collection) {
-        return collection.map((person) => {
+        let collectionCopy = getCopy(collection);
+        collectionCopy = collectionCopy.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
             // console.info(newPerson);
 
             return newPerson;
         });
+
+        return collectionCopy;
     };
 };
 
@@ -127,9 +130,7 @@ exports.limit = function (count) {
     // console.info(count);
 
     return function limit(collection) {
-        let collectionCopy = getCopy(collection).slice(0, count);
-
-        return collectionCopy;
+        return collection.slice(0, count);
     };
 };
 
