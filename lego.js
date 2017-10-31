@@ -48,15 +48,14 @@ exports.select = function (...params) {
 
     return function select(collection) {
         return collection.map((person) => {
-            let newPerson = {};
-            for (var i = 0; i < params.length; i++) {
-                let param = params[i];
-                if (person[param] !== undefined) {
-                    newPerson[param] = person[param];
-                }
-            }
 
-            return newPerson;
+            return params.reduce(function (oldPerson, param) {
+                if (person[param] !== undefined) {
+                    oldPerson[param] = person[param];
+                }
+
+                return oldPerson;
+            }, {});
         });
     };
 };
@@ -103,11 +102,10 @@ exports.format = function (property, formatter) {
 
     return function format(collection) {
         let collectionCopy = getCopy(collection);
-        collectionCopy = collectionCopy.map((person) => {
-            let newPerson = person;
-            newPerson[property] = formatter(person[property]);
+        collectionCopy = collectionCopy.map(person => {
+            person[property] = formatter(person[property]);
 
-            return newPerson;
+            return person;
         });
 
         return collectionCopy;
