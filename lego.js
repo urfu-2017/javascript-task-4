@@ -15,7 +15,7 @@ const PRIORITY = {
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
@@ -43,7 +43,7 @@ exports.query = function (collection, ...selectors) {
 exports.select = function (...params) {
 
     return function select(collection) {
-        let collectionCopy = collection;
+        let collectionCopy = collection.slice(0);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = {};
             for (var i = 0; i < params.length; i++) {
@@ -86,7 +86,7 @@ exports.sortBy = function (property, order) {
     // console.info(property, order);
 
     return function sortBy(collection) {
-        let collectionCopy = collection;
+        let collectionCopy = collection.slice(0);
         if (order === 'asc') {
             collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
 
@@ -108,7 +108,7 @@ exports.format = function (property, formatter) {
     // console.info(property, formatter);
 
     return function format(collection) {
-        let collectionCopy = collection;
+        let collectionCopy = collection.slice(0);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
