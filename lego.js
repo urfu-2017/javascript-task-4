@@ -5,8 +5,8 @@ const PRIORITY = {
     and: 1,
     or: 2,
     sortBy: 3,
-    select: 5,
-    limit: 4,
+    select: 4,
+    limit: 5,
     format: 6
 };
 
@@ -26,7 +26,7 @@ exports.isStar = false;
 
 
 exports.query = function (collection, ...selectors) {
-    let collectionCopy = collection.slice(0);
+    let collectionCopy = getCopy(collection);
     selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
     for (let i = 0; i < selectors.length; i++) {
         collectionCopy = selectors[i](collectionCopy);
@@ -34,6 +34,11 @@ exports.query = function (collection, ...selectors) {
 
     return collectionCopy;
 };
+
+function getCopy(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
 
 /**
  * Выбор полей
@@ -43,8 +48,7 @@ exports.query = function (collection, ...selectors) {
 exports.select = function (...params) {
 
     return function select(collection) {
-        let collectionCopy = collection.slice(0);
-        collectionCopy = collectionCopy.map((person) => {
+        return collection.map((person) => {
             let newPerson = {};
             for (var i = 0; i < params.length; i++) {
                 let param = params[i];
@@ -55,8 +59,6 @@ exports.select = function (...params) {
 
             return newPerson;
         });
-
-        return collectionCopy;
     };
 };
 
@@ -70,7 +72,7 @@ exports.filterIn = function (property, values) {
     // console.info(property, values);
 
     return function filterIn(collection) {
-        let collectionCopy = collection.filter((a) => values.indexOf(a[property]) > -1);
+        let collectionCopy = getCopy(collection).filter((a) => values.indexOf(a[property]) > -1);
 
         return collectionCopy;
     };
@@ -86,7 +88,7 @@ exports.sortBy = function (property, order) {
     // console.info(property, order);
 
     return function sortBy(collection) {
-        let collectionCopy = collection.slice(0);
+        let collectionCopy = getCopy(collection);
         if (order === 'asc') {
             collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
 
@@ -108,7 +110,7 @@ exports.format = function (property, formatter) {
     // console.info(property, formatter);
 
     return function format(collection) {
-        let collectionCopy = collection.slice(0);
+        let collectionCopy = getCopy(collection);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
@@ -130,7 +132,7 @@ exports.limit = function (count) {
     // console.info(count);
 
     return function limit(collection) {
-        let collectionCopy = collection.slice(0, count);
+        let collectionCopy = getCopy(collection).slice(0, count);
 
         return collectionCopy;
     };
