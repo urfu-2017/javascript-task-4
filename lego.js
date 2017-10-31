@@ -41,7 +41,6 @@ exports.select = function (...fields) {
 
                 return friendCorrectFields;
             }
-
             );
         }
     };
