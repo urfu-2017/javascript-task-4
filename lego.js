@@ -100,9 +100,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map((record) => {
-            if (property in record) {
-                record[property] = formatter(record[property]);
-            }
+            record[property] = formatter(record[property]);
 
             return record;
         });
