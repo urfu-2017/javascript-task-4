@@ -1,21 +1,10 @@
 'use strict';
 
-const PRIORITY = {
-    filterIn: 0,
-    and: 1,
-    or: 2,
-    sortBy: 3,
-    select: 5,
-    limit: 4,
-    format: 6
-};
-
-
 /**
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -26,7 +15,16 @@ exports.isStar = false;
 
 
 exports.query = function (collection, ...selectors) {
-    let collectionCopy = getCopy(collection);
+    const PRIORITY = {
+        filterIn: 0,
+        and: 1,
+        or: 2,
+        sortBy: 3,
+        select: 4,
+        limit: 5,
+        format: 6
+    };
+    let collectionCopy = collection.slice();
     selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
     for (let i = 0; i < selectors.length; i++) {
         collectionCopy = selectors[i](collectionCopy);
@@ -34,10 +32,6 @@ exports.query = function (collection, ...selectors) {
 
     return collectionCopy;
 };
-
-function getCopy(collection) {
-    return JSON.parse(JSON.stringify(collection));
-}
 
 
 /**
@@ -48,20 +42,11 @@ function getCopy(collection) {
 exports.select = function (...params) {
 
     return function select(collection) {
-        let collectionCopy = getCopy(collection);
-        collectionCopy = collectionCopy.map((person) => {
-            let newPerson = {};
-            for (var i = 0; i < params.length; i++) {
-                let param = params[i];
-                if (person[param] !== undefined) {
-                    newPerson[param] = person[param];
-                }
-            }
+        return collection.map(person => params.reduce(function (newPerson, param) {
+            newPerson[param] = person[param];
 
             return newPerson;
-        });
-
-        return collectionCopy;
+        }, {}));
     };
 };
 
@@ -72,12 +57,9 @@ exports.select = function (...params) {
  */
 
 exports.filterIn = function (property, values) {
-    // console.info(property, values);
 
     return function filterIn(collection) {
-        let collectionCopy = getCopy(collection).filter((a) => values.indexOf(a[property]) > -1);
-
-        return collectionCopy;
+        return collection.filter(person => values.includes(person[property]));
     };
 };
 
@@ -88,18 +70,15 @@ exports.filterIn = function (property, values) {
  */
 
 exports.sortBy = function (property, order) {
-    // console.info(property, order);
 
     return function sortBy(collection) {
-        let collectionCopy = getCopy(collection);
-        if (order === 'asc') {
-            collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
+        return collection.sort((a, b) => {
+            if (order === 'asc') {
+                return a[property] > b[property];
+            }
 
-            return collectionCopy;
-        }
-        collectionCopy = collectionCopy.sort((a, b) => a[property] < b[property]);
-
-        return collectionCopy;
+            return a[property] < b[property];
+        });
     };
 };
 
@@ -110,19 +89,13 @@ exports.sortBy = function (property, order) {
  */
 
 exports.format = function (property, formatter) {
-    // console.info(property, formatter);
 
     return function format(collection) {
-        let collectionCopy = getCopy(collection);
-        collectionCopy = collectionCopy.map((person) => {
-            let newPerson = person;
-            newPerson[property] = formatter(person[property]);
-            // console.info(newPerson);
+        return collection.map((person) => {
+            person[property] = formatter(person[property]);
 
-            return newPerson;
+            return person;
         });
-
-        return collectionCopy;
     };
 };
 
@@ -132,12 +105,9 @@ exports.format = function (property, formatter) {
  */
 
 exports.limit = function (count) {
-    // console.info(count);
 
     return function limit(collection) {
-        let collectionCopy = getCopy(collection).slice(0, count);
-
-        return collectionCopy;
+        return collection.slice(0, count);
     };
 };
 
@@ -150,12 +120,10 @@ if (exports.isStar) {
      */
 
     exports.or = function (...selectors) {
-        selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
 
         return function or(collection) {
             return collection.filter(person =>
                 selectors.some(func => func(collection).includes(person)));
-            // console.info(collectionCopy);
         };
     };
 
@@ -166,7 +134,6 @@ if (exports.isStar) {
      */
 
     exports.and = function (...selectors) {
-        selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
 
         return function and(collection) {
             return collection.filter(person =>
