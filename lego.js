@@ -11,10 +11,10 @@ const FUNCTION_PRIORITY = {
     limit: 4,
     format: 4,
     select: 3,
-    sortBy: 2,
-    filterIn: 2,
-    or: 1,
-    add: 2
+    or: 2,
+    add: 2,
+    sortBy: 1,
+    filterIn: 1
 };
 
 /**
