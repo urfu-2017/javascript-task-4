@@ -22,8 +22,7 @@ let FUNC_PRIORITETS = {
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection) {
-    let funcs = [...arguments].slice(1);
+exports.query = function (collection, ...funcs) {
     funcs = funcs.sort((a, b) => FUNC_PRIORITETS[b.name] - FUNC_PRIORITETS[a.name]);
     let newCollection = createObjectCopy(collection);
     for (let func of funcs) {
@@ -42,9 +41,7 @@ function createObjectCopy(object) {
  * @params {...String}
  * @returns {Function}
  */
-exports.select = function () {
-    let fields = [...arguments];
-
+exports.select = function (...fields) {
     return function select(collection) {
         return collection.map(element => {
             let newElement = {};
@@ -128,9 +125,7 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.or = function () {
-        let filters = [...arguments];
-
+    exports.or = function (...filters) {
         return function or(collection) {
             return collection.filter(el => filters.some(filter => filter([el]).includes(el)));
         };
@@ -142,9 +137,7 @@ if (exports.isStar) {
      * @params {...Function} – Фильтрующие функции
      * @returns {Function}
      */
-    exports.and = function () {
-        let filters = [...arguments];
-
+    exports.and = function (...filters) {
         return function and(collection) {
             let newCollection = collection;
             for (let filter of filters) {
