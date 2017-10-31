@@ -13,7 +13,7 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let collectionCopy = Object.assign(collection);
+    let collectionCopy = JSON.parse(JSON.stringify(collection));
 
     return functions.sort((a, b) => a.priority - b.priority)
         .reduce((acc, func) => func.exec(acc), collectionCopy);
