@@ -102,7 +102,9 @@ exports.format = function (property, formatter) {
 
     return function format(collection) {
         let collectionCopy = collection.map(person => {
-            person[property] = formatter(person[property]);
+            if (person[property] !== undefined) {
+                person[property] = formatter(person[property]);
+            }
 
             return person;
         });
