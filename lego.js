@@ -67,7 +67,7 @@ exports.select = function (...params) {
 exports.filterIn = function (property, values) {
 
     return function filterIn(collection) {
-        return collection.filter(person => values.indexOf(person[property]) > -1);
+        return collection.filter(person => values.includes(person[property]));
     };
 };
 
@@ -80,13 +80,15 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
-        return collection.sort((a, b) => {
-            if (order === 'asc') {
-                return a[property] > b[property];
-            }
+        let collectionCopy = collection;
+        if (order === 'asc') {
+            collectionCopy = collectionCopy.sort((a, b) => a[property] > b[property]);
 
-            return a[property] < b[property];
-        });
+            return collectionCopy;
+        }
+        collectionCopy = collectionCopy.sort((a, b) => a[property] < b[property]);
+
+        return collectionCopy;
     };
 };
 
