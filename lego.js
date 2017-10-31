@@ -35,6 +35,11 @@ exports.query = function (collection, ...selectors) {
     return collectionCopy;
 };
 
+function getCopy(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
+
+
 /**
  * Выбор полей
  * @params {...String}
@@ -100,7 +105,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
 
     return function format(collection) {
-        let collectionCopy = collection.slice(0);
+        let collectionCopy = getCopy(collection);
         collectionCopy = collectionCopy.map((person) => {
             let newPerson = person;
             newPerson[property] = formatter(person[property]);
