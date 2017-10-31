@@ -69,7 +69,7 @@ exports.select = function (...params) {
 exports.filterIn = function (property, values) {
 
     return function filterIn(collection) {
-        return collection.filter((a) => values.indexOf(a[property]) > -1);
+        return collection.filter((a) => values.includes(a[property]));
     };
 };
 
