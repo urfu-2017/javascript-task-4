@@ -20,8 +20,8 @@ exports.query = function (collection, ...selectors) {
         and: 1,
         or: 2,
         sortBy: 3,
-        select: 4,
-        limit: 5,
+        select: 5,
+        limit: 4,
         format: 6
     };
     let collectionCopy = collection.slice();
