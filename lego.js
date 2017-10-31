@@ -13,7 +13,7 @@ exports.isStar = true;
  * @returns {Array}
  */
 
-var queryFunctions = ['or', 'and', 'filterIn', 'sortBy', 'select', 'limit', 'format'];
+var queryFunctions = ['and', 'or', 'filterIn', 'sortBy', 'select', 'limit', 'format'];
 
 exports.query = function (collection) {
     var collectionCopy = collection.map(function (item) {
@@ -145,12 +145,13 @@ if (exports.isStar) {
 
         return function or(collection) {
             return _arguments.reduce (function (resultedCollection, func) {
-                let newCollection = func(collection);
-                collection = collection.filter(function (item) {
-                    return newCollection.indexOf(item) === -1;
-                });
+                return func(collection).reduce (function (currentCollection, item1) {
+                    if (resultedCollection.indexOf(item1) === -1) {
+                        currentCollection.push(item1);
+                    }
 
-                return resultedCollection.concat(newCollection);
+                    return currentCollection;
+                }, resultedCollection.slice());
             }, []);
         };
     };
