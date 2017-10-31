@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Запрос к коллекции
@@ -40,13 +40,21 @@ exports.query = function (collection, ...selectors) {
  */
 
 exports.select = function (...params) {
-
     return function select(collection) {
-        return collection.map(person => params.reduce(function (newPerson, param) {
-            newPerson[param] = person[param];
+        let collectionCopy = collection;
+        collectionCopy = collectionCopy.map((person) => {
+            let newPerson = {};
+            for (var i = 0; i < params.length; i++) {
+                let param = params[i];
+                if (person[param] !== undefined) {
+                    newPerson[param] = person[param];
+                }
+            }
 
             return newPerson;
-        }, {}));
+        });
+
+        return collectionCopy;
     };
 };
 
