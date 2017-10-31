@@ -126,18 +126,7 @@ if (exports.isStar) {
         const functions = [].slice.call(arguments);
 
         return function or(collection) {
-            return collection.filter(person => {
-                let isGoodPerson = false;
-                functions.forEach(func => {
-                    if (func([person]).length > 0) {
-                        isGoodPerson = true;
-
-                        return;
-                    }
-                });
-
-                return isGoodPerson;
-            });
+            return collection.filter(person => functions.some(func => func([person]).length > 0));
         };
     };
 
@@ -151,18 +140,7 @@ if (exports.isStar) {
         const functions = [].slice.call(arguments);
 
         return function and(collection) {
-            return collection.filter(person => {
-                let isGoodPerson = true;
-                functions.forEach(func => {
-                    if (func([person]).length <= 0) {
-                        isGoodPerson = false;
-
-                        return;
-                    }
-                });
-
-                return isGoodPerson;
-            });
+            return collection.filter(person => functions.every(func => func([person]).length > 0));
         };
     };
 }
