@@ -144,9 +144,8 @@ if (exports.isStar) {
         var _arguments = [].slice.call(arguments);
 
         return function or(collection) {
-            collection = collection.slice();
-
-            return _arguments.reduce (function (resultedCollection, func) {
+            var collectionCopy = collection.slice();
+            var filteredCollection = _arguments.reduce (function (resultedCollection, func) {
                 let newCollection = func(collection);
                 collection = collection.filter(function (item) {
                     return newCollection.indexOf(item) === -1;
@@ -154,6 +153,10 @@ if (exports.isStar) {
 
                 return resultedCollection.concat(newCollection);
             }, []);
+
+            return collectionCopy.filter(function (item) {
+                return filteredCollection.indexOf(item) !== -1;
+            });
         };
     };
 
@@ -169,7 +172,7 @@ if (exports.isStar) {
         return function and(collection) {
             return _arguments.reduce (function (filteredCollection, func) {
                 return func(filteredCollection);
-            }, collection.slice());
+            }, collection);
         };
     };
 }
