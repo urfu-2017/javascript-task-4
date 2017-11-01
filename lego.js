@@ -123,11 +123,11 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         return function or(collection) {
-            let initialCollection = deepCopy(collection);
-
-            return funcs.reduce(function (col, func) {
-                return col.concat(func(initialCollection));
-            }, []);
+            return collection.filter(function (friend) {
+                return funcs.some(function (func) {
+                    return func([friend]).length > 0;
+                });
+            });
         };
     };
 
@@ -139,9 +139,11 @@ if (exports.isStar) {
      */
     exports.and = function (...funcs) {
         return function and(collection) {
-            return funcs.reduce(function (col, func) {
-                return func(col);
-            }, collection);
+            return collection.filter(function (friend) {
+                return funcs.every(function (func) {
+                    return func([friend]).length > 0;
+                });
+            });
         };
     };
 }
