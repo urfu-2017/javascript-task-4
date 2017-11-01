@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-const priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
+const priority = ['and', 'or', 'filterIn', 'sortBy', 'format', 'select', 'limit'];
 
 let deepCopy = col => JSON.parse(JSON.stringify(col));
 
