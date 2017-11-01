@@ -26,12 +26,25 @@ function getCollectionCopy(collection) {
  * @params {...Function} ...functions – Функции для запроса
  * @returns {Array}
  */
-exports.query = function (collection, ...functions) {
-    functions = functions.sort((a, b) => FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name]);
+exports.query = function (collection) {
+    const functions = Array.from(arguments)
+        .slice(1)
+        .sort((a, b) => FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name]);
     let copy = getCollectionCopy(collection);
 
     return functions.reduce((result, func) => func(result), copy);
 };
+
+function getNewPerson(person, fields) {
+    let newPerson = {};
+    for (let property of Object.keys(person)) {
+        if (fields.includes(property)) {
+            newPerson[property] = person[property];
+        }
+    }
+
+    return newPerson;
+}
 
 /**
  * Выбор полей
@@ -39,19 +52,9 @@ exports.query = function (collection, ...functions) {
  * @returns {Function}
  */
 exports.select = function (...fields) {
-    function getNewPerson(person) {
-        let newPerson = {};
-        for (let property of Object.keys(person)) {
-            if (fields.includes(property)) {
-                newPerson[property] = person[property];
-            }
-        }
-
-        return newPerson;
-    }
 
     return function select(collection) {
-        return getCollectionCopy(collection).map(getNewPerson);
+        return collection.map(person => getNewPerson(person, fields));
     };
 };
 
@@ -62,10 +65,8 @@ exports.select = function (...fields) {
  * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    console.info(property, values);
-
     return function filterIn(collection) {
-        return getCollectionCopy(collection)
+        return collection
             .filter(person => values.includes(person[property]));
     };
 };
@@ -77,7 +78,6 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
     const signToNum = {
         asc: 1,
         desc: -1
@@ -85,18 +85,18 @@ exports.sortBy = function (property, order) {
     let sign = signToNum[order];
 
     return function sortBy(collection) {
-        return getCollectionCopy(collection)
+        return collection
             .sort((a, b) => {
                 let first = a[property];
                 let second = b[property];
+                let result = 0;
                 if (first < second) {
-                    return -sign;
-                }
-                if (first > second) {
-                    return sign;
+                    result = -1;
+                } else if (first > second) {
+                    result = 1;
                 }
 
-                return 0;
+                return result * sign;
             });
     };
 };
@@ -108,15 +108,12 @@ exports.sortBy = function (property, order) {
  * @returns {Function}
  */
 exports.format = function (property, formatter) {
-    console.info(property, formatter);
-
     return function format(collection) {
-        let result = getCollectionCopy(collection);
-        result.forEach(person => {
+        collection.forEach(person => {
             person[property] = formatter(person[property]);
         });
 
-        return result;
+        return collection;
     };
 };
 
@@ -126,10 +123,8 @@ exports.format = function (property, formatter) {
  * @returns {Function}
  */
 exports.limit = function (count) {
-    console.info(count);
-
     return function limit(collection) {
-        return getCollectionCopy(collection).slice(0, count);
+        return collection.slice(0, count);
     };
 };
 
@@ -143,9 +138,7 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         return function or(collection) {
-            let copy = getCollectionCopy(collection);
-
-            return copy.filter(item => funcs.some(func => Boolean(func([item]).length)));
+            return collection.filter(item => funcs.some(func => Boolean(func([item]).length)));
         };
     };
 
@@ -157,9 +150,7 @@ if (exports.isStar) {
      */
     exports.and = function (...funcs) {
         return function and(collection) {
-            let copy = getCollectionCopy(collection);
-
-            return copy.filter(item => funcs.every(func => Boolean(func([item]).length)));
+            return collection.filter(item => funcs.every(func => Boolean(func([item]).length)));
         };
     };
 }
