@@ -76,7 +76,7 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort(function (a, b) {
-            return order === 'asc' ? a[property] - b[property] : b[property] - a[property];
+            return order === 'asc' ? a[property] < b[property] : b[property] < a[property];
         });
     };
 };
