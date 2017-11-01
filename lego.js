@@ -41,7 +41,7 @@ exports.query = function (collection, ...selectors) {
 
 exports.select = function (...params) {
     return function select(collection) {
-        return collection.map(person => params.reduce(function (oldPerson, param) {
+        return collection.map(person => params.reduce((oldPerson, param) => {
             if (person[param] !== undefined) {
                 oldPerson[param] = person[param];
             }
