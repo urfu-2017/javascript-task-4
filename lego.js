@@ -41,9 +41,8 @@ exports.query = function (collection, ...queries) {
  */
 exports.select = function (...fields) {
     return function select(collection) {
-        let workingCollection = copyCollectoin(collection);
 
-        return workingCollection.map(record => {
+        return collection.map(record => {
 
             return processOneRecord(record, fields);
         });
@@ -80,9 +79,8 @@ function processOneRecord(record, templates) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        let workingCollection = copyCollectoin(collection);
         console.info(property, values);
-        workingCollection = workingCollection.filter(x => {
+        collection = collection.filter(x => {
             for (var value of values) {
                 if (x[property].indexOf(value) !== -1) {
                     return true;
@@ -92,7 +90,7 @@ exports.filterIn = function (property, values) {
             return false;
         });
 
-        return workingCollection;
+        return collection;
     };
 };
 
@@ -115,15 +113,14 @@ function comparator(a, b) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let workingCollection = copyCollectoin(collection);
         console.info(property, order);
         if (order === 'asc') {
-            workingCollection.sort((a, b) => comparator(a[property], b[property]));
+            collection.sort((a, b) => comparator(a[property], b[property]));
         } else {
-            workingCollection.sort((a, b) => comparator(b[property], a[property]));
+            collection.sort((a, b) => comparator(b[property], a[property]));
         }
 
-        return workingCollection;
+        return collection;
     };
 };
 
@@ -135,13 +132,12 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        let workingCollection = copyCollectoin(collection);
         console.info(property, formatter);
-        for (var record of workingCollection) {
+        for (var record of collection) {
             record[property] = formatter(record[property]);
         }
 
-        return workingCollection;
+        return collection;
     };
 };
 
@@ -152,11 +148,9 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     return function limit(collection) {
-        let workingCollection = copyCollectoin(collection);
-        console.info(count);
-        workingCollection = workingCollection.slice(0, count);
+        collection = collection.slice(0, count);
 
-        return workingCollection;
+        return collection;
     };
 };
 
