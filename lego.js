@@ -96,6 +96,17 @@ exports.filterIn = function (property, values) {
     };
 };
 
+function comparator(a, b) {
+    if (a < b) {
+        return -1;
+    }
+    if (a === b) {
+        return 0;
+    }
+
+    return 1;
+}
+
 /**
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
@@ -107,9 +118,9 @@ exports.sortBy = function (property, order) {
         let workingCollection = copyCollectoin(collection);
         console.info(property, order);
         if (order === 'asc') {
-            workingCollection.sort((a, b) => a[property] > b[property]);
+            workingCollection.sort((a, b) => comparator(a[property], b[property]));
         } else {
-            workingCollection.sort((a, b) => a[property] < b[property]);
+            workingCollection.sort((a, b) => comparator(b[property], a[property]));
         }
 
         return workingCollection;
