@@ -13,9 +13,9 @@ const OPERATOR_PRIORITY = {
     orFunc: 2,
     filterInFunc: 3,
     sortFunc: 4,
-    limitFunc: 5,
-    formatFunc: 6,
-    selectFunc: 7
+    selectFunc: 5,
+    limitFunc: 6,
+    formatFunc: 7
 };
 
 /**
@@ -27,12 +27,16 @@ const OPERATOR_PRIORITY = {
 
 
 exports.query = function (collection, ...operators) {
-    let copiedCollection = JSON.parse(JSON.stringify(collection));
+    let copiedCollection = copyCollection(collection);
 
     return operators
         .sort((o1, o2) => OPERATOR_PRIORITY[o1.name] - OPERATOR_PRIORITY[o2.name])
         .reduce((currentCollection, operator) => operator(currentCollection), copiedCollection);
 };
+
+function copyCollection(collection) {
+    return JSON.parse(JSON.stringify(collection));
+}
 
 /**
  * Выбор полей
@@ -104,7 +108,7 @@ function compareValues(value1, value2) {
 
 exports.format = function (property, formatter) {
     return function formatFunc(collection) {
-        let copiedCollection = JSON.parse(JSON.stringify(collection));
+        let copiedCollection = copyCollection(collection);
 
         return copiedCollection.map(function (item) {
             if (item.hasOwnProperty(property)) {
@@ -123,9 +127,9 @@ exports.format = function (property, formatter) {
  * @returns {Array}
  */
 exports.limit = function (count) {
-    let limitFunc = collection => collection.slice(0, count);
-
-    return limitFunc;
+    return function limitFunc(collection) {
+        return collection.slice(0, count);
+    };
 };
 
 if (exports.isStar) {
