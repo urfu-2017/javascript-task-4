@@ -80,13 +80,7 @@ function processOneRecord(record, templates) {
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
         collection = collection.filter(x => {
-            for (var value of values) {
-                if (x[property].indexOf(value) !== -1) {
-                    return true;
-                }
-            }
-
-            return false;
+            return values.some(t => x[property].indexOf(t) !== -1);
         });
 
         return collection;
