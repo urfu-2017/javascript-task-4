@@ -14,7 +14,10 @@ var FUNCTION_ORDER = ['filterIn', 'sortBy', 'select', 'limit', 'format'];
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var newCollection = Object.assign(collection);
+    var newCollection = [];
+    collection.forEach(function(friend) {
+    	newCollection.push(Object.assign({}, friend));
+    })
 
     ([].slice.call(arguments, 1))
         .sort(function (func1, func2) {
