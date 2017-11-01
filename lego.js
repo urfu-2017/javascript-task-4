@@ -24,20 +24,17 @@ const PRIORITY_LIST = {
  */
 exports.query = function (collection, ...functions) {
     let copyCollection = getCopy(collection);
-    functions = functions.sort((a, b) => {
-        return PRIORITY_LIST[a.name] - PRIORITY_LIST[b.name];
+    functions = functions.sort((a, b) => PRIORITY_LIST[a.name] - PRIORITY_LIST[b.name]);
+    functions.forEach(func => {
+        copyCollection = func(copyCollection);
     });
-    for (const element of functions) {
-        console.info(element);
-        copyCollection = element(copyCollection);
-    }
 
     return copyCollection;
 };
 
 
 function getCopy(collection) {
-    return JSON.parse(JSON.stringify(collection));
+    return collection.slice();
 }
 
 /**
@@ -47,16 +44,11 @@ function getCopy(collection) {
  */
 exports.select = function (...fields) {
     return function select(collection) {
-        return collection.map(element => {
-            let newElement = {};
-            for (const field of Object.keys(element)) {
-                if (fields.includes(field)) {
-                    newElement[field] = element[field];
-                }
-            }
+        return collection.map(element =>
+            fields.reduce((newElement, field) => (
+                Object.assign(newElement, element[field] &&
+                    { [field]: element[field] })), {}));
 
-            return newElement;
-        });
     };
 };
 
@@ -80,9 +72,8 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        return collection.sort((a, b) => {
-            return (order === 'asc') ? a[property] > b[property] : b[property] > a[property];
-        });
+        return collection.sort((a, b) =>
+            (order === 'asc') ? a[property] > b[property] : b[property] > a[property]);
     };
 };
 
@@ -94,12 +85,9 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.map((element) => {
-            var elementq = Object.assign({}, element);
-            elementq[property] = formatter(element[property]);
-
-            return elementq;
-        });
+        return collection.map(element =>
+            Object.assign({}, element, { [property]: formatter(element[property]) })
+        );
     };
 };
 
@@ -124,7 +112,9 @@ if (exports.isStar) {
      */
     exports.or = function (...functions) {
         return function or(collection) {
-            return collection.filter(el => functions.some(func => func([el]).length > 0));
+            return collection.filter(el =>
+                functions.some(func =>
+                    func([el]).length > 0));
         };
     };
 
@@ -136,7 +126,9 @@ if (exports.isStar) {
      */
     exports.and = function (...functions) {
         return function and(collection) {
-            return collection.filter(el => functions.every(func => func([el]).length > 0));
+            return collection.filter(el =>
+                functions.every(func =>
+                    func([el]).length > 0));
         };
     };
 }
