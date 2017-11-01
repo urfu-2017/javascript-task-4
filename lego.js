@@ -14,20 +14,20 @@ var FUNCTION_ORDER = ['filterIn', 'sortBy', 'select', 'limit', 'format'];
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var newCollection = [];
+    var collectionCopy = [];
     collection.forEach(function (friend) {
-        newCollection.push(Object.assign({}, friend));
+        collectionCopy.push(Object.assign({}, friend));
     });
 
-    ([].slice.call(arguments, 1))
-        .sort(function (func1, func2) {
-            return FUNCTION_ORDER.indexOf(func1.name) - FUNCTION_ORDER.indexOf(func2.name);
-        })
-        .forEach(function (func) {
-            newCollection = func(newCollection);
-        });
+    var functions = ([].slice.call(arguments, 1));
+    var sortedFunctions = functions.sort(function (func1, func2) {
+        return FUNCTION_ORDER.indexOf(func1.name) - FUNCTION_ORDER.indexOf(func2.name);
+    });
+    sortedFunctions.forEach(function (func) {
+        collectionCopy = func(collectionCopy);
+    });
 
-    return newCollection;
+    return collectionCopy;
 };
 
 /**
@@ -77,14 +77,12 @@ function getPropertiesIntersection(friendsProperties, givenProperties) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.reduce(function (result, currentFriend) {
+        return collection.reduce(function (result = [], currentFriend) {
             var hasProperty = values.some(function (prop) {
                 return prop === currentFriend[property];
             });
             if (hasProperty) {
                 result.push(currentFriend);
-
-                return result;
             }
 
             return result;
@@ -126,7 +124,7 @@ exports.format = function (property, formatter) {
 
 exports.limit = function (count) {
     return function limit(collection) {
-        return collection.slice(0, count);
+        return collection.slice(0, Math.abs(count));
     };
 };
 
