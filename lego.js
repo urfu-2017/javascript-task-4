@@ -85,7 +85,7 @@ exports.sortBy = function (property, order) {
     let sign = signToNum[order];
 
     return function sortBy(collection) {
-        return collection
+        return getCollectionCopy(collection)
             .sort((a, b) => {
                 let first = a[property];
                 let second = b[property];
@@ -109,11 +109,12 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        collection.forEach(person => {
+        const copy = getCollectionCopy(collection);
+        copy.forEach(person => {
             person[property] = formatter(person[property]);
         });
 
-        return collection;
+        return copy;
     };
 };
 
@@ -124,6 +125,10 @@ exports.format = function (property, formatter) {
  */
 exports.limit = function (count) {
     return function limit(collection) {
+        if (count < 0) {
+            throw new RangeError('Number must be non-negative');
+        }
+
         return collection.slice(0, count);
     };
 };
