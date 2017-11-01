@@ -6,7 +6,7 @@
  */
 exports.isStar = true;
 
-let functionPriority = ['filterIn', 'sortBy', 'limit', 'select', 'format'];
+let functionPriority = ['and', 'or', 'filterIn', 'sortBy', 'limit', 'select', 'format'];
 
 /**
  * Запрос к коллекции
@@ -31,7 +31,6 @@ exports.query = function (collection, ...qFunctions) {
  * @returns {Array}
  */
 exports.select = function (...params) {
-
     return function select(collection) {
         return collection.map(function (record) {
             return params.reduce(function (newObj, param) {
@@ -71,7 +70,6 @@ exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
         return collection.slice().sort(function (a, b) {
-
             if (a[property] < b[property]) {
                 return -sign;
             }
@@ -93,11 +91,7 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(function (record) {
-            let copy = Object.keys(record).reduce(function (newObj, param) {
-                newObj[param] = record[param];
-
-                return newObj;
-            }, {});
+            let copy = Object.assign({}, record);
             copy[property] = formatter(copy[property]);
 
             return copy;
