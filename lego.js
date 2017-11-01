@@ -13,15 +13,14 @@ exports.isStar = true;
  * @param {Object} friend
  * @returns {Object}
  */
-function createProperties(properties, friend) {
-    let result = {};
-    for (let property of properties) {
-        if (Object.keys(friend).indexOf(property) !== -1) {
-            result[property] = friend[property];
+function pickProperties(properties, friend) {
+    return properties.reduce(function (pickedProperties, property) {
+        if (Reflect.has(friend, property)) {
+            pickedProperties[property] = friend[property];
         }
-    }
 
-    return result;
+        return pickedProperties;
+    }, {});
 }
 
 /**
@@ -30,7 +29,7 @@ function createProperties(properties, friend) {
  * @param {Function} f2
  * @returns {Number}
  */
-function compareFunctions(f1, f2) {
+function compareSelectors(f1, f2) {
     const FUNCTION_WEIGHT =
     { 'limit': 5, 'format': 4, 'select': 3, 'sortBy': 2, 'or': 1, 'and': 1, 'filterIn': 1 };
 
@@ -44,11 +43,12 @@ function compareFunctions(f1, f2) {
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    functions.sort(compareFunctions);
+    functions.sort(compareSelectors);
+    let newCollection = collection.map(collectionItem => Object.assign({}, collectionItem));
 
-    return functions.reduce(function (previousValue, currentValue) {
-        return currentValue(previousValue);
-    }, JSON.parse(JSON.stringify(collection)));
+    return functions.reduce(function (resultCollection, selector) {
+        return selector(resultCollection);
+    }, newCollection);
 };
 
 /**
@@ -58,15 +58,14 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...properties) {
     return function select(collection) {
-        let result = [];
-        for (let friend of collection) {
-            let friendProperties = createProperties(properties, friend);
-            if (friendProperties.length !== 0) {
+        return collection.reduce(function (result, friend) {
+            let friendProperties = pickProperties(properties, friend);
+            if (Object.keys(friendProperties).length !== 0) {
                 result.push(friendProperties);
             }
-        }
 
-        return result;
+            return result;
+        }, []);
     };
 };
 
@@ -77,8 +76,8 @@ exports.select = function (...properties) {
  * @returns {Function}
  */
 exports.filterIn = function (property, values) {
-    return function filterIn(col) {
-        return col.filter(obj => values.includes(obj[property]));
+    return function filterIn(collection) {
+        return collection.filter(obj => values.includes(obj[property]));
     };
 };
 
@@ -90,12 +89,8 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        if (order === 'asc') {
-            return collection.sort((f1, f2) => (f1[property] > f2[property] ? 1 : -1));
-        }
-        if (order === 'desc') {
-            return collection.sort((f1, f2) => (f1[property] > f2[property] ? -1 : 1));
-        }
+        return collection.sort(
+            (f1, f2) => (order === 'asc' ? 1 : -1) * (f1[property] > f2[property] ? 1 : -1));
     };
 };
 
@@ -107,11 +102,11 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        for (let friend of collection) {
+        return collection.map(function (friend) {
             friend[property] = formatter(friend[property]);
-        }
 
-        return collection;
+            return friend;
+        });
     };
 };
 
