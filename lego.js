@@ -87,10 +87,9 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(person => {
-            let newPerson = Object.assign({}, person);
-            newPerson[property] = formatter(person[property]);
+            person[property] = formatter(person[property]);
 
-            return newPerson;
+            return person;
         });
     };
 };
