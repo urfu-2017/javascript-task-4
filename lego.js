@@ -14,15 +14,7 @@ var FUNCTION_ORDER = ['filterIn', 'sortBy', 'select', 'limit', 'format'];
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var newCollection = [];
-    var properties = Object.keys(collection[0]);
-    collection.forEach(function (friend) {
-        var copy = {};
-        properties.forEach(function (prop) {
-            copy[prop] = friend[prop];
-        });
-        newCollection.push(copy);
-    });
+    var newCollection = Object.assign(collection);
 
     ([].slice.call(arguments, 1))
         .sort(function (func1, func2) {
@@ -82,15 +74,17 @@ function getPropertiesIntersection(friendsProperties, givenProperties) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.reduce(function (friend, nextFriend) {
+        return collection.reduce(function (result, currentFriend) {
             var hasProperty = values.some(function (prop) {
-                return prop === nextFriend[property];
+                return prop === currentFriend[property];
             });
             if (hasProperty) {
-                return friend.concat([nextFriend]);
+                result.push(currentFriend);
+
+                return result;
             }
 
-            return friend;
+            return result;
         }, []);
     };
 };
