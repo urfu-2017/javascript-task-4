@@ -13,7 +13,7 @@ var priority = {
     'format': 5
 };
 
-function copyCollectoin(collection) {
+function copyCollection(collection) {
     return collection.map((element) => Object.assign({}, element));
 }
 
@@ -24,7 +24,7 @@ function copyCollectoin(collection) {
  * @returns {Array}
  */
 exports.query = function (collection, ...queries) {
-    var workingCollection = copyCollectoin(collection);
+    var workingCollection = copyCollection(collection);
     var orderedQueries = queries.sort((query1, query2) =>
         priority[query1.name] - priority[query2.name]);
     for (var query of orderedQueries) {
