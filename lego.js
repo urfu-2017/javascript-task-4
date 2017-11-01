@@ -79,7 +79,6 @@ function processOneRecord(record, templates) {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        console.info(property, values);
         collection = collection.filter(x => {
             for (var value of values) {
                 if (x[property].indexOf(value) !== -1) {
@@ -113,7 +112,6 @@ function comparator(a, b) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        console.info(property, order);
         if (order === 'asc') {
             collection.sort((a, b) => comparator(a[property], b[property]));
         } else {
@@ -132,7 +130,6 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        console.info(property, formatter);
         for (var record of collection) {
             record[property] = formatter(record[property]);
         }
