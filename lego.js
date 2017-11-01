@@ -13,7 +13,7 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let collectionCopy = collection.map(element => Object.assign(element));
+    let collectionCopy = collection.map(element => Object.assign({}, element));
 
     return functions.sort((a, b) => a.priority - b.priority)
         .reduce((acc, func) => func.exec(acc), collectionCopy);
