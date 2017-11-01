@@ -4,9 +4,11 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
-let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
+const priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
+
+let deepCopy = col => JSON.parse(JSON.stringify(col));
 
 /**
  * Запрос к коллекции
@@ -15,7 +17,7 @@ let priority = ['filterIn', 'sortBy', 'and', 'or', 'format', 'select', 'limit'];
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let copiedCollection = JSON.parse(JSON.stringify(collection));
+    let copiedCollection = deepCopy(collection);
 
     let sortedFuncs = functions.sort(function (func1, func2) {
         return priority.indexOf(func1.name) - priority.indexOf(func2.name);
@@ -38,14 +40,13 @@ exports.query = function (collection, ...functions) {
 exports.select = function (...attrs) {
     return function select(collection) {
         return collection.map(function (friend) {
-            let newObj = {};
-            attrs.forEach(function (attr) {
+            return attrs.reduce(function (newObj, attr) {
                 if (friend.hasOwnProperty(attr)) {
                     newObj[attr] = friend[attr];
                 }
-            });
 
-            return newObj;
+                return newObj;
+            }, {});
         });
     };
 };
@@ -74,11 +75,9 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
-        let sorted = collection.sort(function (a, b) {
-            return a[property] > b[property];
+        return collection.sort(function (a, b) {
+            return order === 'asc' ? a[property] - b[property] : b[property] - a[property];
         });
-
-        return order === 'asc' ? sorted : sorted.reverse();
     };
 };
 
@@ -120,13 +119,11 @@ if (exports.isStar) {
      */
     exports.or = function (...funcs) {
         return function or(collection) {
-            let initialCollection = JSON.parse(JSON.stringify(collection));
-            let col = [];
-            funcs.forEach(function (func) {
-                col = col.concat(func(initialCollection));
-            });
+            let initialCollection = deepCopy(collection);
 
-            return col;
+            return funcs.reduce(function (col, func) {
+                return col.concat(func(initialCollection));
+            }, []);
         };
     };
 
@@ -138,11 +135,9 @@ if (exports.isStar) {
      */
     exports.and = function (...funcs) {
         return function and(collection) {
-            funcs.forEach(function (func) {
-                collection = func(collection);
-            });
-
-            return collection;
+            return funcs.reduce(function (col, func) {
+                return func(col);
+            }, collection);
         };
     };
 }
