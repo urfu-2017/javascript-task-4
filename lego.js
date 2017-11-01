@@ -1,6 +1,6 @@
 'use strict';
 
-const PRECEDENCE = { filterIn: 1, sortBy: 2, select: 3, limit: 4, format: 5 };
+const ORDER = { filterIn: 1, sortBy: 2, select: 3, limit: 4, format: 5 };
 
 /**
  * Сделано задание на звездочку
@@ -14,16 +14,18 @@ exports.isStar = false;
  * @params {...Function} – Функции для запроса
  * @returns {Array}
  */
-exports.query = (array, ...queries) => queries.sort((first, second) => {
-    const orderOne = PRECEDENCE[first.name];
-    const orderTwo = PRECEDENCE[second.name];
+exports.query = (array, ...queries) => {
+    return queries.sort((first, second) => {
+        const orderFirst = ORDER[first.name];
+        const orderSecond = ORDER[second.name];
 
-    if (!orderOne || !orderTwo) {
-        throw new TypeError('Syntax error');
-    }
+        if (!orderFirst || !orderSecond) {
+            throw new TypeError('Syntax error');
+        }
 
-    return orderOne - orderTwo;
-}).reduce((result, selector) => selector(result), array);
+        return orderFirst - orderSecond;
+    }).reduce((result, query) => query(result), array);
+};
 
 /**
  * Выбор полей
@@ -31,17 +33,15 @@ exports.query = (array, ...queries) => queries.sort((first, second) => {
  * @returns {Function}
  */
 exports.select = (...properties) => function select(array) {
-    return array.map(value => {
-        const newvalue = {};
-
-        properties.forEach(property => {
-            if (property in value) {
-                newvalue[property] = value[property];
+    return array.map(value =>
+        properties.reduce((result, property) => {
+            if (value.hasOwnProperty(property)) {
+                result[property] = value[property];
             }
-        });
 
-        return newvalue;
-    });
+            return result;
+        }, {})
+    );
 };
 
 /**
@@ -61,10 +61,10 @@ exports.filterIn = (property, values) => function filterIn(array) {
  * @returns {Function}
  */
 exports.sortBy = (property, order) => function sortBy(array) {
-    const direct = order === 'asc' ? 1 : -1;
+    const direction = order === 'asc' ? 1 : -1;
 
-    return array.slice().sort((value1, value2) => {
-        return (value1[property] > value2[property] ? 1 : -1) * direct;
+    return array.slice().sort((first, second) => {
+        return (first[property] > second[property] ? 1 : -1) * direction;
     });
 };
 
@@ -83,6 +83,6 @@ exports.format = (property, formatter) => function format(array) {
  * @param {Number} count – Максимальное количество элементов
  * @returns {Function}
  */
-exports.limit = (count) => function limit(array) {
+exports.limit = count => function limit(array) {
     return array.slice(0, count);
 };
