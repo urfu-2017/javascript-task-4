@@ -25,7 +25,7 @@ exports.query = function (collection, ...selectors) {
         limit: 5,
         format: 6
     };
-    let collectionCopy = collection.slice(0);
+    let collectionCopy = collection.map(person => Object.assign({}, person));
     selectors.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
     for (let i = 0; i < selectors.length; i++) {
         collectionCopy = selectors[i](collectionCopy);
@@ -40,18 +40,15 @@ exports.query = function (collection, ...selectors) {
  */
 
 exports.select = function (...params) {
-
     return function select(collection) {
-        return collection.map((person) => {
+        return collection.map(person => params.reduce(function (oldPerson, param) {
+            if (person[param] !== undefined) {
+                oldPerson[param] = person[param];
+            }
 
-            return params.reduce(function (oldPerson, param) {
-                if (person[param] !== undefined) {
-                    oldPerson[param] = person[param];
-                }
-
-                return oldPerson;
-            }, {});
-        });
+            return oldPerson;
+        }, {})
+        );
     };
 };
 
@@ -62,7 +59,6 @@ exports.select = function (...params) {
  */
 
 exports.filterIn = function (property, values) {
-
     return function filterIn(collection) {
         return collection.filter((a) => values.includes(a[property]));
     };
@@ -75,15 +71,10 @@ exports.filterIn = function (property, values) {
  */
 
 exports.sortBy = function (property, order) {
-
     return function sortBy(collection) {
-        return collection.sort((a, b) => {
-            if (order === 'asc') {
-                return (a[property] > b[property]);
-            }
-
-            return (a[property] < b[property]);
-        });
+        return collection.sort((a, b) => ((order === 'asc') && (a[property] > b[property])) ||
+        ((order !== 'asc') && (a[property] < b[property]))
+        );
     };
 };
 
@@ -94,7 +85,6 @@ exports.sortBy = function (property, order) {
  */
 
 exports.format = function (property, formatter) {
-
     return function format(collection) {
         return collection.map(person => {
             let newPerson = Object.assign({}, person);
@@ -116,7 +106,6 @@ exports.limit = function (count) {
         return collection.slice(0, count);
     };
 };
-
 if (exports.isStar) {
 
     /**
@@ -126,7 +115,6 @@ if (exports.isStar) {
      */
 
     exports.or = function (...selectors) {
-
         return function or(collection) {
             return collection.filter(person =>
                 selectors.some(func => func(collection).includes(person)));
@@ -140,7 +128,6 @@ if (exports.isStar) {
      */
 
     exports.and = function (...selectors) {
-
         return function and(collection) {
             return collection.filter(person =>
                 selectors.every(func => func(collection).includes(person)));
