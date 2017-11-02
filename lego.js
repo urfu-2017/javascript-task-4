@@ -40,19 +40,19 @@ exports.select = function () {
 
     return function select(collection) {
         var newCollection = [];
-        for (var i = 0; i < collection.length; i++) {
-            var currentFriend = collection[i];
+        collection.forEach(function (friend) {
             var selectedFriend = {};
-            for (var j = 0; j < givenProperties.length; j++) {
-                selectedFriend[givenProperties[j]] = currentFriend[givenProperties[j]];
-            }
+            givenProperties.forEach(function (property) {
+                if (friend[property]) {
+                    selectedFriend[property] = friend[property];
+                }
+            });
             newCollection.push(selectedFriend);
-        }
+        });
 
         return newCollection;
     };
 };
-
 
 /**
  * Фильтрация поля по массиву значений
