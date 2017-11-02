@@ -39,14 +39,12 @@ exports.select = function () {
     var givenProperties = [].slice.call(arguments);
 
     return function select(collection) {
-        var friendProperties = Object.keys(collection[0]);
-        var intersectedProperties = getPropertiesIntersection(friendProperties, givenProperties);
         var newCollection = [];
         for (var i = 0; i < collection.length; i++) {
             var currentFriend = collection[i];
             var selectedFriend = {};
-            for (var j = 0; j < intersectedProperties.length; j++) {
-                selectedFriend[intersectedProperties[j]] = currentFriend[intersectedProperties[j]];
+            for (var j = 0; j < givenProperties.length; j++) {
+                selectedFriend[givenProperties[j]] = currentFriend[givenProperties[j]];
             }
             newCollection.push(selectedFriend);
         }
@@ -55,19 +53,6 @@ exports.select = function () {
     };
 };
 
-/**
- * Выделение общих свойств у друзей и полученных от селекта
- * @param {Array} friendsProperties – Свойства друзей на конкретном шаге(если несколько селектов)
- * @param {Array} givenProperties – Данные нам свойства от селекта
- * @returns {Array}
- */
-function getPropertiesIntersection(friendsProperties, givenProperties) {
-    return givenProperties.filter(function (givenProperty) {
-        return friendsProperties.some(function (friendProperty) {
-            return friendProperty === givenProperty;
-        });
-    });
-}
 
 /**
  * Фильтрация поля по массиву значений
@@ -114,7 +99,12 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function format(collection) {
-        return collection.map(function (friend) {
+        var collectionCopy = [];
+        collection.forEach(function (friend) {
+            collectionCopy.push(Object.assign({}, friend));
+        });
+
+        return collectionCopy.map(function (friend) {
             friend[property] = formatter(friend[property]);
 
             return friend;
