@@ -6,6 +6,7 @@
  */
 
 exports.isStar = false;
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
