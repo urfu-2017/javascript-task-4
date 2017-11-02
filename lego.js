@@ -26,8 +26,8 @@ exports.query = function (collection, ...operators) {
     });
 
     return operators.sort((a, b) => PRIORITIES[a.name] - PRIORITIES[b.name])
-        .reduce(function (stepResult, query) {
-            return query(stepResult);
+        .reduce(function (stepResult, operator) {
+            return operator(stepResult);
         }, copyCollection);
 };
 
@@ -42,12 +42,12 @@ exports.select = function (...fieldsForSampling) {
 
         return collection.map(function (friend) {
 
-            return Object.keys(friend).reduce(function (newCollection, current) {
-                if (fieldsForSampling.includes(current)) {
-                    newCollection[current] = friend[current];
+            return Object.keys(friend).reduce(function (selectFriend, currentField) {
+                if (fieldsForSampling.includes(currentField)) {
+                    selectFriend[currentField] = friend[currentField];
                 }
 
-                return newCollection;
+                return selectFriend;
             }, {});
         });
     };
@@ -81,20 +81,10 @@ exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
 
-        return order === 'desc' ? descSort(collection, property)
-            : ascSort(collection, property);
+        return order === 'desc' ? collection.sort((a, b) => a[property] < b[property])
+            : collection.sort((a, b) => a[property] > b[property]);
     };
 };
-
-function ascSort(collection, property) {
-
-    return collection.sort((a, b) => a[property] > b[property]);
-}
-
-function descSort(collection, property) {
-
-    return collection.sort((a, b) => a[property] < b[property]);
-}
 
 /**
  * Форматирование поля
@@ -123,7 +113,7 @@ exports.limit = function (count) {
 
     return function limit(collection) {
 
-        return collection.slice(0, count);
+        return collection.slice(0, count < 0 ? 0 : count);
     };
 };
 
