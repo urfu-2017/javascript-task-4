@@ -14,17 +14,25 @@ exports.isStar = false;
  * @returns {Array}
  */
 
-const OPERATORS = ['sorting', 'filterPersons', 'needFields', 'toFormat', 'limit'];
+let lodash = require('./node_modules/lodash');
 
-function duplicateObj(collection) {
-    return JSON.parse(JSON.stringify(collection));
+const OPERATORS = {
+    sorting: 0,
+    filterPersons: 1,
+    needFields: 2,
+    toFormat: 3,
+    limit: 4
+};
+
+function clone(collection) {
+    return lodash.cloneDeep(collection);
 }
 
 exports.query = function (collection, ...operators) {
-    let newCollection = duplicateObj(collection);
+    let newCollection = clone(collection);
     operators.sort((a, b) => {
 
-        return OPERATORS.indexOf(a.name) > OPERATORS.indexOf(b.name) ? 1 : -1;
+        return OPERATORS[a.name] > OPERATORS[b.name] ? 1 : -1;
     });
 
     return operators.reduce((result, operator) => {
@@ -39,7 +47,7 @@ exports.query = function (collection, ...operators) {
 
 exports.select = function (...args) {
     return function needFields(collection) {
-        let newCollection = collection.map((person) => {
+        return collection.map((person) => {
 
             return args.reduce((res, arg) => {
                 if (person.hasOwnProperty(arg)) {
@@ -49,8 +57,6 @@ exports.select = function (...args) {
                 return res;
             }, {});
         });
-
-        return newCollection;
     };
 };
 
@@ -63,7 +69,7 @@ exports.select = function (...args) {
 exports.filterIn = function (property, values) {
     return function filterPersons(collection) {
         let filtered = collection.filter((person) => {
-            return values.indexOf(person[property]) !== -1;
+            return values.includes(person[property]);
         });
 
         return filtered;
@@ -94,15 +100,13 @@ exports.sortBy = function (property, order) {
 
 exports.format = function (property, formatter) {
     return function toFormat(collection) {
-        let newCollection = collection.map((person) => {
+        return collection.map((person) => {
             if (person[property]) {
                 person[property] = formatter(person[property]);
             }
 
             return person;
         });
-
-        return newCollection;
     };
 };
 
