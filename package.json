@@ -6,8 +6,9 @@
     "test": "eslint . && mocha *.spec.js"
   },
   "dependencies": {
-    "eslint": "4.8.0",
+    "eslint": "4.10.0",
     "eslint-config-hrundel": "1.2.0",
+    "lodash": "4.17.4",
     "mocha": "4.0.1"
   }
 }
