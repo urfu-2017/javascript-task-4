@@ -14,6 +14,13 @@ const PRIORITIES = {
     'format': 5
 };
 
+function getCopyCollection(collection) {
+
+    return collection.map(function (friend) {
+        return Object.assign({}, friend);
+    });
+}
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -21,14 +28,11 @@ const PRIORITIES = {
  * @returns {Array}
  */
 exports.query = function (collection, ...operators) {
-    let copyCollection = collection.map(function (friend) {
-        return Object.assign({}, friend);
-    });
 
     return operators.sort((a, b) => PRIORITIES[a.name] - PRIORITIES[b.name])
         .reduce(function (stepResult, operator) {
             return operator(stepResult);
-        }, copyCollection);
+        }, getCopyCollection(collection));
 };
 
 /**
@@ -81,8 +85,12 @@ exports.sortBy = function (property, order) {
 
     return function sortBy(collection) {
 
-        return order === 'desc' ? collection.sort((a, b) => a[property] < b[property])
-            : collection.sort((a, b) => a[property] > b[property]);
+        if (order === 'desc') {
+
+            return collection.sort((a, b) => a[property] < b[property]);
+        }
+
+        return collection.sort((a, b) => a[property] > b[property]);
     };
 };
 
@@ -96,7 +104,7 @@ exports.format = function (property, formatter) {
 
     return function format(collection) {
 
-        return collection.map(function (friend) {
+        return getCopyCollection(collection).map(function (friend) {
             friend[property] = formatter(friend[property]);
 
             return friend;
