@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 'use strict';
 
-var assert = require('assert');
+let assert = require('assert');
 
-var lego = require('./lego');
-var friends = [
+let lego = require('./lego');
+let friends = [
     {
         name: 'Сэм',
         age: 29,
@@ -65,7 +65,7 @@ var friends = [
 
 describe('lego.query', function () {
     it('должен вернуть отобранные и отсортированные записи', function () {
-        var result = lego.query(
+        let result = lego.query(
             friends,
             lego.select('name', 'gender', 'email'),
             lego.filterIn('favoriteFruit', ['Яблоко', 'Картофель']),
@@ -86,7 +86,7 @@ describe('lego.query', function () {
 
     if (lego.isStar) {
         it('должен поддерживать операторы or и and', function () {
-            var result = lego.query(
+            let result = lego.query(
                 friends,
                 lego.select('name'),
                 lego.or(
