@@ -80,9 +80,7 @@ exports.sortBy = function (property, order) {
     const orderSign = order === 'asc' ? 1 : -1;
 
     return function sortBy(collection) {
-        return collection.sort((a, b) => {
-            return orderSign * Math.sign(a[property] - b[property]);
-        });
+        return collection.sort((a, b) => orderSign * (a[property] > b[property] ? 1 : -1));
     };
 };
 
