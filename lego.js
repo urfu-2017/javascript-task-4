@@ -13,16 +13,12 @@ exports.isStar = true;
  * @returns {Array}
  */
 exports.query = function (collection, ...actions) {
-    let newCollection = [...collection];
     let formattingActions = actions.filter(action => action.isFormat);
     let limitingActions = actions.filter(action => action.isLimit);
     actions = actions.filter(action => !action.isFormat && ! action.isLimit)
         .concat(formattingActions, limitingActions);
-    for (let action of actions) {
-        newCollection = action(newCollection);
-    }
 
-    return newCollection;
+    return actions.reduce((resultCol, action) => action(resultCol), [...collection]);
 };
 
 /**
@@ -38,19 +34,14 @@ exports.select = function (...fields) {
      * @returns {Object} newData
      */
     let selection = function (person) {
-        let newData = Object.assign({}, person);
-        Object.keys(newData).forEach(prop => Object.defineProperty(newData, prop, {
-            enumerable: false
-        }));
-        for (let field of fields) {
-            if (person.hasOwnProperty(field)) {
-                Object.defineProperty(newData, field, {
-                    enumerable: true
-                });
+        let newPerson = Object.assign({}, person);
+        Object.keys(newPerson).forEach(function (prop) {
+            if (fields.indexOf(prop) === -1) {
+                Object.defineProperty(newPerson, prop, { enumerable: false });
             }
-        }
+        });
 
-        return newData;
+        return newPerson;
     };
 
     return function (collection) {
@@ -66,9 +57,7 @@ exports.select = function (...fields) {
  */
 exports.filterIn = function (property, values) {
     return function (collection) {
-        return collection.filter(person => {
-            return values.indexOf(person[property]) !== -1;
-        });
+        return collection.filter(person => values.indexOf(person[property]) !== -1);
     };
 };
 
@@ -79,10 +68,7 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    let ord = -1;
-    if (order === 'desc') {
-        ord = 1;
-    }
+    let ord = order === 'desc' ? 1 : -1;
 
     return function (collection) {
         return collection.sort((firstPerson, secondPerson) => {
@@ -155,12 +141,7 @@ if (exports.isStar) {
      */
     exports.and = function (...actions) {
         return function (collection) {
-            let newCollection = [...collection];
-            for (let action of actions) {
-                newCollection = action(newCollection);
-            }
-
-            return newCollection;
+            return actions.reduce((resultCol, action) => action(resultCol), [...collection]);
         };
     };
 }
