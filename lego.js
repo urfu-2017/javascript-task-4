@@ -14,13 +14,13 @@ exports.isStar = true;
  */
 exports.query = function (collection, ...functions) {
     const functionPriority = {
-        'sortByProperty': 0,
-        'filterInByProperty': 1,
-        'selectByFields': 2,
-        'limitCount': 3,
-        'formatProperty': 4,
-        'orFilters': 0,
-        'andFilters': 0
+        sortByProperty: 0,
+        filterInByProperty: 1,
+        selectByFields: 2,
+        limitCount: 3,
+        formatProperty: 4,
+        orFilters: 0,
+        andFilters: 0
     };
     const collectionCopy = JSON.parse(JSON.stringify(collection));
     if (functions.length === 0) {
@@ -39,16 +39,15 @@ exports.query = function (collection, ...functions) {
 exports.select = function (...fields) {
     return function selectByFields(collection) {
         return collection.map(friend => {
-            const suitableFields = fields.filter(function (field) {
-                return Object.keys(friend).includes(field);
-            });
-            const person = {};
-            suitableFields.forEach(function (field) {
-                person[field] = friend[field];
-            });
+            return fields
+                .filter(field => {
+                    return Object.keys(friend).includes(field);
+                })
+                .reduce((person, field) => {
+                    person[field] = friend[field];
 
-            return person;
-
+                    return person;
+                }, {});
         });
     };
 };
@@ -62,7 +61,7 @@ exports.select = function (...fields) {
  */
 exports.filterIn = function (property, values) {
     return function filterInByProperty(collection) {
-        return collection.filter(function (friend) {
+        return collection.filter(friend => {
             return values.includes(friend[property]);
         });
     };
@@ -100,7 +99,7 @@ exports.sortBy = function (property, order) {
  */
 exports.format = function (property, formatter) {
     return function formatProperty(collection) {
-        return collection.map(function (friend) {
+        return collection.map(friend => {
             friend[property] = formatter(friend[property]);
 
             return friend;
