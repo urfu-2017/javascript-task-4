@@ -5,7 +5,7 @@
  * Реализованы методы or и and
  */
 
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Запрос к коллекции
