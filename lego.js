@@ -38,17 +38,14 @@ exports.query = function (collection, ...functions) {
  */
 exports.select = function (...fields) {
     return function selectByFields(collection) {
-        return collection.map(friend => {
-            return fields
-                .filter(field => {
-                    return Object.keys(friend).includes(field);
-                })
-                .reduce((person, field) => {
-                    person[field] = friend[field];
+        return collection.map(friend => fields
+            .filter(field => Object.keys(friend).includes(field))
+            .reduce((person, field) => {
+                person[field] = friend[field];
 
-                    return person;
-                }, {});
-        });
+                return person;
+            }, {})
+        );
     };
 };
 
@@ -61,9 +58,7 @@ exports.select = function (...fields) {
  */
 exports.filterIn = function (property, values) {
     return function filterInByProperty(collection) {
-        return collection.filter(friend => {
-            return values.includes(friend[property]);
-        });
+        return collection.filter(friend => values.includes(friend[property]));
     };
 };
 
@@ -75,17 +70,8 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sortByProperty(collection) {
-        const sign = (order !== 'desc') ? 1 : -1;
-        collection.sort((a, b) => {
-            if (a[property] > b[property]) {
-                return sign;
-            }
-            if (a[property] < b[property]) {
-                return -sign;
-            }
-
-            return 0;
-        });
+        collection.sort((a, b) => (order === 'asc') ? Math.sign(a[property] > b[property])
+            : Math.sign(b[property] > a[property]));
 
         return collection;
     };
