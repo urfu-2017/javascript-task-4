@@ -6,6 +6,10 @@ var QUERY_TYPES = {
     LIMIT: 99,
     FORMAT: 99
 };
+var SORT_DIRECTION = {
+    ASCENDING: 'asc',
+    DESCENDING: 'desc'
+};
 
 /**
  * Сделано задание на звездочку
@@ -21,12 +25,7 @@ function cloneCollection(collection) {
     }, []);
 }
 function cloneObject(obj) {
-    var clonedObject = {};
-    Object.keys(obj).forEach(function (key) {
-        clonedObject[key] = obj[key];
-    });
-
-    return clonedObject;
+    return Object.assign({}, obj);
 }
 function getIntersection(listOfArrays) {
     if (!listOfArrays.length) {
@@ -125,18 +124,16 @@ var select = function () {
         queryType: QUERY_TYPES.SELECT,
         queryArguments: args,
         query: function (collection) {
-            var selectedFromCollection = [];
-            collection.forEach(function (item) {
+            return collection.map(function (item) {
                 var selectedItem = {};
                 args.forEach(function (property) {
                     if (item.hasOwnProperty(property)) {
                         selectedItem[property] = item[property];
                     }
                 });
-                selectedFromCollection.push(selectedItem);
-            });
 
-            return selectedFromCollection;
+                return selectedItem;
+            });
         }
     };
 
@@ -193,7 +190,7 @@ exports.filterIn = function (property, values) {
         queryType: QUERY_TYPES.FILTER,
         query: function (collection) {
             return collection.filter(function (item) {
-                if (values.length === 0 || !item.hasOwnProperty(property) ||
+                if (values.length !== 0 && item.hasOwnProperty(property) &&
                     values.indexOf(item[property]) !== -1) {
                     return true;
                 }
@@ -213,10 +210,6 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     console.info(property, order);
-    var SORT_DIRECTION = {
-        ASCENDING: 'asc',
-        DESCENDING: 'desc'
-    };
 
     return {
         queryType: QUERY_TYPES.SORT,
@@ -243,16 +236,13 @@ exports.format = function (property, formatter) {
     return {
         queryType: QUERY_TYPES.FORMAT,
         query: function (collection) {
-            var formatted = [];
-            collection.forEach (function (item) {
-                var newItem = Object.assign({}, item);
-                if (newItem.hasOwnProperty(property)) {
-                    newItem[property] = formatter(item[property]);
+            return collection.map (function (item) {
+                if (item.hasOwnProperty(property)) {
+                    item[property] = formatter(item[property]);
                 }
-                formatted.push(newItem);
-            });
 
-            return formatted;
+                return item;
+            });
         }
     };
 };
@@ -268,8 +258,6 @@ exports.limit = function (count) {
     return {
         queryType: QUERY_TYPES.LIMIT,
         query: function (collection) {
-            count = Math.min(count, collection.length);
-
             return collection.slice(0, count);
         }
     };
