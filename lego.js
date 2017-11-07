@@ -25,12 +25,7 @@ function cloneCollection(collection) {
     }, []);
 }
 function cloneObject(obj) {
-    var clonedObject = {};
-    Object.keys(obj).forEach(function (key) {
-        clonedObject[key] = obj[key];
-    });
-
-    return clonedObject;
+    return Object.assign({}, obj);
 }
 function getIntersection(listOfArrays) {
     if (!listOfArrays.length) {
