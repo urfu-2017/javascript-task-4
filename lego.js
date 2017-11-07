@@ -136,6 +136,7 @@ var select = function () {
                         selectedItem[property] = item[property];
                     }
                 });
+
                 return selectedItem;
             });
         }
