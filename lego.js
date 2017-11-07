@@ -15,22 +15,21 @@ exports.isStar = true;
 exports.query = function (collection) {
     const functionWeight = { 'limit': 1, 'format': 2, 'select': 3, 'filterIn': 4, 'sortBy': 5,
         'or': 6, 'and': 7 };
-    const methods = Array.from(arguments).slice(1)
-        .sort((a, b) => {
-            if (functionWeight[a.name] > functionWeight[b.name]) {
+
+    return Array.from(arguments).slice(1)
+        .sort((firstMethod, secondMethod) => {
+            if (functionWeight[firstMethod.name] > functionWeight[secondMethod.name]) {
                 return -1;
             }
-            if (functionWeight[a.name] < functionWeight[b.name]) {
+            if (functionWeight[firstMethod.name] < functionWeight[secondMethod.name]) {
                 return 1;
             }
 
             return 0;
-        });
-    methods.forEach(method => {
-        collection = method(collection);
-    });
-
-    return collection;
+        })
+        .reduce((accumulator, method) => {
+            return method(accumulator);
+        }, collection);
 };
 
 /**
@@ -63,10 +62,7 @@ exports.select = function () {
  */
 exports.filterIn = function (property, values) {
     return function filterIn(collection) {
-        return collection.filter(friend => {
-
-            return values.includes(friend[property]);
-        });
+        return collection.filter(friend => values.includes(friend[property]));
     };
 };
 
@@ -79,11 +75,11 @@ exports.filterIn = function (property, values) {
 exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         let collectionClone = collection.slice();
-        collectionClone.sort((a, b) => {
-            if (a[property] < b[property]) {
+        collectionClone.sort((firstFriend, secondFriend) => {
+            if (firstFriend[property] < secondFriend[property]) {
                 return -1;
             }
-            if (a[property] > b[property]) {
+            if (firstFriend[property] > secondFriend[property]) {
                 return 1;
             }
 
@@ -139,13 +135,9 @@ if (exports.isStar) {
 
         return function or(collection) {
             return collection.filter(friend => {
-                for (let i = 0; i < filterIns.length; i += 1) {
-                    if (filterIns[i](collection).includes(friend)) {
-                        return true;
-                    }
-                }
-
-                return false;
+                return filterIns.some(filter => {
+                    return filter(collection).includes(friend);
+                });
             });
         };
     };
@@ -161,13 +153,9 @@ if (exports.isStar) {
 
         return function and(collection) {
             return collection.filter(friend => {
-                for (let i = 0; i < filterIns.length; i += 1) {
-                    if (!filterIns[i](collection).includes(friend)) {
-                        return false;
-                    }
-                }
-
-                return true;
+                return filterIns.every(filter => {
+                    return filter(collection).includes(friend);
+                });
             });
         };
     };
