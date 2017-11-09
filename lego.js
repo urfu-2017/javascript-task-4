@@ -1,25 +1,20 @@
 'use strict';
 const _ = require('lodash');
+var FUNCTIONS = {
+    sortBy: 1,
+    filterIn: 2,
+    select: 3,
+    format: 4,
+    limit: 5
+};
 
 exports.isStar = false;
-var FUNCTIONS = ['sortBy', 'filterIn', 'select', 'format', 'limit'];
-
-function putFunctionsInOrder(a, b) {
-    if (FUNCTIONS.indexOf(a.name) > FUNCTIONS.indexOf(b.name)) {
-
-        return 1;
-    }
-    if (FUNCTIONS.indexOf(a.name) < FUNCTIONS.indexOf(b.name)) {
-
-        return -1;
-    }
-
-    return 0;
-}
 
 exports.query = function (collection, ...functions) {
     var collectionCopy = _.cloneDeep(collection);
-    functions = functions.sort(putFunctionsInOrder);
+    functions = functions.sort((a, b) => {
+        return FUNCTIONS[a.name] < FUNCTIONS[b.name] ? -1 : 1;
+    });
     functions.forEach(fun => {
         collectionCopy = fun(collectionCopy);
     });
@@ -27,23 +22,19 @@ exports.query = function (collection, ...functions) {
     return collectionCopy;
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
 
 exports.select = function (...selected) {
+
     return function select(collection) {
-        return collection.map(collectionCopy => {
-            var result = {};
-            for (var key of selected) {
-                if (collectionCopy.hasOwnProperty(key)) {
-                    result[key] = collectionCopy[key];
+        collection.forEach(partner => {
+            for (var key in partner) {
+                if (!selected.includes(key)) {
+                    delete partner[key];
                 }
             }
-
-            return result;
         });
+
+        return collection;
     };
 };
 
