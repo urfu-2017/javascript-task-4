@@ -84,20 +84,20 @@ exports.sortBy = function (property, order) {
     return function sortBy(collection) {
         return collection.sort(
             function (a, b) {
-                var countedValue = a[property] - b[property];
-                if (countedValue === 0) {
-                    return 0;
+                // var countedValue = a[property] - b[property];
+                // if (countedValue === 0) {
+                //     return 0;
+                // }
+                // return (order === 'asc') ? Math.sign(countedValue) : 
+                // (-1) * Math.sign(countedValue);
+                if (a[property] < b[property]) {
+                    return (order === 'asc') ? -1 : 1;
+                }
+                if (a[property] > b[property]) {
+                    return (order === 'asc') ? 1 : -1;
                 }
 
-                return (order === 'asc') ? Math.sign(countedValue) : (-1) * Math.sign(countedValue);
-                // if (a[property] < b[property]) {
-                //     return (order === 'asc') ? -1 : 1;
-                // }
-                // if (a[property] > b[property]) {
-                //     return (order === 'asc') ? 1 : -1;
-                // }
-
-                // return 0;
+                return 0;
             }
         );
     };
