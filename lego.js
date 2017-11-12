@@ -14,7 +14,7 @@ const PRIORITY = {
 };
 
 function copyCollection(collection) {
-    return JSON.parse(JSON.stringify(collection));
+    return Object.assign({}, collection);
 }
 
 /**
@@ -24,10 +24,10 @@ function copyCollection(collection) {
  * @returns {Array}
  */
 exports.query = function (collection, ...funcs) {
-    funcs.sort((a, b) => PRIORITY[a.name] - PRIORITY[b.name]);
+    funcs.sort((func, otherFunc) => PRIORITY[func.name] - PRIORITY[otherFunc.name]);
 
-    return funcs.reduce((newCollection, func) => func(newCollection)
-        , copyCollection(collection));
+    return funcs.reduce((newCollection, func) => func(newCollection),
+        collection.map(copyCollection));
 };
 
 /**
@@ -40,12 +40,13 @@ exports.select = function (...property) {
 
     return function select(collection) {
         return collection.reduce((newCollection, friend) => {
-            let updateFriend = {};
-            for (let key of Object.keys(friend)) {
+            let updateFriend = Object.keys(friend).reduce((update, key) => {
                 if (property.includes(key)) {
-                    updateFriend[key] = friend[key];
+                    update[key] = friend[key];
                 }
-            }
+
+                return update;
+            }, {});
             newCollection.push(updateFriend);
 
             return newCollection;
@@ -77,8 +78,9 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
 
     return function sortBy(collection) {
-        return copyCollection(collection).sort((a, b) => {
-            return (order === 'asc') ? a[property] > b[property] : b[property] > a[property];
+        return collection.map(copyCollection).sort((person, otherPerson) => {
+            return (order === 'asc') ? person[property] > otherPerson[property]
+                : otherPerson[property] > person[property];
         });
     };
 };
@@ -93,12 +95,11 @@ exports.format = function (property, formatter) {
     console.info(property, formatter);
 
     return function format(collection) {
-        let newCollection = copyCollection(collection);
-        newCollection.forEach(friend => {
+        return collection.map(friend => {
             friend[property] = formatter(friend[property]);
-        });
 
-        return newCollection;
+            return friend;
+        });
     };
 };
 
