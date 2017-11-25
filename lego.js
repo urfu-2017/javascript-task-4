@@ -23,16 +23,11 @@ const FUNCTIONS_ORDER = {
  * @returns {Array}
  */
 exports.query = function (collection, ...functions) {
-    let result = deepCopy(collection);
     functions.sort((a, b) => {
         return FUNCTIONS_ORDER[a.name] - FUNCTIONS_ORDER[b.name];
     });
 
-    for (const func of functions) {
-        result = func(result);
-    }
-
-    return result;
+    return functions.reduce((result, func) => func(result), deepCopy(collection));
 };
 
 /**
@@ -75,23 +70,14 @@ exports.filterIn = function (property, values) {
  */
 exports.sortBy = function (property, order) {
     return function sort(collection) {
-        const collectionCopy = collection.slice();
-        collectionCopy.sort((a, b) => {
-            let result = 0;
-            if (a[property] < b[property]) {
-                result = -1;
-            }
-            if (a[property] > b[property]) {
-                result = 1;
-            }
-            if (order === 'desc') {
-                result *= -1;
-            }
+        collection.sort((a, b) => {
+            let sign = order === 'asc' ? 1 : -1;
 
-            return result;
+            // eslint-disable-next-line no-nested-ternary
+            return a[property] === b[property] ? 0 : ((a[property] < b[property]) ? -sign : sign);
         });
 
-        return collectionCopy;
+        return collection;
     };
 };
 
@@ -104,10 +90,9 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     return function format(collection) {
         return collection.map(item => {
-            const itemCopy = deepCopy(item);
-            itemCopy[property] = formatter(item[property]);
+            item[property] = formatter(item[property]);
 
-            return itemCopy;
+            return item;
         });
     };
 };
