@@ -6,7 +6,9 @@
  */
 exports.isStar = false;
 
-const copy = function copyColl(coll) {
+const priority = ['or', 'and', 'filterIn', 'sortBy', 'select', 'format', 'limit'];
+
+const copy = function copyCollection(coll) {
     return JSON.parse(JSON.stringify(coll));
 };
 
@@ -20,7 +22,7 @@ exports.query = function (collection, ...funcs) {
     let localCollection = copy(collection);
 
     funcs.sort(function (func1, func2) {
-        return func1.priority > func2.priority;
+        return priority.indexOf(func1.name) > priority.indexOf(func2.name);
     })
         .forEach(function (func) {
             localCollection = func.func(localCollection);
@@ -36,11 +38,11 @@ exports.query = function (collection, ...funcs) {
  */
 exports.select = function select(...fields) {
     let slct = (coll) => {
-        return coll.map(function (man) {
+        return coll.map(function (friend) {
             let newItem = {};
             fields.forEach(function (field) {
-                if (man.hasOwnProperty(field)) {
-                    newItem[field] = man[field];
+                if (friend.hasOwnProperty(field)) {
+                    newItem[field] = friend[field];
                 }
             });
 
@@ -48,7 +50,7 @@ exports.select = function select(...fields) {
         });
     };
 
-    return { name: 'select', priority: 5, func: slct, params: fields };
+    return { name: 'select', func: slct };
 };
 
 /**
@@ -66,7 +68,7 @@ exports.filterIn = function (property, values) {
         });
     };
 
-    return { name: 'filterIn', priority: 3, func: fltr };
+    return { name: 'filterIn', func: fltr };
 };
 
 /**
@@ -85,7 +87,7 @@ exports.sortBy = function (property, order) {
         return coll.reverse();
     };
 
-    return { name: 'sortBy', priority: 4, func: srt };
+    return { name: 'sortBy', func: srt };
 };
 
 /**
@@ -105,7 +107,7 @@ exports.format = function (property, formatter) {
         });
     };
 
-    return { name: 'format', priority: 6, func: frm };
+    return { name: 'format', func: frm };
 };
 
 /**
@@ -118,7 +120,7 @@ exports.limit = function (count) {
         return coll.splice(0, count);
     };
 
-    return { name: 'limit', priority: 7, func: cnt };
+    return { name: 'limit', func: cnt };
 };
 
 if (exports.isStar) {
@@ -138,7 +140,7 @@ if (exports.isStar) {
             return funcs.length === 0 ? coll : funcs;
         };
 
-        return { name: 'or', priority: 1, func: orFunc };
+        return { name: 'or', func: orFunc };
     };
 
     /**
@@ -156,7 +158,7 @@ if (exports.isStar) {
             return coll;
         };
 
-        return { name: 'and', priority: 2, func: andFunc };
+        return { name: 'and', func: andFunc };
     };
 }
 
