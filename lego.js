@@ -1,89 +1,128 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализованы методы or и and
- */
 exports.isStar = true;
 
-/**
- * Запрос к коллекции
- * @param {Array} collection
- * @params {...Function} – Функции для запроса
- * @returns {Array}
- */
-exports.query = function (collection) {
-    return collection;
+
+// Constants
+//
+const FUNC_PRIORITY = [
+    'and',
+    'or',
+    'filterIn',
+    'sortBy',
+    'select',
+    'limit',
+    'format'
+];
+
+
+// Functions-helpers
+//
+const _functionSorter = (one, another) => {
+    let nameOne = one.name.split(' ')[1];
+    let nameAnother = another.name.split(' ')[1];
+
+    return FUNC_PRIORITY.indexOf(nameOne) > FUNC_PRIORITY.indexOf(nameAnother);
 };
 
-/**
- * Выбор полей
- * @params {...String}
- */
-exports.select = function () {
-    return;
+const _functionApplyer = (obj, f) => f(obj);
+
+const _objectBuilder = (obj, [key, value]) => {
+    let newObject = Object.assign({}, obj);
+    newObject[key] = value;
+
+    return newObject;
 };
 
-/**
- * Фильтрация поля по массиву значений
- * @param {String} property – Свойство для фильтрации
- * @param {Array} values – Доступные значения
- */
-exports.filterIn = function (property, values) {
-    console.info(property, values);
+const _in = (collection, obj) => collection.indexOf(obj) !== -1;
 
-    return;
-};
+const _objIn = (obj, collection) => _in(collection, obj);
 
-/**
- * Сортировка коллекции по полю
- * @param {String} property – Свойство для фильтрации
- * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- */
-exports.sortBy = function (property, order) {
-    console.info(property, order);
+const _takeKeyValuePair = (item, key) => [key, item[key]];
 
-    return;
-};
 
-/**
- * Форматирование поля
- * @param {String} property – Свойство для фильтрации
- * @param {Function} formatter – Функция для форматирования
- */
-exports.format = function (property, formatter) {
-    console.info(property, formatter);
+// Query functions
+//
+const select = (keys, collection) =>
+    collection
+        .map(
+            (item) =>
+                Object.keys(item)
+                    .filter(_in.bind(null, keys))
+                    .map(_takeKeyValuePair.bind(null, item))
+                    .reduce(_objectBuilder, {})
+        );
 
-    return;
-};
+const filterIn = (key, values, collection) =>
+    collection.filter((item) => _in(values, item[key]));
 
-/**
- * Ограничение количества элементов в коллекции
- * @param {Number} count – Максимальное количество элементов
- */
-exports.limit = function (count) {
-    console.info(count);
+const sortBy = (key, order, collection) =>
+    collection.sort(
+        (one, another) =>
+            order === 'asc'
+                ? one[key] > another[key]
+                : one[key] < another[key]
+    );
 
-    return;
-};
+const format = (key, formatter, collection) =>
+    collection.map(
+        (item) => {
+            let itemCopy = Object.assign({}, item);
+            itemCopy[key] = formatter(itemCopy[key]);
+
+            return itemCopy;
+        }
+    );
+
+const limit = (count, collection) =>
+    collection.slice(0, count);
+
+const or = (filters, collection) =>
+    collection
+        .filter(
+            (item) =>
+                filters
+                    .map(_functionApplyer.bind(null, collection))
+                    .some(_objIn.bind(null, item))
+        );
+
+const and = (filters, collection) =>
+    collection
+        .filter(
+            (item) =>
+                filters
+                    .map(_functionApplyer.bind(null, collection))
+                    .every(_objIn.bind(null, item))
+        );
+
+
+// Export
+//
+exports.query = (collection, ...other) =>
+    other
+        .sort(_functionSorter)
+        .reduce(_functionApplyer, collection.slice());
+
+exports.select = (...fields) =>
+    select.bind(null, fields);
+
+exports.filterIn = (key, values) =>
+    filterIn.bind(null, key, values);
+
+exports.sortBy = (key, order) =>
+    sortBy.bind(null, key, order);
+
+exports.format = (key, formatter) =>
+    format.bind(null, key, formatter);
+
+exports.limit = (count) =>
+    limit.bind(null, count);
+
 
 if (exports.isStar) {
+    exports.or = (...funcs) =>
+        or.bind(null, funcs);
 
-    /**
-     * Фильтрация, объединяющая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.or = function () {
-        return;
-    };
-
-    /**
-     * Фильтрация, пересекающая фильтрующие функции
-     * @star
-     * @params {...Function} – Фильтрующие функции
-     */
-    exports.and = function () {
-        return;
-    };
+    exports.and = (...funcs) =>
+        and.bind(null, funcs);
 }
